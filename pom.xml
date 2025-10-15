@@ -19,6 +19,7 @@
     </properties>
 
     <modules>
+        <module>gateway</module>
         <module>services/auth-service</module>
         <module>services/user-service</module>
     </modules>
@@ -31,6 +32,11 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>10.20.0</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
