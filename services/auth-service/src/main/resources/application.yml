@@ -4,19 +4,19 @@ server:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/intern_network
-    username: auth_service
-    password: authservice
+    username: postgres
+    password: postgres
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate.default_schema: auth_schema
       hibernate.jdbc.time_zone: UTC
     open-in-view: false
   flyway:
-    enabled: true
-    schemas: auth_schema
-    baseline-on-migrate: true
+    enabled: false
+    #schemas: auth_schema
+    #baseline-on-migrate: true
 
 app:
   jwt:

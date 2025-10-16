@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
 
         UserAccount user = UserAccount.builder()
                 .email(request.getEmail())
-                .passwordHard(passwordEncoder.encode(request.getPassword()))
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .role(role)
                 .status(AccountStatus.ACTIVE)
                 .build();

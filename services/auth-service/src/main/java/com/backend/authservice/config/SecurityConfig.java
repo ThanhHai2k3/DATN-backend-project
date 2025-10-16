@@ -52,7 +52,7 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return email -> userAccountRepository.findByEmailIgnoreCase(email)
                 .map(user -> User.withUsername(user.getEmail())
-                        .password(user.getPasswordHard())
+                        .password(user.getPasswordHash())
                         .roles(user.getRole().name())
                         .disabled(user.getStatus() != AccountStatus.ACTIVE)
                         .build())
