@@ -4,6 +4,7 @@ import com.backend.authservice.enums.AccountStatus;
 import com.backend.authservice.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
@@ -37,6 +38,7 @@ public class UserAccount {
     @Column(nullable = false)
     private AccountStatus status = AccountStatus.ACTIVE;
 
+    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
