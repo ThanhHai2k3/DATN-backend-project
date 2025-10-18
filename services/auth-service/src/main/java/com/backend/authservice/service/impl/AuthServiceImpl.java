@@ -6,6 +6,8 @@ import com.backend.authservice.dto.request.RegisterRequest;
 import com.backend.authservice.dto.response.AuthResponse;
 import com.backend.authservice.entity.UserAccount;
 import com.backend.authservice.enums.AccountStatus;
+import com.backend.authservice.enums.ErrorCode;
+import com.backend.authservice.exception.AppException;
 import com.backend.authservice.mapper.AuthMapper;
 import com.backend.authservice.repository.RefreshTokenRepository;
 import com.backend.authservice.repository.UserAccountRepository;
@@ -32,7 +34,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse register(RegisterRequest request){
         if(userAccountRepository.existsByEmailIgnoreCase(request.getEmail())){
-            throw new IllegalArgumentException("Email already exists");
+            throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
         }
 
         UserAccount user = authMapper.toUserAccountEntity(request);
@@ -54,16 +56,16 @@ public class AuthServiceImpl implements AuthService {
             );
 
             UserAccount user = userAccountRepository.findByEmailIgnoreCase(request.getEmail())
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
             if (user.getStatus() != AccountStatus.ACTIVE) {
-                throw new BadCredentialsException("Account not active");
+                throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
             }
 
             return tokenService.issueTokens(user);
 
         } catch (BadCredentialsException ex) {
-            throw new BadCredentialsException("Invalid email or password");
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS);
         }
     }
 
