@@ -11,5 +11,5 @@ import lombok.*;
 public class RegisterRequest {
     private String email;
     private String password;
-    private Role role = Role.STUDENT;
+    private Role role;
 }
