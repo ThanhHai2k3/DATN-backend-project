@@ -8,11 +8,12 @@ import org.springframework.http.HttpStatus;
 @RequiredArgsConstructor
 public enum SuccessCode {
 
-    OK("PRO_000", "Success", HttpStatus.OK),
-    PROFILE_UPSERTED("PRO_001", "Profile saved", HttpStatus.OK),
-    SKILLS_UPDATED("PRO_002", "Skills updated", HttpStatus.OK),
-    EDU_UPDATED("PRO_003", "Educations updated", HttpStatus.OK),
-    EXP_UPDATED("PRO_004", "Experiences updated", HttpStatus.OK),
+    PROFILE_FETCHED("PRO_001", "Profile fetched successfully", HttpStatus.OK),
+    PROFILE_AUTO_CREATED("PRO_002", "Profile auto-created successfully", HttpStatus.CREATED),
+    PROFILE_UPSERTED("PRO_003", "Profile saved", HttpStatus.OK),
+    SKILLS_UPDATED("PRO_004", "Skills updated", HttpStatus.OK),
+    EDU_UPDATED("PRO_005", "Educations updated", HttpStatus.OK),
+    EXP_UPDATED("PRO_006", "Experiences updated", HttpStatus.OK),
     ;
 
     private final String code;

@@ -10,27 +10,30 @@ import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.StudentProfileService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/v1/student-profile")
 @RequiredArgsConstructor
+@Slf4j
 public class StudentProfileController {
 
     private final StudentProfileService studentProfileService;
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<StudentProfileResponse>> getProfile(@RequestParam UUID userId){
+    public ResponseEntity<ApiResponse<StudentProfileResponse>> getProfile(@RequestParam("userId") UUID userId){
         StudentProfileResponse response = studentProfileService.getByUserId(userId);
         return ResponseEntity
-                .status(SuccessCode.PROFILE_UPSERTED.getStatus())
+                .status(SuccessCode.PROFILE_FETCHED.getStatus())
                 .body(ApiResponse.success(
-                        SuccessCode.PROFILE_UPSERTED.getCode(),
-                        SuccessCode.PROFILE_UPSERTED.getMessage(),
+                        SuccessCode.PROFILE_FETCHED.getCode(),
+                        SuccessCode.PROFILE_FETCHED.getMessage(),
                         response
                 ));
     }
@@ -48,8 +51,8 @@ public class StudentProfileController {
     }
 
     @PutMapping("/me/visibility")
-    public ResponseEntity<ApiResponse<StudentProfileResponse>> updateVisibility(@RequestParam UUID userId,
-                                                                                @RequestParam boolean visible) {
+    public ResponseEntity<ApiResponse<StudentProfileResponse>> updateVisibility(@RequestParam("userId") UUID userId,
+                                                                                @RequestParam("visible") boolean visible) {
 
         StudentProfileResponse response = studentProfileService.updateVisibility(userId, visible);
         return ResponseEntity
@@ -62,7 +65,7 @@ public class StudentProfileController {
     }
 
     @PutMapping("/me/educations")
-    public ResponseEntity<ApiResponse<Void>> replaceEducations(@RequestParam UUID userId, @Valid @RequestBody List<EducationDTO> educations) {
+    public ResponseEntity<ApiResponse<Void>> replaceEducations(@RequestParam("userId") UUID userId, @Valid @RequestBody List<EducationDTO> educations) {
         studentProfileService.replaceEducations(userId, educations);
         return ResponseEntity
                 .status(SuccessCode.EDU_UPDATED.getStatus())
@@ -74,7 +77,7 @@ public class StudentProfileController {
     }
 
     @PutMapping("/me/experiences")
-    public ResponseEntity<ApiResponse<Void>> replaceExperiences(@RequestParam UUID userId, @Valid @RequestBody List<ExperienceDTO> experiences) {
+    public ResponseEntity<ApiResponse<Void>> replaceExperiences(@RequestParam("userId") UUID userId, @Valid @RequestBody List<ExperienceDTO> experiences) {
         studentProfileService.replaceExperiences(userId, experiences);
         return ResponseEntity
                 .status(SuccessCode.EXP_UPDATED.getStatus())
@@ -86,7 +89,7 @@ public class StudentProfileController {
     }
 
     @PutMapping("/me/skills")
-    public ResponseEntity<ApiResponse<StudentProfileResponse>> replaceSkills(@RequestParam UUID userId, @Valid @RequestBody List<StudentSkillDTO> skills) {
+    public ResponseEntity<ApiResponse<StudentProfileResponse>> replaceSkills(@RequestParam("userId") UUID userId, @Valid @RequestBody List<StudentSkillDTO> skills) {
         StudentProfileResponse response = studentProfileService.replaceSkills(userId, skills);
         return ResponseEntity
                 .status(SuccessCode.SKILLS_UPDATED.getStatus())
@@ -96,4 +99,37 @@ public class StudentProfileController {
                         response
                 ));
     }
+
+//    @PostMapping("/auto-create")
+//    public ResponseEntity<ApiResponse<Void>> autoCreateProfile(
+//            @RequestParam("userId")  UUID userId,
+//            @RequestParam(value = "fullName", required = false) String fullName) {
+//
+//        studentProfileService.autoCreateProfile(userId, fullName);
+//        return ResponseEntity
+//                .status(SuccessCode.PROFILE_AUTO_CREATED.getStatus())
+//                .body(ApiResponse.success(
+//                        SuccessCode.PROFILE_AUTO_CREATED.getCode(),
+//                        SuccessCode.PROFILE_AUTO_CREATED.getMessage(),
+//                        null
+//                ));
+//    }
+
+    @PostMapping("/auto-create")
+    public ResponseEntity<ApiResponse<Void>> autoCreateProfile(@RequestBody Map<String, Object> payload) {
+        UUID userId = UUID.fromString((String) payload.get("userId"));
+        String fullName = (String) payload.get("fullName");
+
+        studentProfileService.autoCreateProfile(userId, fullName);
+        log.info("Auto-created profile for userId={} with fullName='{}'", userId, fullName);
+
+        return ResponseEntity
+                .status(SuccessCode.PROFILE_AUTO_CREATED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.PROFILE_AUTO_CREATED.getCode(),
+                        SuccessCode.PROFILE_AUTO_CREATED.getMessage(),
+                        null
+                ));
+    }
+
 }

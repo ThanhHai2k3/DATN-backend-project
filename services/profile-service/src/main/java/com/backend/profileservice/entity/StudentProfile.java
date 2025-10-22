@@ -27,14 +27,13 @@ public class StudentProfile {
     @Column(nullable = false)
     private UUID userId; // FK tới auth_schema.user_accounts.id
 
-    @Column(nullable = false)
+    @Column(name = "full_name")
     private String fullName;
 
     private String avatarUrl;
     private LocalDate dob;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Gender gender;
 
     private String address;

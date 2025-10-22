@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -34,7 +35,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
     @Transactional(readOnly = true)
     public StudentProfileResponse getByUserId(UUID userId){
         StudentProfile profile = studentProfileRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
 
         return studentProfileMapper.toResponse(profile);
     }
@@ -155,4 +156,21 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         profile.setVisible(isVisible);
         return studentProfileMapper.toResponse(profile);
     }
+
+    @Override
+    public void autoCreateProfile(UUID userId, String fullName) {
+        if (studentProfileRepository.existsByUserId(userId)) {
+            return;
+        }
+
+        StudentProfile profile = StudentProfile.builder()
+                .userId(userId)
+                .fullName(fullName)
+                .isVisible(false)
+                .build();
+
+        studentProfileRepository.save(profile);
+    }
+
+
 }

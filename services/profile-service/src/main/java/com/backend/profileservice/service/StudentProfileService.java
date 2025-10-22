@@ -16,4 +16,5 @@ public interface StudentProfileService {
     void replaceExperiences(UUID userId, List<ExperienceDTO> experiences);
     StudentProfileResponse replaceSkills(UUID userId, List<StudentSkillDTO> skills);
     StudentProfileResponse updateVisibility(UUID userId, boolean isVisible);
+    void autoCreateProfile(UUID userId, String fullName);
 }

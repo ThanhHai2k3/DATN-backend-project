@@ -14,15 +14,23 @@ import com.backend.authservice.repository.UserAccountRepository;
 import com.backend.authservice.service.AuthService;
 import com.backend.authservice.service.TokenService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
     private final UserAccountRepository userAccountRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -30,6 +38,7 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final AuthMapper authMapper;
     private final TokenService tokenService;
+    private final RestTemplate restTemplate;
 
     @Override
     public AuthResponse register(RegisterRequest request){
@@ -39,12 +48,23 @@ public class AuthServiceImpl implements AuthService {
 
         UserAccount user = authMapper.toUserAccountEntity(request);
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-
-//        if (request.getRole() == null) {
-//            user.setRole(Role.STUDENT);
-//        }
-
         user = userAccountRepository.save(user);
+
+        try {
+            // Chuẩn bị payload body JSON
+            Map<String, Object> body = new HashMap<>();
+            body.put("userId", user.getId());
+            body.put("fullName", request.getFullName());
+
+            String url = "http://localhost:8082/v1/student-profile/auto-create";
+
+            restTemplate.postForEntity(url, body, Void.class);
+
+            log.info("Auto-create profile successfully for user: {}", user.getId());
+        } catch (Exception e) {
+            log.error("Failed to auto-create profile for user {}", user.getId(), e);
+        }
+
         return tokenService.issueTokens(user);
     }
 

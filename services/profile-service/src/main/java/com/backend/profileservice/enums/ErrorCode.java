@@ -14,7 +14,10 @@ public enum ErrorCode {
     ACCOUNT_INACTIVE("AUTH_004", "Account is not active", HttpStatus.FORBIDDEN),
     TOKEN_EXPIRED("AUTH_005", "Token has expired", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID("AUTH_006", "Invalid token", HttpStatus.UNAUTHORIZED),
-    INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+
+    PROFILE_NOT_FOUND("PRO_104", "Student profile not found", HttpStatus.NOT_FOUND),
+
+    INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     private final String code;
