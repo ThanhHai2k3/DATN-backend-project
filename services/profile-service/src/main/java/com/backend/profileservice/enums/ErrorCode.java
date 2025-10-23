@@ -17,6 +17,7 @@ public enum ErrorCode {
 
     PROFILE_NOT_FOUND("PRO_104", "Student profile not found", HttpStatus.NOT_FOUND),
 
+    VALIDATION_FAILED("SYS_400", "Request validation failed", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 

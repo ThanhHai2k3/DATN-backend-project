@@ -100,21 +100,6 @@ public class StudentProfileController {
                 ));
     }
 
-//    @PostMapping("/auto-create")
-//    public ResponseEntity<ApiResponse<Void>> autoCreateProfile(
-//            @RequestParam("userId")  UUID userId,
-//            @RequestParam(value = "fullName", required = false) String fullName) {
-//
-//        studentProfileService.autoCreateProfile(userId, fullName);
-//        return ResponseEntity
-//                .status(SuccessCode.PROFILE_AUTO_CREATED.getStatus())
-//                .body(ApiResponse.success(
-//                        SuccessCode.PROFILE_AUTO_CREATED.getCode(),
-//                        SuccessCode.PROFILE_AUTO_CREATED.getMessage(),
-//                        null
-//                ));
-//    }
-
     @PostMapping("/auto-create")
     public ResponseEntity<ApiResponse<Void>> autoCreateProfile(@RequestBody Map<String, Object> payload) {
         UUID userId = UUID.fromString((String) payload.get("userId"));

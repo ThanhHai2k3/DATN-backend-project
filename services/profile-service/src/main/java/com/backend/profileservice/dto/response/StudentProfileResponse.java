@@ -27,7 +27,7 @@ public class StudentProfileResponse {
     private String bio;
     private String cvUrl;
     private String cvText;
-    private boolean isVisible;
+    private boolean visible;
     private Instant createdAt;
     private Instant updatedAt;
     private List<EducationDTO> educations;

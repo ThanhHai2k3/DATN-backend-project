@@ -12,11 +12,11 @@ import com.backend.profileservice.mapper.StudentProfileMapper;
 import com.backend.profileservice.repository.*;
 import com.backend.profileservice.service.StudentProfileService;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -47,28 +47,19 @@ public class StudentProfileServiceImpl implements StudentProfileService {
         if(profile == null){
             StudentProfile newProfile = studentProfileMapper.toEntity(request);
             newProfile.setUserId(request.getUserId());
-            if(request.getIsVisible() != null){
-                newProfile.setVisible(request.getIsVisible());
-            }
+            newProfile.setVisible(request.getVisible() != null ? request.getVisible() : true);
+
             StudentProfile saved = studentProfileRepository.save(newProfile);
             return studentProfileMapper.toResponse(saved);
         }
-        else{
-            // Update existing profile
-            profile.setFullName(request.getFullName());
-            profile.setAvatarUrl(request.getAvatarUrl());
-            profile.setDob(request.getDob());
-            profile.setGender(request.getGender());
-            profile.setAddress(request.getAddress());
-            profile.setBio(request.getBio());
-            profile.setCvUrl(request.getCvUrl());
-            profile.setCvText(request.getCvText());
-            if (request.getIsVisible() != null) {
-                profile.setVisible(request.getIsVisible());
-            }
-
-            return studentProfileMapper.toResponse(profile);
+        // Cập nhật profile có sẵn (merge chỉ các field khác null)
+        studentProfileMapper.updateProfileFromRequest(request, profile);
+        if (request.getVisible() != null) {
+            profile.setVisible(request.getVisible());
         }
+
+        StudentProfile updated = studentProfileRepository.save(profile);
+        return studentProfileMapper.toResponse(updated);
     }
 
     @Override
@@ -126,6 +117,7 @@ public class StudentProfileServiceImpl implements StudentProfileService {
 
         if (dtos != null && !dtos.isEmpty()) {
             for (StudentSkillDTO dto : dtos) {
+                // Tìm hoặc tạo mới skill
                 Skill skill = skillRepository.findByNameIgnoreCase(dto.getName())
                         .orElseGet(() -> skillRepository.save(
                                 Skill.builder()
@@ -134,9 +126,9 @@ public class StudentProfileServiceImpl implements StudentProfileService {
                                         .build()
                         ));
 
-                StudentSkillId id = new StudentSkillId(profile.getId(), skill.getId());
+                // Tạo quan hệ student-skill
                 StudentSkill studentSkill = StudentSkill.builder()
-                        .id(id)
+                        .id(new StudentSkillId(profile.getId(), skill.getId()))
                         .student(profile)
                         .skill(skill)
                         .level(dto.getLevel())
@@ -146,8 +138,15 @@ public class StudentProfileServiceImpl implements StudentProfileService {
             }
         }
 
-        return studentProfileMapper.toResponse(profile);
+        StudentProfile updatedProfile = studentProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        //Ép Hibernate load danh sách kỹ năng trước khi map
+        Hibernate.initialize(updatedProfile.getStudentSkills());
+
+        return studentProfileMapper.toResponse(updatedProfile);
     }
+
 
     @Override
     public StudentProfileResponse updateVisibility(UUID userId, boolean isVisible) {

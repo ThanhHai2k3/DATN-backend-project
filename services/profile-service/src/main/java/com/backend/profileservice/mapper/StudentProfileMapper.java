@@ -9,8 +9,7 @@ import com.backend.profileservice.entity.Education;
 import com.backend.profileservice.entity.Experience;
 import com.backend.profileservice.entity.StudentProfile;
 import com.backend.profileservice.entity.StudentSkill;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -25,6 +24,9 @@ public interface StudentProfileMapper {
 
     @Mapping(target = "skills", source = "studentSkills")
     StudentProfileResponse toResponse(StudentProfile entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateProfileFromRequest(StudentProfileRequest request, @MappingTarget StudentProfile entity);
 
     // child mappers
     EducationDTO toDto(Education e);

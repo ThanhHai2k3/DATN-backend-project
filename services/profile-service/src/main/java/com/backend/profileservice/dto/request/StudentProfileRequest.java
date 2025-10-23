@@ -17,7 +17,7 @@ public class StudentProfileRequest {
     @NotNull
     private UUID userId; // tạm thời; khi có JWT thì lấy từ token
 
-    @NotBlank
+    //@NotBlank
     private String fullName;
 
     private String avatarUrl;
@@ -27,5 +27,5 @@ public class StudentProfileRequest {
     private String bio;
     private String cvUrl;
     private String cvText;
-    private Boolean isVisible; // optional; default true nếu null
+    private Boolean visible; // optional; default true nếu null
 }
