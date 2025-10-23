@@ -22,6 +22,7 @@
         <module>gateway</module>
         <module>services/auth-service</module>
         <module>services/profile-service</module>
+        <module>services/message-service</module>
     </modules>
 
     <dependencyManagement>
