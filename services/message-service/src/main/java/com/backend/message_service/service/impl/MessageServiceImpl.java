@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +29,7 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
@@ -54,7 +56,16 @@ public class MessageServiceImpl implements MessageService {
         conversationRepository.save(conversation);
 
 
-        return convertToMessageResponse(savedMessage);
+//        return convertToMessageResponse(savedMessage);
+        MessageResponse response = convertToMessageResponse(savedMessage);
+
+
+        // gửi res  đến kênh "/topic/conversation/{conversationId}"
+        String destination = "/topic/conversation/" + response.getConversationId();
+        messagingTemplate.convertAndSend(destination, response);
+        System.out.println("Đã đẩy tin nhắn đến kênh: " + destination);
+
+        return response;
     }
 
     @Override

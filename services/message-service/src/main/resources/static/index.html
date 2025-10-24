@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<!--    CLIENT TEST WEBSOCKET SỬ DỤNG CỔNG 8084 NHÉ-->
+<!--    API: POST http://localhost:8084/api/v1/messages-->
+<!--    TRÌNH DUYỆT: http://localhost:8084/index.html-->
+<!--    DB GIỮ NGUYÊN-->
+<!--    reload trang vẫn đang bị mất tin nhắn hiện có, tuy nhiên vẫn lưu vào db đầy đủ-->
+    <title>WebSocket Chat Test</title>
+    <style>
+        body { font-family: sans-serif; }
+        #messageForm { margin-top: 20px; }
+        #messages p { margin: 5px 0; padding: 8px; border-radius: 5px; background-color: #f1f1f1; }
+        #messages p.sent { background-color: #dcf8c6; text-align: right; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<h1>Real-time Chat (Conversation #1)</h1>
+
+<div id="messages"></div>
+
+<form id="messageForm" name="messageForm">
+    <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off"/>
+    <button type="submit">Send as Duke (ID=1)</button>
+</form>
+
+<script type="text/javascript">
+    //config
+    const CONVERSATION_ID = 1;
+    const CURRENT_USER_ID = 1; // Giả lập đang là Duke
+
+    //gửi tin nhắn
+    const messageForm = document.getElementById('messageForm');
+    const messageInput = document.getElementById('messageInput');
+
+    messageForm.addEventListener('submit', function(event) {
+        event.preventDefault(); // Ngăn form tải lại trang
+        const messageContent = messageInput.value.trim();
+
+        if (messageContent) {
+            const sendMessageRequest = {
+                conversationId: CONVERSATION_ID,
+                senderId: CURRENT_USER_ID,
+                content: messageContent,
+                messageType: 'TEXT'
+            };
+
+            // Gọi API POST để gửi tin nhắn
+            fetch('/api/v1/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sendMessageRequest)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    console.error('Gửi tin nhắn thất bại!');
+                }
+                messageInput.value = ''; // Xóa nội dung trong ô input sau khi gửi
+            });
+        }
+    });
+
+    // --- LOGIC NHẬN TIN NHẮN (QUA WEBSOCKET) ---
+    const messagesArea = document.getElementById('messages');
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+
+    const onConnected = function() {
+        console.log("Đã kết nối thành công đến WebSocket!");
+        // Lắng nghe trên kênh của cuộc trò chuyện
+        stompClient.subscribe('/topic/conversation/' + CONVERSATION_ID, onMessageReceived);
+    };
+
+    const onMessageReceived = function(payload) {
+        const message = JSON.parse(payload.body);
+
+        const messageElement = document.createElement('p');
+        messageElement.innerHTML = '<strong>' + message.sender.fullName + ':</strong> ' + message.content;
+
+        // Nếu là tin nhắn của chính mình thì thêm class 'sent' để đổi màu
+        if (message.sender.id === CURRENT_USER_ID) {
+            messageElement.classList.add('sent');
+        }
+
+        messagesArea.prepend(messageElement);
+    };
+
+    stompClient.connect({}, onConnected, () => console.error('Lỗi kết nối WebSocket.'));
+
+</script>
+</body>
+</html>
