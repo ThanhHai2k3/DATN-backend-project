@@ -23,8 +23,8 @@ public class Employer {
     @Column(nullable = false)
     private UUID userId; // FK tới auth_schema.user_accounts.id
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "company_id")
     private Company company;
 
     @Column(nullable = false)

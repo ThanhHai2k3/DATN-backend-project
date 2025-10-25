@@ -34,7 +34,8 @@ public class CompanyServiceImpl implements CompanyService {
         }
 
         Company company = companyMapper.toEntity(request);
-        company = companyRepository.save(company);
+        //company = companyRepository.save(company);
+        company = companyRepository.saveAndFlush(company);
 
         //Tìm employer theo userId (người tạo công ty)
         Employer employer = employerRepository.findByUserId(userId)
@@ -111,6 +112,14 @@ public class CompanyServiceImpl implements CompanyService {
         if (company == null) {
             throw new AppException(ErrorCode.COMPANY_NOT_FOUND);
         }
+
+        // Tách tất cả employer ra khỏi công ty
+        List<Employer> companyEmployers = employerRepository.findAllByCompanyId(company.getId());
+        for (Employer e : companyEmployers) {
+            e.setCompany(null);
+            e.setAdmin(false);
+        }
+        employerRepository.saveAll(companyEmployers);
 
         companyRepository.delete(company);
     }
