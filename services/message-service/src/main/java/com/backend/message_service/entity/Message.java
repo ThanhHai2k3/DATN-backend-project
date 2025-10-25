@@ -28,7 +28,7 @@ public class Message {
     @Column(name = "message_type", nullable = false, length = 20)
     private MessageType messageType;
 
-    @Lob
+//    @Lob
     @Column(name = "content", nullable = false)
     private String content;
 

@@ -10,7 +10,7 @@ import lombok.Setter;
 @Setter
 public class ConversationResponse {
     private Long id;
-    private UserResponse participant;
+    private UserResponse receiver; //cũ: participant
     private MessageResponse lastMessage;
     private long unreadCount;
 }

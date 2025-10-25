@@ -12,7 +12,7 @@ GRANT ALL ON ALL TABLES IN SCHEMA message_schema TO duke;
 -- 4. Đặt quyền mặc định: Bất kỳ bảng nào được TẠO MỚI trong tương lai cũng sẽ tự động cấp quyền cho 'duke'
 ALTER DEFAULT PRIVILEGES IN SCHEMA message_schema GRANT ALL ON TABLES TO duke;
 
-
+  
 
 cổng mà service sử dụng: 8084 (8083 vẫn trống)
 
@@ -58,3 +58,7 @@ conversation.setUser1(conversation.getUser2());
 conversation.setUser2(temp);
 }
 conversationRepository.save(conversation); //đảm bảo u1id<u2id
+
+GET http://localhost:8084/api/v1/messages/conversation/{conversationId}?page=0&size=20
+POST http://localhost:8084/api/v1/messages
+GET http://localhost:8084/api/v1/conversations/user/1 //load all conversation cua user voi {userid}

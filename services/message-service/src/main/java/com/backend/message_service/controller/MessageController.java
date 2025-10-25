@@ -62,7 +62,6 @@ import org.springframework.web.bind.annotation.*;
 public class MessageController {
 
     private final MessageService messageService;
-
     /**
     URL: http://localhost:8084/api/v1/messages   POST
      */
@@ -77,11 +76,11 @@ public class MessageController {
      */
     @GetMapping("/conversation/{conversationId}")
     public ResponseEntity<Page<MessageResponse>> getMessagesByConversation(
-            @PathVariable Long conversationId,
+            @PathVariable("conversationId") Long conversationId,
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
 
-        Page<MessageResponse> messagePage = messageService.getMessagesByConversation(conversationId, page, size);
+        Page<MessageResponse> messagePage = messageService.getMessagesByConversation( conversationId, page, size);
         return ResponseEntity.ok(messagePage);
     }
 }
