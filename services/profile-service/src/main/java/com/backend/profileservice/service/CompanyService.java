@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 public interface CompanyService {
-    CompanyResponse create(UUID creatorUserId, CompanyRequest request); //employer dau tien tao cong ty
-    CompanyResponse update(UUID companyId, CompanyRequest request, UUID actorUserId);
-    CompanyResponse getById(UUID companyId);
+    CompanyResponse create(UUID userId, CompanyRequest request);
+    CompanyResponse updateByUser(UUID userId, CompanyRequest request);
+    CompanyResponse getByUserId(UUID userId);
     List<CompanyResponse> getAll();
-    void delete(UUID companyId, UUID actorUserId);
+    void deleteByUserId(UUID userId);
 }

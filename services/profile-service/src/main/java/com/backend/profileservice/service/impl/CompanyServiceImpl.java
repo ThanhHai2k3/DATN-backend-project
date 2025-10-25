@@ -28,7 +28,7 @@ public class CompanyServiceImpl implements CompanyService {
 
     @Override
     @Transactional
-    public CompanyResponse create(UUID creatorUserId, CompanyRequest request){
+    public CompanyResponse create(UUID userId, CompanyRequest request){
         if(companyRepository.existsByNameIgnoreCase(request.getName())){
             throw new AppException(ErrorCode.COMPANY_NAME_EXISTED);
         }
@@ -37,12 +37,11 @@ public class CompanyServiceImpl implements CompanyService {
         company = companyRepository.save(company);
 
         //Tìm employer theo userId (người tạo công ty)
-        Employer employer = employerRepository.findByUserId(creatorUserId)
+        Employer employer = employerRepository.findByUserId(userId)
                 .orElseGet(() -> {
-                    // Nếu user vừa đăng ký chưa có hồ sơ Employer, tạo mới luôn
                     Employer newEmployer = new Employer();
-                    newEmployer.setUserId(creatorUserId);
-                    newEmployer.setName("HR Admin"); // có thể cập nhật lại từ frontend sau
+                    newEmployer.setUserId(userId);
+                    newEmployer.setName("HR Admin");
                     newEmployer.setPosition("Admin");
                     return newEmployer;
                 });
@@ -54,27 +53,37 @@ public class CompanyServiceImpl implements CompanyService {
         return companyMapper.toResponse(company);
     }
 
-    @Override
-    @Transactional
-    public CompanyResponse update(UUID companyId, CompanyRequest request, UUID actorUserId){
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
+    public CompanyResponse updateByUser(UUID userId, CompanyRequest request) {
+        // Lấy employer theo userId
+        Employer employer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
-        boolean isAdmin = employerRepository.findByUserId(actorUserId)
-                .filter(employer -> employer.getCompany().getId().equals(companyId) && employer.isAdmin())
-                .isPresent();
-        if(!isAdmin){
+        // Chỉ admin của công ty được phép sửa
+        if (!employer.isAdmin()) {
             throw new AppException(ErrorCode.UPDATE_COMPANY_DENIED);
         }
 
+        Company company = employer.getCompany();
+        if (company == null) {
+            throw new AppException(ErrorCode.COMPANY_NOT_FOUND);
+        }
+
         companyMapper.update(company, request);
-        return companyMapper.toResponse(companyRepository.save(company));
+        companyRepository.save(company);
+
+        return companyMapper.toResponse(company);
     }
 
+    // Lấy công ty theo userId (company mà user thuộc về)
     @Override
-    public CompanyResponse getById(UUID companyId){
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
+    public CompanyResponse getByUserId(UUID userId) {
+        Employer employer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        Company company = employer.getCompany();
+        if (company == null) {
+            throw new AppException(ErrorCode.COMPANY_NOT_FOUND);
+        }
 
         return companyMapper.toResponse(company);
     }
@@ -87,17 +96,20 @@ public class CompanyServiceImpl implements CompanyService {
                 .collect(Collectors.toList());
     }
 
+    //Xoá công ty mà user đang quản lý (chỉ admin công ty)
     @Override
     @Transactional
-    public void delete(UUID companyId, UUID actorUserId){
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
+    public void deleteByUserId(UUID userId) {
+        Employer employer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
-        boolean isAdmin = employerRepository.findByUserId(actorUserId)
-                .filter(emp -> emp.getCompany().getId().equals(companyId) && emp.isAdmin())
-                .isPresent();
-        if (!isAdmin) {
+        if (!employer.isAdmin()) {
             throw new AppException(ErrorCode.UPDATE_COMPANY_DENIED);
+        }
+
+        Company company = employer.getCompany();
+        if (company == null) {
+            throw new AppException(ErrorCode.COMPANY_NOT_FOUND);
         }
 
         companyRepository.delete(company);

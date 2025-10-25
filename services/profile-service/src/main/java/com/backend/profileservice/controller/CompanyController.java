@@ -20,38 +20,9 @@ public class CompanyController {
 
     private final CompanyService companyService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<CompanyResponse>> createCompany(@RequestParam("creatorUserId") UUID creatorUserId,
-                                                                      @Valid @RequestBody CompanyRequest request){
-        CompanyResponse response = companyService.create(creatorUserId, request);
-        return ResponseEntity
-                .status(SuccessCode.COMPANY_CREATED.getStatus())
-                .body(ApiResponse.success(
-                        SuccessCode.COMPANY_CREATED.getCode(),
-                        SuccessCode.COMPANY_CREATED.getMessage(),
-                        response
-                ));
-    }
-
-    @PutMapping("/{companyId}")
-    public ResponseEntity<ApiResponse<CompanyResponse>> updateCompany(
-            @PathVariable UUID companyId,
-            @Valid @RequestBody CompanyRequest request,
-            @RequestParam("actorUserId") UUID actorUserId
-    ) {
-        CompanyResponse response = companyService.update(companyId, request, actorUserId);
-        return ResponseEntity
-                .status(SuccessCode.COMPANY_UPDATED.getStatus())
-                .body(ApiResponse.success(
-                        SuccessCode.COMPANY_UPDATED.getCode(),
-                        SuccessCode.COMPANY_UPDATED.getMessage(),
-                        response
-                ));
-    }
-
-    @GetMapping("/{companyId}")
-    public ResponseEntity<ApiResponse<CompanyResponse>> getCompanyById(@PathVariable UUID companyId) {
-        CompanyResponse response = companyService.getById(companyId);
+    @GetMapping("/me")
+    public ResponseEntity<ApiResponse<CompanyResponse>> getCompany(@RequestParam("userId") UUID userId) {
+        CompanyResponse response = companyService.getByUserId(userId);
         return ResponseEntity
                 .status(SuccessCode.COMPANY_FETCHED.getStatus())
                 .body(ApiResponse.success(
@@ -61,7 +32,46 @@ public class CompanyController {
                 ));
     }
 
-    @GetMapping
+    // ======================
+    // 2️⃣ Tạo công ty mới (khi employer đầu tiên chưa có company)
+    // ======================
+    @PostMapping("/me")
+    public ResponseEntity<ApiResponse<CompanyResponse>> createCompany(
+            @RequestParam("userId") UUID userId,
+            @Valid @RequestBody CompanyRequest request
+    ) {
+        CompanyResponse response = companyService.create(userId, request);
+        return ResponseEntity
+                .status(SuccessCode.COMPANY_CREATED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.COMPANY_CREATED.getCode(),
+                        SuccessCode.COMPANY_CREATED.getMessage(),
+                        response
+                ));
+    }
+
+    // ======================
+    // 3️⃣ Cập nhật thông tin công ty của user
+    // ======================
+    @PutMapping("/me")
+    public ResponseEntity<ApiResponse<CompanyResponse>> updateCompany(
+            @RequestParam("userId") UUID userId,
+            @Valid @RequestBody CompanyRequest request
+    ) {
+        CompanyResponse response = companyService.updateByUser(userId, request);
+        return ResponseEntity
+                .status(SuccessCode.COMPANY_UPDATED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.COMPANY_UPDATED.getCode(),
+                        SuccessCode.COMPANY_UPDATED.getMessage(),
+                        response
+                ));
+    }
+
+    // ======================
+    // 4️⃣ Lấy danh sách tất cả công ty (dành cho admin / debug)
+    // ======================
+    @GetMapping("/all")
     public ResponseEntity<ApiResponse<List<CompanyResponse>>> getAllCompanies() {
         List<CompanyResponse> responses = companyService.getAll();
         return ResponseEntity
@@ -73,12 +83,12 @@ public class CompanyController {
                 ));
     }
 
-    @DeleteMapping("/{companyId}")
-    public ResponseEntity<ApiResponse<Void>> deleteCompany(
-            @PathVariable UUID companyId,
-            @RequestParam("actorUserId") UUID actorUserId
-    ) {
-        companyService.delete(companyId, actorUserId);
+    // ======================
+    // 5️⃣ Xoá công ty của user (nếu user là admin)
+    // ======================
+    @DeleteMapping("/me")
+    public ResponseEntity<ApiResponse<Void>> deleteCompany(@RequestParam("userId") UUID userId) {
+        companyService.deleteByUserId(userId);
         return ResponseEntity
                 .status(SuccessCode.COMPANY_DELETED.getStatus())
                 .body(ApiResponse.success(
