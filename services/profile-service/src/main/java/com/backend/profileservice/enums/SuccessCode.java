@@ -14,6 +14,12 @@ public enum SuccessCode {
     SKILLS_UPDATED("PRO_004", "Skills updated", HttpStatus.OK),
     EDU_UPDATED("PRO_005", "Educations updated", HttpStatus.OK),
     EXP_UPDATED("PRO_006", "Experiences updated", HttpStatus.OK),
+
+    COMPANY_CREATED("COM_001", "Company created successfully", HttpStatus.CREATED),
+    COMPANY_UPDATED("COM_002", "Company updated successfully", HttpStatus.OK),
+    COMPANY_FETCHED("COM_003", "Company fetched successfully", HttpStatus.OK),
+    COMPANY_LIST_FETCHED("COM_004", "Companies fetched successfully", HttpStatus.OK),
+    COMPANY_DELETED("COM_005", "Company deleted", HttpStatus.OK),
     ;
 
     private final String code;

@@ -15,7 +15,11 @@ public enum ErrorCode {
     TOKEN_EXPIRED("AUTH_005", "Token has expired", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID("AUTH_006", "Invalid token", HttpStatus.UNAUTHORIZED),
 
-    PROFILE_NOT_FOUND("PRO_104", "Student profile not found", HttpStatus.NOT_FOUND),
+    PROFILE_NOT_FOUND("PRO_101", "Student profile not found", HttpStatus.NOT_FOUND),
+
+    COMPANY_NAME_EXISTED("PRO_301", "Company name already exists", HttpStatus.BAD_REQUEST),
+    COMPANY_NOT_FOUND("PRO_302", "Company not found", HttpStatus.NOT_FOUND),
+    UPDATE_COMPANY_DENIED("PRO_303", "You are not allowed to update this company", HttpStatus.FORBIDDEN),
 
     VALIDATION_FAILED("SYS_400", "Request validation failed", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
