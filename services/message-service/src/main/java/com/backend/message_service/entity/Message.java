@@ -1,5 +1,6 @@
 package com.backend.message_service.entity;
 
+import com.backend.message_service.enums.MessageType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

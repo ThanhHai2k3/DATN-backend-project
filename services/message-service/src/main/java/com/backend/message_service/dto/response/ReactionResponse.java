@@ -12,4 +12,5 @@ public class ReactionResponse {
     private Long id;
     private Long userId;
     private String reactionType;
+    private Long messageId;
 }

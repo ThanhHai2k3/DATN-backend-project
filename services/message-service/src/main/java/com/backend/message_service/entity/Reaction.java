@@ -1,8 +1,7 @@
 package com.backend.message_service.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
@@ -17,6 +16,9 @@ import java.time.Instant;
 )
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Reaction {
 
     @Id

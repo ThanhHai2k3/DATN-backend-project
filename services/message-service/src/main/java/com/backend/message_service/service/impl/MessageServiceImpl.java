@@ -1,14 +1,16 @@
 package com.backend.message_service.service.impl;
 
+import com.backend.message_service.dto.WebSocketEvent;
+import com.backend.message_service.dto.request.CreateReactionRequest;
 import com.backend.message_service.dto.response.MessageResponse;
 import com.backend.message_service.dto.request.SendMessageRequest;
+import com.backend.message_service.dto.response.ReactionResponse;
 import com.backend.message_service.dto.response.UserResponse;
-import com.backend.message_service.entity.Conversation;
-import com.backend.message_service.entity.Message;
-import com.backend.message_service.entity.MessageType;
-import com.backend.message_service.entity.User;
+import com.backend.message_service.entity.*;
+import com.backend.message_service.enums.MessageType;
 import com.backend.message_service.repository.ConversationRepository;
 import com.backend.message_service.repository.MessageRepository;
+import com.backend.message_service.repository.ReactionRepository;
 import com.backend.message_service.repository.UserRepository;
 import com.backend.message_service.service.MessageService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @Service
@@ -30,6 +35,7 @@ public class MessageServiceImpl implements MessageService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ReactionRepository reactionRepository;
 
     @Override
     @Transactional
@@ -88,7 +94,9 @@ public class MessageServiceImpl implements MessageService {
         return convertToMessageResponse(recalledMessage);
     }
 
+
     @Override
+    @Transactional
     public Page<MessageResponse> getMessagesByConversation(Long conversationId, int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by("sentAt").descending());
         Page<Message> messagePage = messageRepository.findByConversationIdOrderBySentAtDesc(conversationId, pageable);
@@ -123,5 +131,57 @@ public class MessageServiceImpl implements MessageService {
         // TODO: Lấy và chuyển đổi danh sách reactions sau này
 
         return response;
+    }
+    public ReactionResponse addReaction(CreateReactionRequest request){
+        Message message = messageRepository.findById(request.getMessageId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tin nhắn"));
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+
+        // 2. Tạo và lưu Reaction Entity
+        Reaction newReaction = new Reaction();
+        newReaction.setMessage(message);
+        newReaction.setUser(user);
+        newReaction.setReactionType(request.getReactionType());
+        Reaction savedReaction = reactionRepository.save(newReaction);
+
+        // 3. Chuyển đổi sang DTO
+        ReactionResponse response = convertToReactionResponse(savedReaction);
+
+        // 4. Đẩy sự kiện "ADD_REACTION" qua WebSocket
+        String destination = "/topic/conversation/" + message.getConversation().getId();
+        WebSocketEvent<ReactionResponse> event = new WebSocketEvent<>("ADD_REACTION", response);
+        messagingTemplate.convertAndSend(destination, event);
+
+        return response;
+    }
+
+    private ReactionResponse convertToReactionResponse(Reaction savedReaction) {
+        if(savedReaction.getId()==null || savedReaction.getReactionType()==null) return null;
+        ReactionResponse res = new ReactionResponse();
+        res.setId(savedReaction.getId());
+        res.setUserId(savedReaction.getUser().getId());
+        res.setReactionType(savedReaction.getReactionType());
+        res.setMessageId(savedReaction.getMessage().getId());
+        return res;
+    }
+    @Override
+    @Transactional
+    public void removeReaction(Long reactionId, Long userId){
+        Reaction reaction = reactionRepository.findById(reactionId).orElseThrow(()-> new RuntimeException("Reaction không tồn tại!"));
+        if(reaction.getUser().getId()!=userId) {
+            throw new SecurityException("Bạn không có quyền xóa reaction này.");
+//            return;
+        }
+        Long conversationId = reaction.getMessage().getConversation().getId();
+        Long messageId = reaction.getMessage().getId();
+        reactionRepository.deleteById(reactionId);
+
+        String destination = "/topic/conversation/" + conversationId;
+        Map<String, Long> payload = new HashMap<>();
+        payload.put("messageId", messageId);
+        payload.put("reactionId", reactionId);
+        WebSocketEvent<Map<String, Long>> event = new WebSocketEvent<>("REMOVE_REACTION", payload);
+        messagingTemplate.convertAndSend(destination, event);
     }
 }

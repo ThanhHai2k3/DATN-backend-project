@@ -6,7 +6,7 @@ import com.backend.message_service.dto.response.MessageResponse;
 import com.backend.message_service.dto.response.UserResponse;
 import com.backend.message_service.entity.Conversation;
 import com.backend.message_service.entity.Message;
-import com.backend.message_service.entity.MessageType;
+import com.backend.message_service.enums.MessageType;
 import com.backend.message_service.entity.User;
 import com.backend.message_service.repository.ConversationRepository;
 import com.backend.message_service.repository.MessageRepository;
