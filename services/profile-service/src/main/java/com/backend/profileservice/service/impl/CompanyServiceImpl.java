@@ -6,6 +6,7 @@ import com.backend.profileservice.entity.Company;
 import com.backend.profileservice.entity.Employer;
 import com.backend.profileservice.enums.ErrorCode;
 import com.backend.profileservice.exception.AppException;
+import com.backend.profileservice.helper.EmployerHelper;
 import com.backend.profileservice.mapper.CompanyMapper;
 import com.backend.profileservice.repository.CompanyRepository;
 import com.backend.profileservice.repository.EmployerRepository;
@@ -25,6 +26,7 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepository companyRepository;
     private final EmployerRepository employerRepository;
     private final CompanyMapper companyMapper;
+    private final EmployerHelper employerHelper;
 
     @Override
     @Transactional
@@ -38,18 +40,22 @@ public class CompanyServiceImpl implements CompanyService {
         company = companyRepository.saveAndFlush(company);
 
         //Tìm employer theo userId (người tạo công ty)
-        Employer employer = employerRepository.findByUserId(userId)
-                .orElseGet(() -> {
-                    Employer newEmployer = new Employer();
-                    newEmployer.setUserId(userId);
-                    newEmployer.setName("HR Admin");
-                    newEmployer.setPosition("Admin");
-                    return newEmployer;
-                });
-        //Gắn employer này vào công ty và set quyền admin
-        employer.setCompany(company);
-        employer.setAdmin(true);
-        employerRepository.save(employer);
+//        Employer employer = employerRepository.findByUserId(userId)
+//                .orElseGet(() -> {
+//                    Employer newEmployer = new Employer();
+//                    newEmployer.setUserId(userId);
+//                    newEmployer.setName("HR Admin");
+//                    newEmployer.setPosition("Admin");
+//                    return newEmployer;
+//                });
+
+//        //Gắn employer này vào công ty và set quyền admin
+//        employer.setCompany(company);
+//        employer.setAdmin(true);
+//        employerRepository.save(employer);
+
+        //Gọi helper để gán user tạo công ty này làm admin đầu tiên
+        employerHelper.ensureEmployerAdmin(userId, company, "HR Admin", "Admin");
 
         return companyMapper.toResponse(company);
     }

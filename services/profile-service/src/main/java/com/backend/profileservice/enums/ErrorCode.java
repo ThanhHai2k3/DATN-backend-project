@@ -15,9 +15,11 @@ public enum ErrorCode {
     TOKEN_EXPIRED("AUTH_005", "Token has expired", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID("AUTH_006", "Invalid token", HttpStatus.UNAUTHORIZED),
 
-    PROFILE_NOT_FOUND("PRO_001", "Student profile not found", HttpStatus.NOT_FOUND),
+    PROFILE_NOT_FOUND("STU_001", "Student profile not found", HttpStatus.NOT_FOUND),
 
     EMPLOYER_NOT_FOUND("EMP_001", "Employer not found", HttpStatus.NOT_FOUND),
+    EMPLOYER_PROFILE_EXISTED("EMP_002", "Employer profile already exists", HttpStatus.BAD_REQUEST),
+    CANNOT_DELETE_ADMIN_EMPLOYER("EMP_003", "Cannot delete employer admin in company", HttpStatus.FORBIDDEN),
 
     COMPANY_NAME_EXISTED("PRO_001", "Company name already exists", HttpStatus.BAD_REQUEST),
     COMPANY_NOT_FOUND("PRO_002", "Company not found", HttpStatus.NOT_FOUND),
