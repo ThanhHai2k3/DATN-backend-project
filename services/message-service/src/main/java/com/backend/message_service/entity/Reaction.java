@@ -1,5 +1,6 @@
 package com.backend.message_service.entity;
 
+import com.backend.message_service.enums.ReactionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,8 +34,12 @@ public class Reaction {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+//    @Column(name = "reaction_type", nullable = false, length = 50)
+//    private String reactionType;  // sớm sẽ bổ sung enum reaction type
+
+    @Enumerated(EnumType.STRING) // <-- Rất quan trọng!
     @Column(name = "reaction_type", nullable = false, length = 50)
-    private String reactionType;  // sớm sẽ bổ sung enum reaction type
+    private ReactionType reactionType;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

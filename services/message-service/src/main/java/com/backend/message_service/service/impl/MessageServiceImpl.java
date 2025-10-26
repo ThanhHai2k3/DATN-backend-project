@@ -8,6 +8,7 @@ import com.backend.message_service.dto.response.ReactionResponse;
 import com.backend.message_service.dto.response.UserResponse;
 import com.backend.message_service.entity.*;
 import com.backend.message_service.enums.MessageType;
+import com.backend.message_service.enums.ReactionType;
 import com.backend.message_service.repository.ConversationRepository;
 import com.backend.message_service.repository.MessageRepository;
 import com.backend.message_service.repository.ReactionRepository;
@@ -22,8 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
@@ -66,7 +70,7 @@ public class MessageServiceImpl implements MessageService {
         MessageResponse response = convertToMessageResponse(savedMessage);
 
 
-        // gửi res  đến kênh "/topic/conversation/{conversationId}"
+        // gửi res đến kênh "/topic/conversation/{conversationId}"
         String destination = "/topic/conversation/" + response.getConversationId();
         messagingTemplate.convertAndSend(destination, response);
         System.out.println("Đã đẩy tin nhắn đến kênh: " + destination);
@@ -129,47 +133,97 @@ public class MessageServiceImpl implements MessageService {
         response.setSender(senderResponse);
 
         // TODO: Lấy và chuyển đổi danh sách reactions sau này
+        List<Reaction> reactions = reactionRepository.findByMessageId(message.getId());
+        if (reactions != null && !reactions.isEmpty()) {
+            response.setReactions(
+                    reactions.stream()
+                            .map(this::convertToReactionResponse)
+                            .collect(Collectors.toList())
+            );
+        } else {
+            response.setReactions(Collections.emptyList());
+        }
 
         return response;
     }
-    public ReactionResponse addReaction(CreateReactionRequest request){
-        Message message = messageRepository.findById(request.getMessageId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tin nhắn"));
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+//    public ReactionResponse addReaction(CreateReactionRequest request){
+//        Message message = messageRepository.findById(request.getMessageId())
+//                .orElseThrow(() -> new RuntimeException("Không tìm thấy tin nhắn"));
+//        User user = userRepository.findById(request.getUserId())
+//                .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng"));
+//
+//        // 2. Tạo và lưu Reaction Entity
+//        Reaction newReaction = new Reaction();
+//        newReaction.setMessage(message);
+//        newReaction.setUser(user);
+//        newReaction.setReactionType(request.getReactionType());
+//        Reaction savedReaction = reactionRepository.save(newReaction);
+//
+//        // 3. Chuyển đổi sang DTO
+//        ReactionResponse response = convertToReactionResponse(savedReaction);
+//
+//        // 4. Đẩy sự kiện "ADD_REACTION" qua WebSocket
+//        String destination = "/topic/conversation/" + message.getConversation().getId();
+//        WebSocketEvent<ReactionResponse> event = new WebSocketEvent<>("ADD_REACTION", response);
+//        messagingTemplate.convertAndSend(destination, event);
+//
+//        return response;
+//    }
+@Override
+@Transactional
+public ReactionResponse addReaction(CreateReactionRequest request) {
+    // 1. Lấy các Entity liên quan từ database
+    Message message = messageRepository.findById(request.getMessageId())
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy tin nhắn với ID: " + request.getMessageId()));
+    User user = userRepository.findById(request.getUserId())
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy người dùng với ID: " + request.getUserId()));
 
-        // 2. Tạo và lưu Reaction Entity
-        Reaction newReaction = new Reaction();
-        newReaction.setMessage(message);
-        newReaction.setUser(user);
-        newReaction.setReactionType(request.getReactionType());
-        Reaction savedReaction = reactionRepository.save(newReaction);
+    // 2. Tạo và lưu Reaction Entity
+    Reaction newReaction = new Reaction();
+    newReaction.setMessage(message);
+    newReaction.setUser(user);
 
-        // 3. Chuyển đổi sang DTO
-        ReactionResponse response = convertToReactionResponse(savedReaction);
+    // --- THAY ĐỔI QUAN TRỌNG: CHUYỂN ĐỔI TỪ STRING SANG ENUM ---
+    // Chuyển chuỗi String từ request (ví dụ: "LIKE") thành giá trị Enum ReactionType.LIKE
+    // toUpperCase() để đảm bảo khớp với tên Enum (LIKE, LOVE...)
+    newReaction.setReactionType(ReactionType.valueOf(request.getReactionType().toUpperCase()));
 
-        // 4. Đẩy sự kiện "ADD_REACTION" qua WebSocket
-        String destination = "/topic/conversation/" + message.getConversation().getId();
-        WebSocketEvent<ReactionResponse> event = new WebSocketEvent<>("ADD_REACTION", response);
-        messagingTemplate.convertAndSend(destination, event);
+    Reaction savedReaction = reactionRepository.save(newReaction);
 
-        return response;
-    }
+    // 3. Chuyển đổi sang DTO để trả về
+    ReactionResponse response = convertToReactionResponse(savedReaction);
 
-    private ReactionResponse convertToReactionResponse(Reaction savedReaction) {
-        if(savedReaction.getId()==null || savedReaction.getReactionType()==null) return null;
-        ReactionResponse res = new ReactionResponse();
-        res.setId(savedReaction.getId());
-        res.setUserId(savedReaction.getUser().getId());
-        res.setReactionType(savedReaction.getReactionType());
-        res.setMessageId(savedReaction.getMessage().getId());
-        return res;
-    }
+    // 4. Đẩy sự kiện "ADD_REACTION" qua WebSocket
+    String destination = "/topic/conversation/" + message.getConversation().getId();
+    WebSocketEvent<ReactionResponse> event = new WebSocketEvent<>("ADD_REACTION", response);
+    messagingTemplate.convertAndSend(destination, event);
+
+    return response;
+}
+
+//    private ReactionResponse convertToReactionResponse(Reaction savedReaction) {
+//        if(savedReaction.getId()==null || savedReaction.getReactionType()==null) return null;
+//        ReactionResponse res = new ReactionResponse();
+//        res.setId(savedReaction.getId());
+//        res.setUserId(savedReaction.getUser().getId());
+//        res.setReactionType(savedReaction.getReactionType());
+//        res.setMessageId(savedReaction.getMessage().getId());
+//        return res;
+//    }
+private ReactionResponse convertToReactionResponse(Reaction reaction) {
+    if (reaction == null) return null;
+    ReactionResponse response = new ReactionResponse();
+    response.setId(reaction.getId());
+    response.setMessageId(reaction.getMessage().getId());
+    response.setUserId(reaction.getUser().getId());
+    response.setReactionType(reaction.getReactionType().name());
+    return response;
+}
     @Override
     @Transactional
     public void removeReaction(Long reactionId, Long userId){
         Reaction reaction = reactionRepository.findById(reactionId).orElseThrow(()-> new RuntimeException("Reaction không tồn tại!"));
-        if(reaction.getUser().getId()!=userId) {
+        if(!reaction.getUser().getId().equals(userId)) {
             throw new SecurityException("Bạn không có quyền xóa reaction này.");
 //            return;
         }

@@ -20,7 +20,7 @@ public class ReactionController {
     }
 
     @DeleteMapping("/{reactionId}")
-    public ResponseEntity<Void> removeReaction(@PathVariable Long reactionId, @RequestParam Long userId) { // userId sẽ lấy từ token sau
+    public ResponseEntity<Void> removeReaction(@PathVariable("reactionId") Long reactionId, @RequestParam("userId") Long userId) { // userId sẽ lấy từ token sau
         messageService.removeReaction(reactionId, userId);
         return ResponseEntity.noContent().build();
     }
