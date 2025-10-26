@@ -3,6 +3,8 @@ package com.backend.authservice.dto.response;
 import com.backend.authservice.enums.Role;
 import lombok.*;
 
+import java.util.UUID;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,4 +16,7 @@ public class AuthResponse {
     private String tokenType = "Bearer";
     private long expiresInSeconds;
     private String role;
+
+    private UUID userId;
+    private String fullName;
 }

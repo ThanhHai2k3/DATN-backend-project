@@ -15,6 +15,7 @@ import com.backend.authservice.service.AuthService;
 import com.backend.authservice.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import java.util.UUID;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -39,6 +41,27 @@ public class AuthServiceImpl implements AuthService {
     private final AuthMapper authMapper;
     private final TokenService tokenService;
     private final RestTemplate restTemplate;
+
+    private String getFullNameFromProfile(UUID userId) {
+        try {
+            String url = "http://localhost:8082/v1/student-profile/me?userId=" + userId;
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                Map<String, Object> apiResponse = response.getBody();
+                if (apiResponse.containsKey("data")) {
+                    Map<String, Object> apiData = (Map<String, Object>) apiResponse.get("data");
+                    if (apiData != null && apiData.containsKey("fullName") && apiData.get("fullName") != null) {
+                        return (String) apiData.get("fullName");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Could not fetch full name for user {}: {}", userId, e.getMessage());
+        }
+        return "User";
+    }
+
 
     @Override
     public AuthResponse register(RegisterRequest request){
@@ -65,7 +88,11 @@ public class AuthServiceImpl implements AuthService {
             log.error("Failed to auto-create profile for user {}", user.getId(), e);
         }
 
-        return tokenService.issueTokens(user);
+        AuthResponse response = tokenService.issueTokens(user);
+        // SỬA: Đặt Full Name từ request (đã có sẵn)
+        response.setFullName(request.getFullName());
+
+        return response;
     }
 
     @Override
@@ -82,7 +109,13 @@ public class AuthServiceImpl implements AuthService {
                 throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
             }
 
-            return tokenService.issueTokens(user);
+            AuthResponse response = tokenService.issueTokens(user);
+
+            // THÊM LẠI LOGIC LẤY VÀ SET FULL NAME
+            String fullName = getFullNameFromProfile(user.getId());
+            response.setFullName(fullName);
+
+            return response;
 
         } catch (BadCredentialsException ex) {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);

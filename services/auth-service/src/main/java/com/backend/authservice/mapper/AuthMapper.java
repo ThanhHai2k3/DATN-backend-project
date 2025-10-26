@@ -22,5 +22,7 @@ public interface AuthMapper {
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(target = "expiresInSeconds", ignore = true)
     @Mapping(target = "role", source = "role")
+    @Mapping(target = "userId", source = "id")
+    @Mapping(target = "fullName", ignore = true)
     AuthResponse toAuthResponse(UserAccount userAccount);
 }
