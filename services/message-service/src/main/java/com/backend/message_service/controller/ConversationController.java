@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/conversations")
@@ -17,7 +18,7 @@ import java.util.List;
 public class ConversationController {
     private final ConversationService conversationService;
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ConversationResponse>> getConversationsByUserId(@PathVariable("userId") Long userId) {
+    public ResponseEntity<List<ConversationResponse>> getConversationsByUserId(@PathVariable("userId") UUID userId) {
         List<ConversationResponse> responses = conversationService.getConversationsByUserId(userId);
         return ResponseEntity.ok(responses);
     }

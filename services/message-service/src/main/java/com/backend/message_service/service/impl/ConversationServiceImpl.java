@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +32,23 @@ public class ConversationServiceImpl implements ConversationService {
     @Transactional
     public ConversationResponse findOrCreateConversation(FindConversationRequest request) {
         // Sắp xếp ID để đảm bảo user1Id < user2Id
-        Long user1Id = Math.min(request.getUser1Id(), request.getUser2Id());
-        Long user2Id = Math.max(request.getUser1Id(), request.getUser2Id());
+//        Long user1Id = Math.min(request.getUser1Id(), request.getUser2Id());
+//        Long user2Id = Math.max(request.getUser1Id(), request.getUser2Id());
+        UUID user1Id = request.getUser1Id();
+        UUID user2Id = request.getUser2Id();
+
+// Sắp xếp để đảm bảo firstId < secondId theo natural order của UUID
+        UUID firstId;
+        UUID secondId;
+
+        if (user1Id.compareTo(user2Id) < 0) {
+            firstId = user1Id;
+            secondId = user2Id;
+        } else {
+            firstId = user2Id;
+            secondId = user1Id;
+        }
+
 
         // Tìm kiếm cuộc trò chuyện
         Conversation conversation = conversationRepository.findByUser1IdAndUser2Id(user1Id, user2Id)
@@ -51,7 +67,7 @@ public class ConversationServiceImpl implements ConversationService {
         return convertToConversationResponse(conversation, request.getUser1Id());
     }
 
-    private ConversationResponse convertToConversationResponse(Conversation conversation, Long user1Id) {
+    private ConversationResponse convertToConversationResponse(Conversation conversation, UUID user1Id) {
         if(conversation == null) return null;
         ConversationResponse res = new ConversationResponse();
         res.setId(conversation.getId());
@@ -106,7 +122,7 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Transactional
-    public List<ConversationResponse> getConversationsByUserId(Long userId){
+    public List<ConversationResponse> getConversationsByUserId(UUID userId){
         List<Conversation> listConversationRepo = conversationRepository.findByUser1IdOrUser2IdOrderByUpdatedAtDesc(userId, userId);
         List<ConversationResponse> res = new ArrayList<>();
         for(Conversation x:listConversationRepo)

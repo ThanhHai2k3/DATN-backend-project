@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * DTO chứa thông tin đầy đủ của một tin nhắn để hiển thị cho người dùng.

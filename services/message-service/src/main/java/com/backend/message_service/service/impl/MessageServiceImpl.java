@@ -23,10 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -80,7 +77,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     @Transactional
-    public MessageResponse recallMessage(Long messageId, Long userId) {
+    public MessageResponse recallMessage(Long messageId, UUID userId) {
 
         Message messageToRecall = messageRepository.findById(messageId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy tin nhắn với ID: " + messageId));
@@ -221,7 +218,7 @@ private ReactionResponse convertToReactionResponse(Reaction reaction) {
 }
     @Override
     @Transactional
-    public void removeReaction(Long reactionId, Long userId){
+    public void removeReaction(Long reactionId, UUID userId){
         Reaction reaction = reactionRepository.findById(reactionId).orElseThrow(()-> new RuntimeException("Reaction không tồn tại!"));
         if(!reaction.getUser().getId().equals(userId)) {
             throw new SecurityException("Bạn không có quyền xóa reaction này.");

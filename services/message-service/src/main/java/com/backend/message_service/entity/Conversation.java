@@ -10,7 +10,7 @@ import java.time.Instant;
 @Table(
         name = "conversations",
         schema = "message_schema",
-        //  đảm bảo không có cặp (user1, user2) nào bị trùng
+        // đảm bảo không có cặp (user1, user2) nào bị trùng
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"user1_id", "user2_id"})
         }
@@ -24,11 +24,19 @@ public class Conversation {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user1_id", nullable = false)
+    @JoinColumn(
+            name = "user1_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
+    )
     private User user1;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user2_id", nullable = false)
+    @JoinColumn(
+            name = "user2_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
+    )
     private User user2;
 
     @Column(name = "user1_last_read_message_id")
@@ -44,5 +52,5 @@ public class Conversation {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    // note: nhớ nhắc duke bổ sung code kiểm tra userid1<userid2 trong service nhé
+    // note: nhớ nhắc duke bổ sung code kiểm tra userid1 < userid2 trong service nhé
 }

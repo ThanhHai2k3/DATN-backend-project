@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/v1/reactions")
 @RequiredArgsConstructor
@@ -20,7 +22,7 @@ public class ReactionController {
     }
 
     @DeleteMapping("/{reactionId}")
-    public ResponseEntity<Void> removeReaction(@PathVariable("reactionId") Long reactionId, @RequestParam("userId") Long userId) { // userId sẽ lấy từ token sau
+    public ResponseEntity<Void> removeReaction(@PathVariable("reactionId") Long reactionId, @RequestParam("userId") UUID userId) { // userId sẽ lấy từ token sau
         messageService.removeReaction(reactionId, userId);
         return ResponseEntity.noContent().build();
     }

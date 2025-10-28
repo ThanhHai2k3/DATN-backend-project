@@ -18,18 +18,25 @@ public class Message {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "conversation_id", nullable = false)
+    @JoinColumn(
+            name = "conversation_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT) // không tạo FK
+    )
     private Conversation conversation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "sender_id", nullable = false)
+    @JoinColumn(
+            name = "sender_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT) // không tạo FK
+    )
     private User sender;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type", nullable = false, length = 20)
     private MessageType messageType;
 
-//    @Lob
     @Column(name = "content", nullable = false)
     private String content;
 

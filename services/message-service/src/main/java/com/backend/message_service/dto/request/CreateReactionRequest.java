@@ -3,6 +3,8 @@ package com.backend.message_service.dto.request;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.UUID;
+
 /**
  * DTO chứa dữ liệu để thả một cảm xúc mới vào tin nhắn.
  */
@@ -10,6 +12,6 @@ import lombok.Setter;
 @Setter
 public class CreateReactionRequest {
     private Long messageId;
-    private Long userId;
+    private UUID userId;
     private String reactionType;
 }

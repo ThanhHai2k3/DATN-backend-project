@@ -27,17 +27,22 @@ public class Reaction {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "message_id", nullable = false)
+    @JoinColumn(
+            name = "message_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
+    )
     private Message message;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(
+            name = "user_id",
+            nullable = false,
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
+    )
     private User user;
 
-//    @Column(name = "reaction_type", nullable = false, length = 50)
-//    private String reactionType;  // sớm sẽ bổ sung enum reaction type
-
-    @Enumerated(EnumType.STRING) // <-- Rất quan trọng!
+    @Enumerated(EnumType.STRING) // <-- enum reaction type
     @Column(name = "reaction_type", nullable = false, length = 50)
     private ReactionType reactionType;
 

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 public interface ConversationRepository extends JpaRepository<Conversation, Long> {
@@ -19,6 +20,6 @@ public interface ConversationRepository extends JpaRepository<Conversation, Long
      * @param user2Id ID của người dùng thứ hai (luôn lớn hơn)
      * @return một Optional chứa Conversation nếu tìm thấy.
      */
-    Optional<Conversation> findByUser1IdAndUser2Id(Long user1Id, Long user2Id);
-    List<Conversation> findByUser1IdOrUser2IdOrderByUpdatedAtDesc(Long user1Id, Long user2Id);
+    Optional<Conversation> findByUser1IdAndUser2Id(UUID user1Id, UUID user2Id);
+    List<Conversation> findByUser1IdOrUser2IdOrderByUpdatedAtDesc(UUID user1Id, UUID user2Id);
 }
