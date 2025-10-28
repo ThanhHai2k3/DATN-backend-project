@@ -109,10 +109,10 @@ public class StudentProfileController {
         log.info("Auto-created profile for userId={} with fullName='{}'", userId, fullName);
 
         return ResponseEntity
-                .status(SuccessCode.PROFILE_AUTO_CREATED.getStatus())
+                .status(SuccessCode.STUDENT_PROFILE_AUTO_CREATED.getStatus())
                 .body(ApiResponse.success(
-                        SuccessCode.PROFILE_AUTO_CREATED.getCode(),
-                        SuccessCode.PROFILE_AUTO_CREATED.getMessage(),
+                        SuccessCode.STUDENT_PROFILE_AUTO_CREATED.getCode(),
+                        SuccessCode.STUDENT_PROFILE_AUTO_CREATED.getMessage(),
                         null
                 ));
     }

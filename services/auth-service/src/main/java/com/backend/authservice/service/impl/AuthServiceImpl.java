@@ -7,6 +7,7 @@ import com.backend.authservice.dto.response.AuthResponse;
 import com.backend.authservice.entity.UserAccount;
 import com.backend.authservice.enums.AccountStatus;
 import com.backend.authservice.enums.ErrorCode;
+import com.backend.authservice.enums.Role;
 import com.backend.authservice.exception.AppException;
 import com.backend.authservice.mapper.AuthMapper;
 import com.backend.authservice.repository.RefreshTokenRepository;
@@ -79,13 +80,25 @@ public class AuthServiceImpl implements AuthService {
             body.put("userId", user.getId());
             body.put("fullName", request.getFullName());
 
-            String url = "http://localhost:8082/api/profile/v1/student-profile/auto-create";
+            String baseUrl = "http://localhost:8082/api/profile/v1";
+            String url;
 
-            restTemplate.postForEntity(url, body, Void.class);
+            if (user.getRole() == Role.STUDENT) {
+                url = baseUrl + "/student-profile/auto-create";
+            } else if (user.getRole() == Role.EMPLOYER) {
+                url = baseUrl + "/employers/auto-create";
+            } else {
+                url = null;
+            }
 
-            log.info("Auto-create profile successfully for user: {}", user.getId());
+            if (url != null) {
+                restTemplate.postForEntity(url, body, Void.class);
+                log.info("Auto-created profile for userId={} with role={}", user.getId(), user.getRole());
+            } else {
+                log.warn("Role {} does not have profile auto-create configured.", user.getRole());
+            }
         } catch (Exception e) {
-            log.error("Failed to auto-create profile for user {}", user.getId(), e);
+            log.error("Failed to auto-create profile for userId={} (role={})", user.getId(), user.getRole(), e);
         }
 
         AuthResponse response = tokenService.issueTokens(user);

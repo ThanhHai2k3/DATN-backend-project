@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 public enum SuccessCode {
 
     PROFILE_FETCHED("STU_001", "Profile fetched successfully", HttpStatus.OK),
-    PROFILE_AUTO_CREATED("STU_002", "Profile auto-created successfully", HttpStatus.CREATED),
+    STUDENT_PROFILE_AUTO_CREATED("STU_002", "Student profile auto-created successfully", HttpStatus.CREATED),
     PROFILE_UPSERTED("STU_003", "Profile saved", HttpStatus.OK),
     SKILLS_UPDATED("STU_004", "Skills updated", HttpStatus.OK),
     EDU_UPDATED("STU_005", "Educations updated", HttpStatus.OK),
@@ -20,6 +20,7 @@ public enum SuccessCode {
     EMPLOYER_INFO_FETCHED("EMP_003", "Employer profile fetched successfully", HttpStatus.OK),
     EMPLOYER_INFO_DELETED("EMP_004", "Employer profile deleted successfully", HttpStatus.OK),
     EMPLOYERS_LIST_FETCHED("EMP_005", "List of employers fetched successfully", HttpStatus.OK),
+    EMPLOYER_PROFILE_AUTO_CREATED("EMP_006", "Employer profile auto-created successfully", HttpStatus.CREATED),
 
     COMPANY_INFO_CREATED("COM_001", "Company created successfully", HttpStatus.CREATED),
     COMPANY_INFO_UPDATED("COM_002", "Company updated successfully", HttpStatus.OK),

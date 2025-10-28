@@ -12,10 +12,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/employers")
+@RequestMapping("/api/profile/v1/employers")
 @RequiredArgsConstructor
 @Slf4j
 public class EmployerController {
@@ -94,6 +95,23 @@ public class EmployerController {
                         SuccessCode.EMPLOYERS_LIST_FETCHED.getCode(),
                         SuccessCode.EMPLOYERS_LIST_FETCHED.getMessage(),
                         responses
+                ));
+    }
+
+    @PostMapping("/auto-create")
+    public ResponseEntity<ApiResponse<Void>> autoCreateEmployerProfile(@RequestBody Map<String, Object> payload) {
+        UUID userId = UUID.fromString((String) payload.get("userId"));
+        String fullName = (String) payload.get("fullName");
+
+        employerService.autoCreateProfile(userId, fullName);
+        log.info("Auto-created employer profile for userId={} with fullName={}", userId, fullName);
+
+        return ResponseEntity
+                .status(SuccessCode.EMPLOYER_PROFILE_AUTO_CREATED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.EMPLOYER_PROFILE_AUTO_CREATED.getCode(),
+                        SuccessCode.EMPLOYER_PROFILE_AUTO_CREATED.getMessage(),
+                        null
                 ));
     }
 }

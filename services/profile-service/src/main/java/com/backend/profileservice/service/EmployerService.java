@@ -12,4 +12,5 @@ public interface EmployerService {
     EmployerResponse updateProfile(UUID userId, EmployerRequest request);
     List<EmployerResponse> getAllByCompany(UUID companyId);
     void delete(UUID userId);
+    void autoCreateProfile(UUID userId, String fullName);
 }

@@ -147,4 +147,21 @@ public class EmployerServiceImpl implements EmployerService {
 
         employerRepository.save(employer);
     }
+
+    @Override
+    @Transactional
+    public void autoCreateProfile(UUID userId, String fullName) {
+        if (employerRepository.existsByUserId(userId)) {
+            return;
+        }
+
+        Employer employer = Employer.builder()
+                .userId(userId)
+                .name(fullName)
+                .position(null)
+                .isAdmin(false)
+                .build();
+
+        employerRepository.save(employer);
+    }
 }
