@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Chat Client</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        #chat-window { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: scroll; background-color: #fff; margin-bottom: 10px; border-radius: 5px; }
+        #messages p { margin: 5px 0; padding: 8px; border-radius: 5px; }
+        #messages p.recalled { font-style: italic; color: #888; }
+        #controls { display: flex; }
+        #messageInput { flex-grow: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        #sendButton { padding: 10px 15px; margin-left: 10px; border: none; background-color: #007bff; color: white; cursor: pointer; border-radius: 5px; }
+        #sendButton:hover { background-color: #0056b3; }
+        h3 { color: #333; }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+
+<h3>Simple Chat Client</h3>
+<div id="chat-window">
+    <div id="messages"></div>
+</div>
+<div id="controls">
+    <input type="text" id="messageInput" placeholder="Nhập tin nhắn..." autocomplete="off"/>
+    <button id="sendButton">Gửi</button>
+</div>
+
+<script>
+    // --- CẤU HÌNH ---
+    const API_BASE_URL = 'http://localhost:8084/api/v1/messages';
+    const WEBSOCKET_URL = 'http://localhost:8084/ws'; // Endpoint WebSocket bạn đã cấu hình trong Spring
+    const CONVERSATION_ID = 1; // ID cuộc trò chuyện bạn muốn test
+    const SENDER_ID = '569e6f40-cd87-432a-bfd0-c257b00b0ddf'; // UUID bạn đã cung cấp
+
+    // --- Lấy các phần tử DOM ---
+    const messageInput = document.getElementById('messageInput');
+    const sendButton = document.getElementById('sendButton');
+    const messagesDiv = document.getElementById('messages');
+
+    let stompClient = null;
+
+    /**
+     * Hàm kết nối tới WebSocket server và đăng ký kênh trò chuyện
+     */
+    function connect() {
+        const socket = new SockJS(WEBSOCKET_URL);
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('🚀 Đã kết nối WebSocket: ' + frame);
+
+            // Đăng ký (subscribe) để lắng nghe các sự kiện trên kênh của cuộc trò chuyện
+            const topic = `/topic/conversation/${CONVERSATION_ID}`;
+            stompClient.subscribe(topic, function (message) {
+                const event = JSON.parse(message.body);
+                console.log('Nhận được sự kiện:', event);
+
+                // Xử lý các loại sự kiện khác nhau
+                if (event.eventType === 'NEW_MESSAGE') {
+                    displayMessage(event.payload);
+                }
+                // Bạn có thể thêm các case khác ở đây, ví dụ: 'ADD_REACTION'
+            });
+        }, function(error) {
+            console.error('Lỗi kết nối WebSocket:', error);
+        });
+    }
+
+    /**
+     * Hàm gửi tin nhắn qua REST API
+     */
+    async function sendMessage() {
+        const content = messageInput.value.trim();
+        if (content && stompClient) {
+            const messagePayload = {
+                conversationId: CONVERSATION_ID,
+                senderId: SENDER_ID,
+                content: content,
+                messageType: 'TEXT'
+            };
+
+            try {
+                const response = await fetch(API_BASE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(messagePayload)
+                });
+
+                if (!response.ok) {
+                    throw new Error('Gửi tin nhắn thất bại!');
+                }
+
+                console.log('✅ Tin nhắn đã được gửi qua API.');
+                messageInput.value = ''; // Xóa nội dung input sau khi gửi
+            } catch (error) {
+                console.error('Lỗi khi gửi tin nhắn:', error);
+            }
+        }
+    }
+
+    /**
+     * Hàm hiển thị tin nhắn lên giao diện
+     * @param {object} msg - Đối tượng MessageResponse từ server
+     */
+    function displayMessage(msg) {
+        const p = document.createElement('p');
+        const senderName = msg.sender ? msg.sender.fullName || `User ${msg.sender.id.substring(0, 8)}` : 'Unknown';
+
+        if (msg.messageType === 'RECALLED') {
+            p.textContent = 'Tin nhắn đã được thu hồi.';
+            p.classList.add('recalled');
+        } else {
+            p.innerHTML = `<strong>${senderName}:</strong> ${msg.content}`;
+        }
+
+        messagesDiv.appendChild(p);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight; // Tự động cuộn xuống dưới
+    }
+
+    // --- Gắn sự kiện và bắt đầu kết nối ---
+    sendButton.addEventListener('click', sendMessage);
+    messageInput.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    });
+
+    // Bắt đầu kết nối WebSocket khi trang được tải
+    connect();
+
+</script>
+</body>
+</html>

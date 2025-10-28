@@ -6,18 +6,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
-
-    /**
-     * Tìm tất cả các tin nhắn trong một cuộc trò chuyện,
-     * sắp xếp theo thời gian gửi và hỗ trợ phân trang.
-     *
-     * @param conversationId ID của cuộc trò chuyện.
-     * @param pageable       Đối tượng chứa thông tin phân trang (trang số mấy, bao nhiêu tin nhắn mỗi trang).
-     * @return một trang (Page) chứa danh sách các tin nhắn.
-     */
-    Page<Message> findByConversationIdOrderBySentAtDesc(Long conversationId, Pageable pageable);
+    List<Message> findByConversationIdOrderBySentAtDesc(Long conversationId);
+//    Page<Message> findByConversationIdOrderBySentAtDesc(Long conversationId, Pageable pageable);
 }
