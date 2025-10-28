@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/v1/student-profile")
+@RequestMapping("/api/profile/v1/student-profile")
 @RequiredArgsConstructor
 @Slf4j
 public class StudentProfileController {

@@ -1,5 +1,7 @@
 package com.backend.profileservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -33,6 +35,7 @@ public class Employer {
     private String position;
 
     @Column(name = "is_admin", nullable = false)
+    @JsonProperty("isAdmin")
     private boolean isAdmin = false;
 
     @CreationTimestamp
@@ -42,4 +45,18 @@ public class Employer {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+    // Chỉ giữ 1 getter
+    public boolean isIsAdmin() {
+        return isAdmin;
+    }
+    public void setIsAdmin(boolean isAdmin) {
+        this.isAdmin = isAdmin;
+    }
+
+    // Tắt getAdmin()
+    @JsonIgnore
+    public boolean getAdmin() {
+        return isAdmin;
+    }
 }

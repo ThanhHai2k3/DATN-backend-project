@@ -17,9 +17,10 @@ public enum ErrorCode {
 
     PROFILE_NOT_FOUND("STU_001", "Student profile not found", HttpStatus.NOT_FOUND),
 
-    EMPLOYER_NOT_FOUND("EMP_001", "Employer not found", HttpStatus.NOT_FOUND),
+    EMPLOYER_NOT_FOUND("EMP_001", "Employer with userId not found", HttpStatus.NOT_FOUND),
     EMPLOYER_PROFILE_EXISTED("EMP_002", "Employer profile already exists", HttpStatus.BAD_REQUEST),
     CANNOT_DELETE_ADMIN_EMPLOYER("EMP_003", "Cannot delete employer admin in company", HttpStatus.FORBIDDEN),
+    EMPLOYER_ALREADY_HAS_COMPANY("EMP_004", "Employer already belongs to a company", HttpStatus.BAD_REQUEST),
 
     COMPANY_NAME_EXISTED("PRO_001", "Company name already exists", HttpStatus.BAD_REQUEST),
     COMPANY_NOT_FOUND("PRO_002", "Company not found", HttpStatus.NOT_FOUND),

@@ -35,27 +35,19 @@ public class CompanyServiceImpl implements CompanyService {
             throw new AppException(ErrorCode.COMPANY_NAME_EXISTED);
         }
 
+        Employer employer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        if (employer.getCompany() != null) {
+            throw new AppException(ErrorCode.EMPLOYER_ALREADY_HAS_COMPANY);
+        }
+
         Company company = companyMapper.toEntity(request);
-        //company = companyRepository.save(company);
         company = companyRepository.saveAndFlush(company);
 
-        //Tìm employer theo userId (người tạo công ty)
-//        Employer employer = employerRepository.findByUserId(userId)
-//                .orElseGet(() -> {
-//                    Employer newEmployer = new Employer();
-//                    newEmployer.setUserId(userId);
-//                    newEmployer.setName("HR Admin");
-//                    newEmployer.setPosition("Admin");
-//                    return newEmployer;
-//                });
-
-//        //Gắn employer này vào công ty và set quyền admin
-//        employer.setCompany(company);
-//        employer.setAdmin(true);
-//        employerRepository.save(employer);
-
-        //Gọi helper để gán user tạo công ty này làm admin đầu tiên
-        employerHelper.ensureEmployerAdmin(userId, company, "HR Admin", "Admin");
+        employer.setCompany(company);
+        employer.setIsAdmin(true);
+        employerRepository.saveAndFlush(employer);
 
         return companyMapper.toResponse(company);
     }
@@ -66,7 +58,7 @@ public class CompanyServiceImpl implements CompanyService {
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
         // Chỉ admin của công ty được phép sửa
-        if (!employer.isAdmin()) {
+        if (!employer.isIsAdmin()) {
             throw new AppException(ErrorCode.UPDATE_COMPANY_DENIED);
         }
 
@@ -110,7 +102,7 @@ public class CompanyServiceImpl implements CompanyService {
         Employer employer = employerRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
-        if (!employer.isAdmin()) {
+        if (!employer.isIsAdmin()) {
             throw new AppException(ErrorCode.UPDATE_COMPANY_DENIED);
         }
 
@@ -123,7 +115,7 @@ public class CompanyServiceImpl implements CompanyService {
         List<Employer> companyEmployers = employerRepository.findAllByCompanyId(company.getId());
         for (Employer e : companyEmployers) {
             e.setCompany(null);
-            e.setAdmin(false);
+            e.setIsAdmin(false);
         }
         employerRepository.saveAll(companyEmployers);
 

@@ -47,40 +47,67 @@ public class EmployerServiceImpl implements EmployerService {
             throw new AppException(ErrorCode.EMPLOYER_PROFILE_EXISTED);
         }
 
-        // Khởi tạo entity Employer
-        Employer employer = new Employer();
-        employer.setUserId(userId);
-        employer.setName(request.getName());
-        employer.setPosition(request.getPosition());
+//        // Khởi tạo entity Employer (profile)
+//        Employer employer = new Employer();
+//        employer.setUserId(userId);
+//        employer.setName(request.getName());
+//        employer.setPosition(request.getPosition());
 
-        Company company;
+//        // Validate name bắt buộc
+//        if (request.getName() == null || request.getName().trim().isEmpty()) {
+//            throw new AppException(ErrorCode.INVALID_REQUEST, "Name is required");
+//        }
 
-        // Trường hợp 1: join vào công ty có sẵn
         if (request.getCompanyId() != null) {
-            company = companyRepository.findById(request.getCompanyId())
+            // Trường hợp 1: join vào công ty có sẵn
+            Company company = companyRepository.findById(request.getCompanyId())
                     .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
-            employer.setCompany(company);
-            employer.setAdmin(false);
-            employerRepository.save(employer);
-        }
-        // Trường hợp 2: chưa có công ty → auto-create tạm (fallback cho giai đoạn phát triển BE)
-        // Sau này khi FE có form tạo công ty riêng, sẽ bỏ đoạn này đi
-        else {
+
+//            employer.setCompany(company);
+//            employer.setAdmin(false);
+            Employer employer = Employer.builder()
+                    .userId(userId)
+                    .name(request.getName())
+                    .position(request.getPosition())
+                    .company(company)
+                    .isAdmin(false)
+                    .build();
+
+            Employer saved = employerRepository.saveAndFlush(employer);
+            return employerMapper.toResponse(saved);
+        } else {
+            // Trường hợp 2: chưa có công ty → auto-create tạm (fallback cho giai đoạn phát triển BE)
+            // Sau này khi FE có form tạo công ty riêng, sẽ bỏ đoạn này đi
             // Tạo company mới qua CompanyService
-            CompanyRequest companyRequest = new CompanyRequest();
-            companyRequest.setName("Company" + request.getName());
-            companyRequest.setDescription("New company created by " + request.getName());
-            companyRequest.setIndustry("Unknown");
+            CompanyRequest companyRequest = CompanyRequest.builder()
+                    .name("Company " + request.getName())
+                    .description("New company created by " + request.getName())
+                    .industry("Unknown")
+                    .build();
 
             CompanyResponse companyResponse = companyService.create(userId, companyRequest);
-            company = companyRepository.findById(companyResponse.getId())
+            Company company = companyRepository.findById(companyResponse.getId())
                     .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
 
-            // Gọi helper: gắn user này làm admin cho company vừa tạo
-            employerHelper.ensureEmployerAdmin(userId, company, request.getName(), request.getPosition());
-        }
+            // Dùng helper – sẽ tạo employer với đúng name/position
+//            Employer adminEmployer = employerHelper.ensureEmployerAdmin(
+//                    userId,
+//                    company,
+//                    request.getName(),
+//                    request.getPosition()
+//            );
 
-        return employerMapper.toResponse(employer);
+            Employer adminEmployer = Employer.builder()
+                    .userId(userId)
+                    .name(request.getName())
+                    .position(request.getPosition())
+                    .company(company)
+                    .isAdmin(true)
+                    .build();
+
+            Employer saved = employerRepository.saveAndFlush(adminEmployer);
+            return employerMapper.toResponse(saved);
+        }
     }
 
     @Override
@@ -90,9 +117,8 @@ public class EmployerServiceImpl implements EmployerService {
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
         employerMapper.update(employer, request);
-        employerRepository.save(employer);
-
-        return employerMapper.toResponse(employer);
+        Employer saved = employerRepository.saveAndFlush(employer);
+        return employerMapper.toResponse(saved);
     }
 
     @Override
@@ -109,14 +135,15 @@ public class EmployerServiceImpl implements EmployerService {
         Employer employer = employerRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
-        //Nếu employer là admin công ty → không cho xóa trực tiếp khi vẫn còn company
-        if (employer.isAdmin() && employer.getCompany() != null) {
+        // Nếu là admin công ty, không thể xóa khi công ty vẫn tồn tại
+        // Admin phải xóa công ty trước hoặc chuyển quyền admin
+        if (employer.isIsAdmin() && employer.getCompany() != null) {
             throw new AppException(ErrorCode.CANNOT_DELETE_ADMIN_EMPLOYER);
         }
 
         //HR bình thường -> unlink khỏi công ty
         employer.setCompany(null);
-        employer.setAdmin(false);
+        employer.setIsAdmin(false);
 
         employerRepository.save(employer);
     }
