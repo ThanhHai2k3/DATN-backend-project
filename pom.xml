@@ -23,6 +23,7 @@
         <module>services/auth-service</module>
         <module>services/profile-service</module>
         <module>services/message-service</module>
+        <module>services/cv-service</module>
     </modules>
 
     <dependencyManagement>
