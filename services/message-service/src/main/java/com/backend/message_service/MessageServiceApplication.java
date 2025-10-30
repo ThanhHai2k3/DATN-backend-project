@@ -8,21 +8,19 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class MessageServiceApplication {
     public static void main(String[] args) {
 
-        // ✅ Load .env từ cả 2 nơi để chắc chắn
         Dotenv dotenv = Dotenv.configure()
-                .directory("services/message-service") // nếu chạy từ root
+                .directory("services/message-service")
                 .ignoreIfMissing()
                 .load();
 
-        // ✅ Nếu không tìm thấy, thử lại ở thư mục root
+
         if (dotenv.entries().isEmpty()) {
             dotenv = Dotenv.configure()
-                    .directory(".") // thư mục hiện tại
+                    .directory(".")
                     .ignoreIfMissing()
                     .load();
         }
 
-        // ✅ Inject biến môi trường vào System properties
         dotenv.entries().forEach(entry -> {
             System.setProperty(entry.getKey(), entry.getValue());
             System.out.println("Loaded env var: " + entry.getKey());

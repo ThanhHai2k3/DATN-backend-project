@@ -13,7 +13,7 @@ import java.nio.charset.StandardCharsets;
 public class JwtService {
 
     @Value("${jwt.secret}")
-    private String secret; // <- inject String thôi
+    private String secret;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
@@ -21,7 +21,7 @@ public class JwtService {
 
     public Claims extractClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey()) // truyền SecretKey thực tế
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
