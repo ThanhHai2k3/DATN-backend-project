@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class CV {
     private Long id;
 
     @Column(name = "student_id", nullable = false)
-    private String studentId; // Hoặc Long, tùy thuộc vào kiểu dữ liệu của user id
+    private UUID studentId; // Hoặc Long, tùy thuộc vào kiểu dữ liệu của user id
 
     @Column(name = "cv_name", nullable = false)
     private String cvName;
