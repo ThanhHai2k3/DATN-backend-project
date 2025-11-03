@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.sql.Date;
 import java.time.Instant;
+import java.util.UUID;
 
 @Component
 public class JwtService {
@@ -28,7 +29,8 @@ public class JwtService {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(jwtExpirationMinutes * 60);
         return Jwts.builder()
-                .subject(userAccount.getEmail())
+                .subject(userAccount.getId().toString())
+                //.claim("email", userAccount.getEmail())   //Thêm email để hiển thị hoặc audit
                 .claim("role", userAccount.getRole().name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(exp))
@@ -43,7 +45,25 @@ public class JwtService {
                 .parseSignedClaims(token);
     }
 
-    public String extractEmail(String token) {
-        return parse(token).getPayload().getSubject();
+//
+//    public String extractEmail(String token) {
+//        return parse(token).getPayload().getSubject();
+//    }
+
+    public UUID extractUserId(String token) {
+        try {
+            return UUID.fromString(parse(token).getPayload().getSubject());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid userId format in JWT", e);
+        }
     }
+
+    public String extractEmail(String token) {
+        return parse(token).getPayload().get("email", String.class);
+    }
+
+    public String extractRole(String token) {
+        return parse(token).getPayload().get("role", String.class);
+    }
+
 }
