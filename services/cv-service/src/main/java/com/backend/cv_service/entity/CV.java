@@ -33,16 +33,16 @@ public class CV {
     // --- Mối quan hệ ---
 
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Experience> experiences;
+    private Set<Experience> experiences;
 
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Education> educations;
+    private Set<Education> educations;
 
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Project> projects;
+    private Set<Project> projects;
 
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Certification> certifications;
+    private Set<Certification> certifications;
 
     @ManyToMany
     @JoinTable(

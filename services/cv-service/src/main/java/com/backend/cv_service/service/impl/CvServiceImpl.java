@@ -35,6 +35,7 @@ public class CvServiceImpl implements CvService {
     private static final Logger log = LoggerFactory.getLogger(S3FileStorageService.class);
 
     @Override
+    @Transactional
     public CvSummaryDto uploadAndSaveCv(UUID studentId, String cvName, MultipartFile file) {
         String fileUrl;
         try{

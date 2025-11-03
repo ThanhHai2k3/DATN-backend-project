@@ -22,47 +22,41 @@ public class CvController {
     private CvService cvService;
 
     @Autowired
-    private JwtUtil jwtUtil; // Lớp tiện ích để giải mã token
+    private JwtUtil jwtUtil;
 
-    /**
-     * Endpoint để upload một CV mới.
-     */
-//    @PostMapping("/upload")
-//    public ResponseEntity<CvSummaryDto> uploadNewCv(
-//            @RequestParam("file") MultipartFile file,
-//            @RequestParam("cvName") String cvName,
-//            @RequestHeader("Authorization") String authorizationHeader
-//    ) {
-//        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
-//        CvSummaryDto newCv = cvService.uploadAndSaveCv(studentId, cvName, file);
-//        return new ResponseEntity<>(newCv, HttpStatus.CREATED);
-//    }
-    @PostMapping("/upload-test")
-    public ResponseEntity<?> uploadNewCv(
+
+    @PostMapping("/upload")//TODO:test ròi nhe
+    public ResponseEntity<CvSummaryDto> uploadNewCv(
             @RequestParam("file") MultipartFile file,
             @RequestParam("cvName") String cvName,
-            @RequestParam("studentId") String studentIdString
+            @RequestHeader("Authorization") String authorizationHeader
     ) {
-        UUID studentId;
-
-        try {
-            studentId = UUID.fromString(studentIdString);
-        } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>("Định dạng studentId (UUID) không hợp lệ.", HttpStatus.BAD_REQUEST);
-        }
-
-        // 3. Vẫn gọi CvService như bình thường
+        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         CvSummaryDto newCv = cvService.uploadAndSaveCv(studentId, cvName, file);
-
         return new ResponseEntity<>(newCv, HttpStatus.CREATED);
     }
+//    @PostMapping("/upload-test")
+//    public ResponseEntity<?> uploadNewCvTest(
+//            @RequestParam("file") MultipartFile file,
+//            @RequestParam("cvName") String cvName,
+//            @RequestParam("studentId") String studentIdString
+//    ) {
+//        UUID studentId;
+//
+//        try {
+//            studentId = UUID.fromString(studentIdString);
+//        } catch (IllegalArgumentException e) {
+//            return new ResponseEntity<>("Định dạng studentId (UUID) không hợp lệ.", HttpStatus.BAD_REQUEST);
+//        }
+//
+//        CvSummaryDto newCv = cvService.uploadAndSaveCv(studentId, cvName, file);
+//
+//        return new ResponseEntity<>(newCv, HttpStatus.CREATED);
+//    }
 
-    // --- Lấy thông tin CV ---
 
-    /**
-     * Lấy danh sách tóm tắt tất cả CV của người dùng đang đăng nhập.
-     */
-    @GetMapping("/my-cvs")
+
+    @GetMapping("/my-cvs") //TODO:test ròi nhe
     public ResponseEntity<List<CvSummaryDto>> getMyCVs(
             @RequestHeader("Authorization") String authorizationHeader
     ) {
@@ -71,13 +65,10 @@ public class CvController {
         return ResponseEntity.ok(cvs);
     }
 
-    /**
-     * Lấy thông tin chi tiết của một CV cụ thể.
-     * Đảm bảo người dùng chỉ có thể xem CV của chính họ.
-     */
-    @GetMapping("/{cvId}")
+
+    @GetMapping("/{cvId}") //TODO:đã test, 1 bug studentId=null
     public ResponseEntity<CvDetailDto> getCvById(
-            @PathVariable Long cvId,
+            @PathVariable("cvId") Long cvId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
@@ -85,14 +76,10 @@ public class CvController {
         return ResponseEntity.ok(cvDetail);
     }
 
-    // --- Chỉnh sửa và Xóa CV ---
 
-    /**
-     * Cập nhật tên của một CV.
-     */
-    @PutMapping("/{cvId}")
+    @PutMapping("/{cvId}") //TODO:đã test
     public ResponseEntity<CvSummaryDto> updateCvName(
-            @PathVariable Long cvId,
+            @PathVariable("cvId") Long cvId,
             @RequestBody UpdateCvNameRequest request,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
@@ -101,36 +88,29 @@ public class CvController {
         return ResponseEntity.ok(updatedCv);
     }
 
-    @DeleteMapping("/{cvId}")
+    @DeleteMapping("/{cvId}") //TODO:đã test
     public ResponseEntity<Void> deleteCv(
-            @PathVariable Long cvId,
+            @PathVariable("cvId") Long cvId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         cvService.deleteCv(cvId, studentId);
-        return ResponseEntity.noContent().build(); // Trả về 204 No Content là chuẩn cho API DELETE
+        return ResponseEntity.noContent().build(); //204
+        //TODO: xử lý trường hợp xóa CV mặc định
     }
 
-    // --- Chức năng đặc biệt ---
-
-    /**
-     * Đặt một CV làm CV mặc định.
-     */
-    @PutMapping("/{cvId}/set-default")
+    @PutMapping("/{cvId}/set-default") //TODO:đã test
     public ResponseEntity<String> setDefaultCv(
-            @PathVariable Long cvId,
+            @PathVariable("cvId") Long cvId,
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         cvService.setDefaultCv(cvId, studentId);
-        return ResponseEntity.ok("CV with id " + cvId + " has been set as default.");
+        return ResponseEntity.ok("CV với id " + cvId + " đã được đặt làm mặc định.");
     }
 
-    /**
-     * API nội bộ: Lấy dữ liệu có cấu trúc của CV để phục vụ cho matching-service.
-     * API này có thể có cơ chế bảo mật riêng (ví dụ: chỉ cho phép gọi từ gateway).
-     */
-    @GetMapping("/{cvId}/structured-data")
+//API nội bộ
+    @GetMapping("/{cvId}/structured-data")//TODO:chưa test
     public ResponseEntity<Object> getStructuredDataForMatching(@PathVariable Long cvId) {
         // Lưu ý: Cần có cơ chế bảo mật để đảm bảo chỉ các service nội bộ mới gọi được API này.
         Object structuredData = cvService.getStructuredDataForMatching(cvId);
