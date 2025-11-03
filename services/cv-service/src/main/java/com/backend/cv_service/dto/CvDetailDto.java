@@ -21,12 +21,10 @@ public class CvDetailDto {
     private String cvUrl;
     private boolean isDefault;
 
-    // Dữ liệu đã được bóc tách
+
     private Set<String> skills;
     private List<ExperienceDto> experiences;
     private List<EducationDto> educations;
     private List<ProjectDto> projects;
     private List<CertificationDto> certifications;
 }
-
-// Bạn sẽ cần tạo các DTO con tương ứng

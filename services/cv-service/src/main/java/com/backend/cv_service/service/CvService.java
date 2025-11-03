@@ -2,9 +2,12 @@ package com.backend.cv_service.service;
 
 import com.backend.cv_service.dto.CvDetailDto;
 import com.backend.cv_service.dto.CvSummaryDto;
+import com.backend.cv_service.entity.CV;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface CvService {
@@ -36,4 +39,6 @@ public interface CvService {
 
 //  Lấy dữ liệu có cấu trúc của một CV để gửi cho matching-service.
     Object getStructuredDataForMatching(Long cvId);
+
+
 }

@@ -31,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+"services/cv-service/.env" 

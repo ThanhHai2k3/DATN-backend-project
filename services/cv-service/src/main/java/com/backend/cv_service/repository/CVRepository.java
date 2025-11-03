@@ -1,6 +1,7 @@
 package com.backend.cv_service.repository;
 
 import com.backend.cv_service.entity.CV;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,4 +19,19 @@ public interface CVRepository extends JpaRepository<CV, Long> {
     boolean existsByStudentId(UUID studentId);
 
     boolean existsByIdAndStudentId(Long id, UUID studentId);
+    @EntityGraph(attributePaths = {
+            "educations",
+            "experiences",
+            "certifications",
+            "projects",
+            "skills"
+    })
+    Optional<CV> findDetailedByIdAndStudentId(Long id, UUID studentId);
+
+    @EntityGraph(attributePaths = {
+            "educations",
+            "experiences",
+            "skills"
+    })
+    Optional<CV> findDetailedById(Long id);
 }

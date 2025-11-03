@@ -27,14 +27,33 @@ public class CvController {
     /**
      * Endpoint để upload một CV mới.
      */
-    @PostMapping("/upload")
-    public ResponseEntity<CvSummaryDto> uploadNewCv(
+//    @PostMapping("/upload")
+//    public ResponseEntity<CvSummaryDto> uploadNewCv(
+//            @RequestParam("file") MultipartFile file,
+//            @RequestParam("cvName") String cvName,
+//            @RequestHeader("Authorization") String authorizationHeader
+//    ) {
+//        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
+//        CvSummaryDto newCv = cvService.uploadAndSaveCv(studentId, cvName, file);
+//        return new ResponseEntity<>(newCv, HttpStatus.CREATED);
+//    }
+    @PostMapping("/upload-test")
+    public ResponseEntity<?> uploadNewCv(
             @RequestParam("file") MultipartFile file,
             @RequestParam("cvName") String cvName,
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestParam("studentId") String studentIdString
     ) {
-        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
+        UUID studentId;
+
+        try {
+            studentId = UUID.fromString(studentIdString);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>("Định dạng studentId (UUID) không hợp lệ.", HttpStatus.BAD_REQUEST);
+        }
+
+        // 3. Vẫn gọi CvService như bình thường
         CvSummaryDto newCv = cvService.uploadAndSaveCv(studentId, cvName, file);
+
         return new ResponseEntity<>(newCv, HttpStatus.CREATED);
     }
 
