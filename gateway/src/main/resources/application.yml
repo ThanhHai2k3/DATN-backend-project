@@ -1,22 +1,23 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: gateway
   cloud:
     gateway:
-      server:
-        webflux:
-          default-filters:
-            - AddResponseHeader=X-Gateway, InternshipGateway
-          routes:
-            - id: auth-service
-              uri: http://localhost:8081
-              predicates:
-                - Path=/api/auth/**
-            - id: profile-service
-              uri: http://localhost:8082
-              predicates:
-                - Path=/api/profile/**
-            - id: job-service
-              uri: http://localhost:8083
-              predicates:
-                - Path=/api/job/**
+      default-filters:
+        - AddResponseHeader=X-Gateway, InternshipGateway
+      routes:
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+        - id: profile-service
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/profile/**
+        - id: job-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/job/**

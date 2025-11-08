@@ -5,8 +5,7 @@ import com.backend.jobservice.dto.request.InternshipPostUpdateRequest;
 import com.backend.jobservice.dto.response.InternshipPostResponse;
 import com.backend.jobservice.dto.response.InternshipPostSummaryResponse;
 import com.backend.jobservice.entity.InternshipPost;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -30,6 +29,9 @@ public interface InternshipPostMapper {
     @Mapping(target = "expiredAt", ignore = true)
     @Mapping(target = "status", ignore = true)
     InternshipPost toEntity(InternshipPostUpdateRequest dto);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateEntityFromDto(InternshipPostUpdateRequest dto, @MappingTarget InternshipPost entity);
 
     InternshipPostResponse toResponse(InternshipPost entity);
 

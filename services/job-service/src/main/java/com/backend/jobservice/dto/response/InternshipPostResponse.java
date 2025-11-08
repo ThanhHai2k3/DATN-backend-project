@@ -5,6 +5,7 @@ import com.backend.jobservice.enums.WorkMode;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
