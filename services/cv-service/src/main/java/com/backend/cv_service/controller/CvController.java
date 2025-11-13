@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/cvs")
+@RequestMapping("/api/cv/v1")
 public class CvController {
 
     @Autowired

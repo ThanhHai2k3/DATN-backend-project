@@ -18,7 +18,7 @@ import java.util.UUID;
 @Service
 public class S3FileStorageService {
 
-    // Inject các giá trị từ file application.properties
+    // Inject các giá trị từ file application.yml
     @Value("${aws.s3.bucket-name}")
     private String bucketName;
 

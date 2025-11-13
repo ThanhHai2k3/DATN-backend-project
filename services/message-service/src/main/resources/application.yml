@@ -1,0 +1,61 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: message-service
+
+  # ===============================
+  # PostgreSQL DataSource
+  # ===============================
+  datasource:
+    url: jdbc:postgresql://localhost:5432/intern_network
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # ===============================
+  # JPA / Hibernate
+  # ===============================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  # Flyway
+  flyway:
+    enabled: false
+
+  # Jackson
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+  # Multipart (file upload)
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+# ===============================
+# Logging
+# ===============================
+logging:
+  level:
+    org.springframework: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# ===============================
+# AWS S3 Configuration
+# ===============================
+aws:
+  region: ${AWS_REGION}
+  s3:
+    bucket-name: ${AWS_S3_BUCKET_NAME}
+  access-key-id: ${AWS_ACCESS_KEY_ID}
+  secret-access-key: ${AWS_SECRET_ACCESS_KEY}

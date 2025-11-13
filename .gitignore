@@ -33,3 +33,7 @@ build/
 .vscode/
 "services/cv-service/.env" 
 services/cv-service/.env
+services/message-service/.env
+
+.env.example
+.env

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/reactions")
+@RequestMapping("/api/message/v1/reactions")
 @RequiredArgsConstructor
 public class ReactionController {
 
