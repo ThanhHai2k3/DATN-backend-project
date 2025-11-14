@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,20 +45,22 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         post.setUpdatedAt(Instant.now());
 
         //Gọi profile-service lấy companyId của employer
-        UUID companyId = profileClient.getCompanyIdByEmployer(employerId);
-        post.setCompanyId(companyId);
+//        UUID companyId = profileClient.getCompanyIdByEmployer(employerId);
+//        post.setCompanyId(companyId);
+        post.setCompanyId(UUID.randomUUID());
 
         InternshipPost saved = internshipPostRepository.save(post);
 
-        if(request.getSkills() != null && request.getSkills().isEmpty()){
-            List<JobSkill> jobSkills = request.getSkills().stream()
+        List<JobSkill> jobSkills = new ArrayList<>();
+        if(request.getSkills() != null && !request.getSkills().isEmpty()){
+            jobSkills = request.getSkills().stream()
                     .map(jobSkillMapper::toEntity)
                     .peek(jobSkill -> jobSkill.setInternshipPost(saved))
                     .collect(Collectors.toList());
 
             jobSkillRepository.saveAll(jobSkills);
-            saved.setJobSkills(jobSkills);
         }
+        saved.setJobSkills(jobSkills);
 
         return internshipPostMapper.toResponse(saved);
     }
@@ -102,8 +105,12 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     public void hidePost(UUID employerId, UUID postId){
-        InternshipPost post = internshipPostRepository.findByIdAndPostedBy(postId, employerId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND_OR_FORBIDDEN));
+        InternshipPost post = internshipPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        if (!post.getPostedBy().equals(employerId)) {
+            throw new AppException(ErrorCode.HIDE_POST_DENIED);
+        }
 
         if(post.getStatus().equals(PostStatus.HIDDEN)){
             throw new AppException(ErrorCode.POST_ALREADY_HIDDEN);

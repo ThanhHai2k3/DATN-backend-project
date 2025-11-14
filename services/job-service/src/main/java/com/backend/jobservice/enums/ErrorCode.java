@@ -33,6 +33,7 @@ public enum ErrorCode {
     POST_EXPIRED("JOB_002", "This post already expired", HttpStatus.UNAUTHORIZED),
     POST_NOT_FOUND("JOB_003", "Internship post with this id not found", HttpStatus.NOT_FOUND),
     POST_ALREADY_HIDDEN("JOB_004", "This internship post already hidden", HttpStatus.BAD_REQUEST),
+    HIDE_POST_DENIED("JOB_005", "You are not allowed to modify this post", HttpStatus.FORBIDDEN),
 
     ;
 
