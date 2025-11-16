@@ -1,0 +1,25 @@
+server:
+  port: 8086
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/intern_network
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.default_schema: skill_schema
+      hibernate.jdbc.time_zone: UTC
+    open-in-view: false
+  flyway:
+    enabled: false
+    #schemas: skill_schema
+    #baseline-on-migrate: true
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.http.converter.json: TRACE
+    org.springframework.web.servlet.mvc.method.annotation: TRACE

@@ -27,6 +27,7 @@
         <module>services/message-service</module>
         <module>services/cv-service</module>
         <module>services/ai-nlp-service</module>
+        <module>services/skill-service</module>
     </modules>
 
     <dependencyManagement>
