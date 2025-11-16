@@ -10,8 +10,8 @@ spring:
   # ===============================
   datasource:
     url: jdbc:postgresql://localhost:5432/intern_network
-    username: postgres
-    password: postgres
+    username: duke
+    password: duke
     driver-class-name: org.postgresql.Driver
 
   # ===============================

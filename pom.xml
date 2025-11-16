@@ -26,6 +26,7 @@
         <module>services/job-service</module>
         <module>services/message-service</module>
         <module>services/cv-service</module>
+        <module>services/ai-nlp-service</module>
     </modules>
 
     <dependencyManagement>
