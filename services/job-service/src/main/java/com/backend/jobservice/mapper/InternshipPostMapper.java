@@ -19,6 +19,7 @@ public interface InternshipPostMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "expiredAt", ignore = true)
+    @Mapping(target = "jobSkills", ignore = true)    // xử lý riêng
     InternshipPost toEntity(InternshipPostRequest dto);
 
     @Mapping(target = "id", ignore = true)
@@ -31,8 +32,10 @@ public interface InternshipPostMapper {
     InternshipPost toEntity(InternshipPostUpdateRequest dto);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "jobSkills", ignore = true)
     void updateEntityFromDto(InternshipPostUpdateRequest dto, @MappingTarget InternshipPost entity);
 
+    @Mapping(source = "jobSkills", target = "skills")
     InternshipPostResponse toResponse(InternshipPost entity);
 
     List<InternshipPostResponse> toResponseList(List<InternshipPost> entities);

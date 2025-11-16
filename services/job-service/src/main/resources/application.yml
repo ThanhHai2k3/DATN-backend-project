@@ -27,3 +27,6 @@ logging:
 services:
   profile:
     base-url: http://localhost:8082
+
+  skill:
+    base-url: http://localhost:8086

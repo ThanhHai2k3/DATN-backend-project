@@ -11,6 +11,7 @@ public interface JobSkillMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "internshipPost", ignore = true) // set trong service
+    @Mapping(target = "skillId", expression = "java( java.util.UUID.fromString(dto.getSkillId()) )")
     JobSkill toEntity(JobSkillRequest dto);
 
     @Mapping(target = "skillName", ignore = true) //set sau khi gọi skill-service

@@ -1,10 +1,11 @@
 package com.backend.jobservice.service.impl;
 
 import com.backend.jobservice.client.ProfileClient;
+import com.backend.jobservice.client.SkillClient;
 import com.backend.jobservice.dto.request.InternshipPostRequest;
 import com.backend.jobservice.dto.request.InternshipPostUpdateRequest;
-import com.backend.jobservice.dto.response.InternshipPostResponse;
-import com.backend.jobservice.dto.response.InternshipPostSummaryResponse;
+import com.backend.jobservice.dto.request.JobSkillRequest;
+import com.backend.jobservice.dto.response.*;
 import com.backend.jobservice.entity.InternshipPost;
 import com.backend.jobservice.entity.JobSkill;
 import com.backend.jobservice.enums.ErrorCode;
@@ -35,6 +36,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     private final InternshipPostMapper internshipPostMapper;
     private final JobSkillMapper jobSkillMapper;
     private final ProfileClient profileClient;
+    private final SkillClient skillClient;
 
     @Override
     public InternshipPostResponse createPost(UUID employerId, InternshipPostRequest request){
@@ -47,22 +49,58 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         //Gọi profile-service lấy companyId của employer
 //        UUID companyId = profileClient.getCompanyIdByEmployer(employerId);
 //        post.setCompanyId(companyId);
-        post.setCompanyId(UUID.randomUUID());
+        post.setCompanyId(UUID.randomUUID()); // TODO: profile-client
 
         InternshipPost saved = internshipPostRepository.save(post);
 
+        //Validate and save job skills
         List<JobSkill> jobSkills = new ArrayList<>();
-        if(request.getSkills() != null && !request.getSkills().isEmpty()){
-            jobSkills = request.getSkills().stream()
-                    .map(jobSkillMapper::toEntity)
-                    .peek(jobSkill -> jobSkill.setInternshipPost(saved))
-                    .collect(Collectors.toList());
 
-            jobSkillRepository.saveAll(jobSkills);
+//        if(request.getSkills() != null && !request.getSkills().isEmpty()){
+//            jobSkills = request.getSkills().stream()
+//                    .map(jobSkillMapper::toEntity)
+//                    .peek(jobSkill -> jobSkill.setInternshipPost(saved))
+//                    .collect(Collectors.toList());
+//
+//            jobSkillRepository.saveAll(jobSkills);
+//        }
+        if(request.getSkills() != null){
+            for(JobSkillRequest skillRequest : request.getSkills()){
+                // FE bắt buộc gửi skillId trong job-service
+                if(skillRequest.getSkillId() == null){
+                    throw new AppException(ErrorCode.SKILL_ID_REQUIRED);
+                }
+
+                UUID skillId;
+                try{
+                    skillId = UUID.fromString(skillRequest.getSkillId());
+                } catch (Exception e){
+                    throw new AppException(ErrorCode.INVALID_UUID);
+                }
+
+                ApiResponse<SkillResponse> api = skillClient.getSkillById(skillId);
+                SkillResponse skillResponse = api.getData();
+                if (skillResponse == null) {
+                    throw new AppException(ErrorCode.SKILL_NOT_FOUND);
+                }
+
+                // Map JobSkill entity
+                JobSkill jobSkill = new JobSkill();
+                jobSkill.setSkillId(skillId);
+                jobSkill.setInternshipPost(saved);
+                jobSkill.setImportanceLevel(skillRequest.getImportanceLevel());
+                jobSkill.setNote(skillRequest.getNote());
+
+                jobSkills.add(jobSkill);
+            }
         }
+
+        jobSkillRepository.saveAll(jobSkills);
         saved.setJobSkills(jobSkills);
 
-        return internshipPostMapper.toResponse(saved);
+        InternshipPostResponse response = internshipPostMapper.toResponse(saved);
+        fillSkillNames(response.getSkills());
+        return response;
     }
 
     @Override
@@ -81,17 +119,48 @@ public class InternshipPostServiceImpl implements InternshipPostService {
             post.setStatus(PostStatus.PENDING);
         }
 
-        jobSkillRepository.deleteByInternshipPostId(post.getId());
+        List<JobSkill> newSkills = new ArrayList<>();
+
         if (request.getSkills() != null) {
-            List<JobSkill> newSkills = request.getSkills().stream()
-                    .map(jobSkillMapper::toEntity)
-                    .peek(js -> js.setInternshipPost(post))
-                    .collect(Collectors.toList());
+            // Xóa toàn bộ skill cũ trong entity
+            post.getJobSkills().clear();
+
+            // Xóa trong DB
+            jobSkillRepository.deleteByInternshipPostId(post.getId());
+
+            for(JobSkillRequest skillRequest : request.getSkills()){
+                if(skillRequest.getSkillId() == null){
+                    throw new AppException(ErrorCode.SKILL_ID_REQUIRED);
+                }
+
+                UUID skillId;
+                try{
+                    skillId = UUID.fromString(skillRequest.getSkillId());
+                } catch (Exception e){
+                    throw new AppException(ErrorCode.INVALID_UUID);
+                }
+
+                ApiResponse<SkillResponse> api = skillClient.getSkillById(skillId);
+                SkillResponse skillResponse = api.getData();
+                if (skillResponse == null) {
+                    throw new AppException(ErrorCode.SKILL_NOT_FOUND);
+                }
+
+                JobSkill jobSkill = new JobSkill();
+                jobSkill.setSkillId(skillId);
+                jobSkill.setInternshipPost(post);
+                jobSkill.setImportanceLevel(skillRequest.getImportanceLevel());
+                jobSkill.setNote(skillRequest.getNote());
+
+                newSkills.add(jobSkill);
+            }
+            post.getJobSkills().addAll(newSkills);
             jobSkillRepository.saveAll(newSkills);
-            post.setJobSkills(newSkills);
         }
 
-        return internshipPostMapper.toResponse(post);
+        InternshipPostResponse response = internshipPostMapper.toResponse(post);
+        fillSkillNames(response.getSkills());
+        return response;
     }
 
     @Override
@@ -100,7 +169,10 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-        return internshipPostMapper.toResponse(post);
+        InternshipPostResponse response = internshipPostMapper.toResponse(post);
+        fillSkillNames(response.getSkills());
+
+        return response;
     }
 
     @Override
@@ -131,7 +203,10 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         InternshipPost saved = internshipPostRepository.save(post);
 
         // TODO: gửi notification tới Employer
-        return internshipPostMapper.toResponse(saved);
+        InternshipPostResponse response = internshipPostMapper.toResponse(saved);
+        fillSkillNames(response.getSkills());
+
+        return response;
     }
 
     @Override
@@ -142,5 +217,17 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
         // TODO: mở rộng filter workMode, skillId, companyId
         return internshipPostMapper.toSummaryResponseList(found);
+    }
+
+    private void fillSkillNames(List<JobSkillResponse> skills) {
+        if (skills == null) return;
+
+        for (JobSkillResponse js : skills) {
+            ApiResponse<SkillResponse> api = skillClient.getSkillById(js.getSkillId());
+            SkillResponse skill = api.getData();
+            if (skill != null) {
+                js.setSkillName(skill.getName());
+            }
+        }
     }
 }
