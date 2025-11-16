@@ -3,12 +3,17 @@
     "canonical": "Java",
     "aliases": [
       "java",
-      "core java"
+      "core java",
+      "java se",
+      "java ee"
     ]
   },
   "react_native": {
     "canonical": "React Native",
-    "aliases": ["react native", "react-native"]
+    "aliases": [
+      "react native",
+      "react-native"
+    ]
   },
   "spring_boot": {
     "canonical": "Spring Boot",
@@ -41,6 +46,655 @@
       "docker",
       "docker container"
     ]
+  },
+  "python": {
+    "canonical": "Python",
+    "aliases": [
+      "python",
+      "py"
+    ]
+  },
+  "nodejs": {
+    "canonical": "Node.js",
+    "aliases": [
+      "nodejs",
+      "node js",
+      "node",
+      "node.js"
+    ]
+  },
+  "expressjs": {
+    "canonical": "Express.js",
+    "aliases": [
+      "express",
+      "expressjs",
+      "express.js"
+    ]
+  },
+  "typescript": {
+    "canonical": "TypeScript",
+    "aliases": [
+      "typescript",
+      "ts"
+    ]
+  },
+  "javascript": {
+    "canonical": "JavaScript",
+    "aliases": [
+      "javascript",
+      "js",
+      "ecmascript"
+    ]
+  },
+  "html": {
+    "canonical": "HTML",
+    "aliases": [
+      "html",
+      "html5"
+    ]
+  },
+  "css": {
+    "canonical": "CSS",
+    "aliases": [
+      "css",
+      "css3"
+    ]
+  },
+  "tailwind": {
+    "canonical": "Tailwind CSS",
+    "aliases": [
+      "tailwind",
+      "tailwindcss",
+      "tailwind css"
+    ]
+  },
+  "bootstrap": {
+    "canonical": "Bootstrap",
+    "aliases": [
+      "bootstrap",
+      "bs4",
+      "bs5"
+    ]
+  },
+  "mysql": {
+    "canonical": "MySQL",
+    "aliases": [
+      "mysql",
+      "mariadb"
+    ]
+  },
+  "mongodb": {
+    "canonical": "MongoDB",
+    "aliases": [
+      "mongodb",
+      "mongo",
+      "nosql mongo"
+    ]
+  },
+  "redis": {
+    "canonical": "Redis",
+    "aliases": [
+      "redis",
+      "redis db"
+    ]
+  },
+  "kubernetes": {
+    "canonical": "Kubernetes",
+    "aliases": [
+      "k8s",
+      "kubernetes"
+    ]
+  },
+  "ci_cd": {
+    "canonical": "CI/CD",
+    "aliases": [
+      "ci/cd",
+      "cicd",
+      "continuous integration",
+      "continuous delivery"
+    ]
+  },
+  "git": {
+    "canonical": "Git",
+    "aliases": [
+      "git",
+      "version control git"
+    ]
+  },
+  "github": {
+    "canonical": "GitHub",
+    "aliases": [
+      "github",
+      "git hub"
+    ]
+  },
+  "gitlab": {
+    "canonical": "GitLab",
+    "aliases": [
+      "gitlab",
+      "git lab"
+    ]
+  },
+  "aws": {
+    "canonical": "AWS",
+    "aliases": [
+      "aws",
+      "amazon web services"
+    ]
+  },
+  "gcp": {
+    "canonical": "Google Cloud Platform",
+    "aliases": [
+      "gcp",
+      "google cloud"
+    ]
+  },
+  "azure": {
+    "canonical": "Microsoft Azure",
+    "aliases": [
+      "azure",
+      "ms azure"
+    ]
+  },
+  "linux": {
+    "canonical": "Linux",
+    "aliases": [
+      "linux",
+      "ubuntu",
+      "debian",
+      "centos"
+    ]
+  },
+  "rest_api": {
+    "canonical": "REST API",
+    "aliases": [
+      "rest api",
+      "restful api",
+      "rest", "rest apis", "restful apis"
+    ]
+  },
+  "graphql": {
+    "canonical": "GraphQL",
+    "aliases": [
+      "graphql",
+      "graph ql"
+    ]
+  },
+  "fastapi": {
+    "canonical": "FastAPI",
+    "aliases": [
+      "fastapi",
+      "fast api"
+    ]
+  },
+  "django": {
+    "canonical": "Django",
+    "aliases": [
+      "django",
+      "django rest framework",
+      "drf"
+    ]
+  },
+  "flask": {
+    "canonical": "Flask",
+    "aliases": [
+      "flask",
+      "flask framework"
+    ]
+  },
+  "android": {
+    "canonical": "Android",
+    "aliases": [
+      "android",
+      "android app",
+      "kotlin android",
+      "java android"
+    ]
+  },
+  "ios": {
+    "canonical": "iOS",
+    "aliases": [
+      "ios",
+      "swift ios"
+    ]
+  },
+  "flutter": {
+    "canonical": "Flutter",
+    "aliases": [
+      "flutter",
+      "flutter dart"
+    ]
+  },
+  "dart": {
+    "canonical": "Dart",
+    "aliases": [
+      "dart"
+    ]
+  },
+  "machine_learning": {
+    "canonical": "Machine Learning",
+    "aliases": [
+      "machine learning",
+      "ml",
+      "ml model"
+    ]
+  },
+  "deep_learning": {
+    "canonical": "Deep Learning",
+    "aliases": [
+      "deep learning",
+      "dl",
+      "neural network"
+    ]
+  },
+  "nlp": {
+    "canonical": "NLP",
+    "aliases": [
+      "nlp",
+      "natural language processing"
+    ]
+  },
+  "opencv": {
+    "canonical": "OpenCV",
+    "aliases": [
+      "opencv",
+      "cv2"
+    ]
+  },
+  "sql": {
+    "canonical": "SQL",
+    "aliases": [
+      "sql",
+      "structured query language"
+    ]
+  },
+  "jira": {
+    "canonical": "Jira",
+    "aliases": [
+      "jira",
+      "atlassian jira"
+    ]
+  },
+  "agile": {
+    "canonical": "Agile",
+    "aliases": [
+      "agile",
+      "scrum",
+      "agile methodology"
+    ]
+  },
+  "vuejs": {
+    "canonical": "Vue.js",
+    "aliases": [
+      "vue",
+      "vuejs",
+      "vue.js"
+    ]
+  },
+  "angular": {
+    "canonical": "Angular",
+    "aliases": [
+      "angular",
+      "angularjs",
+      "angular 2+"
+    ]
+  },
+  "sass": {
+    "canonical": "Sass/SCSS",
+    "aliases": [
+      "sass",
+      "scss",
+      "css preprocessor"
+    ]
+  },
+  "vite": {
+    "canonical": "Vite",
+    "aliases": [
+      "vite",
+      "vitejs"
+    ]
+  },
+  "webpack": {
+    "canonical": "Webpack",
+    "aliases": [
+      "webpack"
+    ]
+  },
+  "dotnet": {
+    "canonical": ".NET",
+    "aliases": [
+      ".net",
+      ".net core",
+      "dotnet",
+      "c#",
+      "asp.net"
+    ]
+  },
+  "golang": {
+    "canonical": "Go (Golang)",
+    "aliases": [
+      "go",
+      "golang"
+    ]
+  },
+  "php": {
+    "canonical": "PHP",
+    "aliases": [
+      "php",
+      "laravel",
+      "symfony"
+    ]
+  },
+  "tensorflow": {
+    "canonical": "TensorFlow",
+    "aliases": [
+      "tensorflow",
+      "tf"
+    ]
+  },
+  "pytorch": {
+    "canonical": "PyTorch",
+    "aliases": [
+      "pytorch",
+      "torch"
+    ]
+  },
+  "power_bi": {
+    "canonical": "Power BI",
+    "aliases": [
+      "power bi",
+      "powerbi"
+    ]
+  },
+  "tableau": {
+    "canonical": "Tableau",
+    "aliases": [
+      "tableau"
+    ]
+  },
+  "terraform": {
+    "canonical": "Terraform",
+    "aliases": [
+      "terraform",
+      "iac"
+    ]
+  },
+  "ansible": {
+    "canonical": "Ansible",
+    "aliases": [
+      "ansible"
+    ]
+  },
+  "jenkins": {
+    "canonical": "Jenkins",
+    "aliases": [
+      "jenkins",
+      "jenkins ci/cd"
+    ]
+  },
+  "_comment_skillsC_": "==========================================",
+  "marketing": {
+    "canonical": "Marketing",
+    "aliases": [
+      "marketing",
+      "digital marketing",
+      "marketing online"
+    ]
+  },
+  "seo": {
+    "canonical": "SEO",
+    "aliases": [
+      "seo",
+      "search engine optimization"
+    ]
+  },
+  "sem": {
+    "canonical": "SEM",
+    "aliases": [
+      "sem",
+      "search engine marketing"
+    ]
+  },
+  "sales": {
+    "canonical": "Sales",
+    "aliases": [
+      "sales",
+      "telesales",
+      "bán hàng"
+    ]
+  },
+  "business_analysis": {
+    "canonical": "Business Analysis",
+    "aliases": [
+      "business analysis",
+      "ba",
+      "phân tích nghiệp vụ"
+    ]
+  },
+  "project_management": {
+    "canonical": "Project Management",
+    "aliases": [
+      "project management",
+      "quản lý dự án",
+      "pm"
+    ]
+  },
+  "excel": {
+    "canonical": "Microsoft Excel",
+    "aliases": [
+      "excel",
+      "ms excel"
+    ]
+  },
+  "accounting": {
+    "canonical": "Accounting",
+    "aliases": [
+      "accounting",
+      "kế toán"
+    ]
+  },
+  "financial_analysis": {
+    "canonical": "Financial Analysis",
+    "aliases": [
+      "financial analysis",
+      "phân tích tài chính"
+    ]
+  },
+  "customer_service": {
+    "canonical": "Customer Service",
+    "aliases": [
+      "customer service",
+      "chăm sóc khách hàng",
+      "cs",
+      "cskh"
+    ]
+  },
+  "_comment_skillsB_": "==========================================",
+  "risk_management": {
+    "canonical": "Risk Management",
+    "aliases": [
+      "risk management",
+      "quản trị rủi ro"
+    ]
+  },
+  "banking_operations": {
+    "canonical": "Banking Operations",
+    "aliases": [
+      "banking operations",
+      "nghiệp vụ ngân hàng"
+    ]
+  },
+  "audit": {
+    "canonical": "Audit",
+    "aliases": [
+      "audit",
+      "kiểm toán",
+      "internal audit"
+    ]
+  },
+  "_comment_skillsA_": "==========================================",
+  "teaching": {
+    "canonical": "Teaching",
+    "aliases": [
+      "teaching",
+      "giảng dạy",
+      "sư phạm"
+    ]
+  },
+  "curriculum_design": {
+    "canonical": "Curriculum Design",
+    "aliases": [
+      "curriculum design",
+      "thiết kế chương trình học"
+    ]
+  },
+  "classroom_management": {
+    "canonical": "Classroom Management",
+    "aliases": [
+      "classroom management",
+      "quản lý lớp học"
+    ]
+  },
+  "_comment_skills_": "==========================================",
+  "human_resources": {
+    "canonical": "Human Resources",
+    "aliases": [
+      "human resources",
+      "hr",
+      "nhân sự"
+    ]
+  },
+  "recruitment": {
+    "canonical": "Recruitment",
+    "aliases": [
+      "recruitment",
+      "tuyển dụng"
+    ]
+  },
+  "training": {
+    "canonical": "Training",
+    "aliases": [
+      "training",
+      "đào tạo"
+    ]
+  },
+  "public_relations": {
+    "canonical": "Public Relations",
+    "aliases": [
+      "public relations",
+      "pr",
+      "quan hệ công chúng"
+    ]
+  },
+  "psychology": {
+    "canonical": "Psychology",
+    "aliases": [
+      "psychology",
+      "tâm lý học"
+    ]
+  },
+  "administration": {
+    "canonical": "Office Administration",
+    "aliases": [
+      "administration",
+      "hành chính",
+      "văn phòng"
+    ]
+  },
+  "_comment_soft_skills_": "kỹ năng mềm",
+  "communication": {
+    "canonical": "Communication",
+    "aliases": [
+      "communication",
+      "giao tiếp"
+    ]
+  },
+  "teamwork": {
+    "canonical": "Teamwork",
+    "aliases": [
+      "teamwork",
+      "làm việc nhóm"
+    ]
+  },
+  "problem_solving": {
+    "canonical": "Problem Solving",
+    "aliases": [
+      "problem solving",
+      "giải quyết vấn đề"
+    ]
+  },
+  "leadership": {
+    "canonical": "Leadership",
+    "aliases": [
+      "leadership",
+      "lãnh đạo"
+    ]
+  },
+  "time_management": {
+    "canonical": "Time Management",
+    "aliases": [
+      "time management",
+      "quản lý thời gian"
+    ]
+  },
+  "critical_thinking": {
+    "canonical": "Critical Thinking",
+    "aliases": [
+      "critical thinking",
+      "tư duy phản biện"
+    ]
+  },
+  "_comment_design_skills_": "==========================================",
+  "ui_ux": {
+    "canonical": "UI/UX Design",
+    "aliases": [
+      "ui/ux",
+      "ui design",
+      "ux design",
+      "user experience",
+      "user interface"
+    ]
+  },
+  "figma": {
+    "canonical": "Figma",
+    "aliases": [
+      "figma"
+    ]
+  },
+  "adobe_xd": {
+    "canonical": "Adobe XD",
+    "aliases": [
+      "adobe xd",
+      "xd"
+    ]
+  },
+  "sketch": {
+    "canonical": "Sketch",
+    "aliases": [
+      "sketch",
+      "sketch app"
+    ]
+  },
+  "adaptability": {
+    "canonical": "Adaptability",
+    "aliases": [
+      "adaptability",
+      "thích ứng",
+      "linh hoạt"
+    ]
+  },
+  "creativity": {
+    "canonical": "Creativity",
+    "aliases": [
+      "creativity",
+      "sáng tạo"
+    ]
+  },
+  "negotiation": {
+    "canonical": "Negotiation",
+    "aliases": [
+      "negotiation",
+      "đàm phán"
+    ]
   }
 }
-//TODO: phát triển thêm nhé

@@ -30,6 +30,10 @@ public class CV {
     @Column(name = "is_default")
     private boolean isDefault = false;
 
+    @Lob
+    @Column(name = "raw_text", columnDefinition = "TEXT")
+    private String rawText;
+
     // --- Mối quan hệ ---
 
     @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)

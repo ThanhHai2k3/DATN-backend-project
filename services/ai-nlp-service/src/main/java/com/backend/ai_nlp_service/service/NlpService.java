@@ -142,17 +142,29 @@ public CvNlpResult processCv(ProcessCvRequest request) {
 
 
     private Double extractYearsOfExperience(String text) {
-        // Ví dụ match "3 năm", "2 năm", "3 years"
-        Pattern p = Pattern.compile("(\\d+(?:\\.\\d+)?)\\s*(năm|year|years)");
+        if (text == null || text.isEmpty()) return null;
+
+        Pattern p = Pattern.compile(
+                "(\\d+(?:\\.\\d+)?)\\s*\\+?\\s*(năm|year|years)",
+                Pattern.CASE_INSENSITIVE
+        );
         Matcher m = p.matcher(text);
-        if (m.find()) {
+
+        Double maxYears = null;
+
+        while (m.find()) {
             try {
-                return Double.parseDouble(m.group(1));
+                double years = Double.parseDouble(m.group(1));
+                if (maxYears == null || years > maxYears) {
+                    maxYears = years;
+                }
             } catch (NumberFormatException ignored) {
             }
         }
-        return null;
+
+        return maxYears;
     }
+
 
     private String capitalizeSkill(String s) {
         if (s == null || s.isEmpty()) return s;

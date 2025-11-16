@@ -7,6 +7,7 @@ import com.backend.cv_service.exception.ResourceNotFoundException;
 import com.backend.cv_service.repository.*;
 import com.backend.cv_service.service.CvService;
 import com.backend.cv_service.service.S3FileStorageService;
+import com.backend.cv_service.util.CvTextExtractor;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +39,19 @@ public class CvServiceImpl implements CvService {
     @Transactional
     public CvSummaryDto uploadAndSaveCv(UUID studentId, String cvName, MultipartFile file) {
         String fileUrl;
+        String rawText;
         try{
+            rawText = CvTextExtractor.extractText(
+                    file.getInputStream(),
+                    file.getOriginalFilename()
+            );
             fileUrl = s3FileStorageService.storeFile(file, "cvs/");
         }
         catch (IOException e){
             throw new RuntimeException("Lỗi khi lưu file: " + file.getOriginalFilename(), e);
+        }
+        catch (Exception e){
+            throw new RuntimeException("Lỗi khi trích xuất nội dung CV: "+ file.getOriginalFilename(), e);
         }
 
         boolean isFirstCv = !cvRepository.existsByStudentId(studentId);
@@ -51,6 +60,7 @@ public class CvServiceImpl implements CvService {
         newCv.setCvName(cvName);
         newCv.setCvUrl(fileUrl);
         newCv.setDefault(isFirstCv);
+        newCv.setRawText(rawText);
 
         CV savedCv = cvRepository.save(newCv);
         return mapToCvSummaryDto(savedCv);
