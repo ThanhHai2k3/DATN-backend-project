@@ -93,6 +93,10 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public List<SkillResponse> getSkillsByCategory(UUID categoryId) {
+        if(!categoryRepository.existsById(categoryId)){
+            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+
         return skillRepository.findByCategoryId(categoryId)
                 .stream()
                 .map(skillMapper::toResponse)

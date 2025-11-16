@@ -16,6 +16,7 @@ public enum ErrorCode {
     SKILL_NOT_FOUND("SK_005", "Skill not found", HttpStatus.NOT_FOUND),
 
     VALIDATION_FAILED("SYS_400", "Request validation failed", HttpStatus.BAD_REQUEST),
+    INVALID_UUID("SYS_401", "Invalid UUID", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 

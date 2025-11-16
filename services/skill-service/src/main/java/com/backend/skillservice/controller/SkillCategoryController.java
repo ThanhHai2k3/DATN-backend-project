@@ -37,7 +37,7 @@ public class SkillCategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<SkillCategoryResponse>> updateCategory(@PathVariable UUID id,
+    public ResponseEntity<ApiResponse<SkillCategoryResponse>> updateCategory(@PathVariable("id") UUID id,
                                                                              @RequestBody @Valid UpdateCategoryRequest request) {
 
         SkillCategoryResponse result = categoryService.updateCategory(id, request);
@@ -64,9 +64,7 @@ public class SkillCategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<SkillCategoryResponse>> getCategory(
-            @PathVariable UUID id) {
-
+    public ResponseEntity<ApiResponse<SkillCategoryResponse>> getCategory(@PathVariable("id") UUID id) {
         SkillCategoryResponse result = categoryService.getCategory(id);
         return ResponseEntity
                 .status(SuccessCode.GET_SUCCESS.getStatus())
@@ -80,7 +78,7 @@ public class SkillCategoryController {
     }
 
     @GetMapping("/{id}/skills")
-    public ResponseEntity<ApiResponse<List<SkillResponse>>> getSkillsByCategory(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<List<SkillResponse>>> getSkillsByCategory(@PathVariable("id") UUID id) {
         List<SkillResponse> result = skillService.getSkillsByCategory(id);
 
         return ResponseEntity
@@ -93,7 +91,7 @@ public class SkillCategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteCategory(@PathVariable("id") UUID id) {
         categoryService.deleteCategory(id);
         return ResponseEntity
                 .status(SuccessCode.CATEGORY_DELETED.getStatus())

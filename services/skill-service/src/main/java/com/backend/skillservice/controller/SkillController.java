@@ -34,7 +34,7 @@ public class SkillController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<SkillResponse>> updateSkill(@PathVariable UUID id, @RequestBody @Valid UpdateSkillRequest request) {
+    public ResponseEntity<ApiResponse<SkillResponse>> updateSkill(@PathVariable("id") UUID id, @RequestBody @Valid UpdateSkillRequest request) {
         SkillResponse result = skillService.updateSkill(id, request);
         return ResponseEntity
                 .status(SuccessCode.SKILL_UPDATED.getStatus())
@@ -46,7 +46,7 @@ public class SkillController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<SkillResponse>> getSkill(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<SkillResponse>> getSkill(@PathVariable("id") UUID id) {
         SkillResponse result = skillService.getSkill(id);
         return ResponseEntity
                 .status(SuccessCode.GET_SUCCESS.getStatus())
@@ -70,7 +70,7 @@ public class SkillController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<ApiResponse<List<SkillResponse>>> getSkillsByCategory(@PathVariable UUID categoryId) {
+    public ResponseEntity<ApiResponse<List<SkillResponse>>> getSkillsByCategory(@PathVariable("categoryId") UUID categoryId) {
         List<SkillResponse> result = skillService.getSkillsByCategory(categoryId);
         return ResponseEntity
                 .status(SuccessCode.GET_SUCCESS.getStatus())
@@ -82,13 +82,13 @@ public class SkillController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteSkill(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> deleteSkill(@PathVariable("id") UUID id) {
         skillService.deleteSkill(id);
         return ResponseEntity
-                .status(SuccessCode.GET_SUCCESS.getStatus())
+                .status(SuccessCode.SKILL_DELETED.getStatus())
                 .body(ApiResponse.success(
-                        SuccessCode.GET_SUCCESS.getCode(),
-                        SuccessCode.GET_SUCCESS.getMessage(),
+                        SuccessCode.SKILL_DELETED.getCode(),
+                        SuccessCode.SKILL_DELETED.getMessage(),
                         null
                 ));
     }

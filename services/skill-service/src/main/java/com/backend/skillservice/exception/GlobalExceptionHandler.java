@@ -4,6 +4,7 @@ import com.backend.skillservice.dto.response.ApiResponse;
 import com.backend.skillservice.enums.ErrorCode;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,6 +38,16 @@ public class GlobalExceptionHandler {
                         message
                 ));
     }
+
+    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidFormat(HttpMessageNotReadableException exception){
+        ErrorCode errorCode =ErrorCode.INVALID_UUID;
+
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResponse.error(errorCode.getCode(), errorCode.getMessage()));
+    }
+
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception exception){
