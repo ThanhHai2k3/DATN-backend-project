@@ -26,6 +26,7 @@
         <module>services/job-service</module>
         <module>services/message-service</module>
         <module>services/cv-service</module>
+        <module>services/skill-service</module>
     </modules>
 
     <dependencyManagement>
