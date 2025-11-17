@@ -3,7 +3,6 @@ package com.backend.cv_service.service.impl;
 import com.backend.cv_service.client.AiNlpClient;
 import com.backend.cv_service.dto.*;
 import com.backend.cv_service.entity.CV;
-import com.backend.cv_service.entity.Skill;
 import com.backend.cv_service.exception.ResourceNotFoundException;
 import com.backend.cv_service.repository.*;
 import com.backend.cv_service.service.CvNormService;
@@ -16,12 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.function.EntityResponse;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,11 +25,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CvServiceImpl implements CvService {
     private final CVRepository cvRepository;
-    private final CertificationRepository certificationRepository;
-    private final EducationRepository educationRepository;
-    private final ExperienceRepository experienceRepository;
-    private final ProjectRepository projectRepository;
-    private final SkillRepository skillRepository;
     private final S3FileStorageService s3FileStorageService;
     private final CvNormService cvNormService;
     private final AiNlpClient aiNlpClient;
@@ -109,39 +100,6 @@ public class CvServiceImpl implements CvService {
                 .cvName(cv.getCvName())
                 .cvUrl(cv.getCvUrl())
                 .isDefault(cv.isDefault())
-                .educations(cv.getEducations().stream().map(
-                        x -> EducationDto.builder()
-                                .universityName(x.getUniversityName())
-                                .major(x.getMajor())
-                                .originalGpa(x.getOriginalGpa())
-                                .gpaScale(x.getGpaScale())
-                                .build())
-                        .collect(Collectors.toList()))
-                .experiences(cv.getExperiences().stream().map(
-                        x-> ExperienceDto.builder()
-                                .companyName(x.getCompanyName())
-                                .position(x.getPosition())
-                                .startDate(x.getStartDate())
-                                .endDate(x.getEndDate())
-                                .build())
-                        .collect(Collectors.toList()))
-                .certifications(cv.getCertifications().stream().map(
-                        x-> CertificationDto.builder()
-                                .name(x.getName())
-                                .issueOrg(x.getIssueOrg())
-                                .build())
-                                .collect(Collectors.toList())
-                        )
-                .projects(cv.getProjects().stream().map(
-                        x->ProjectDto.builder()
-                                .projectName(x.getProjectName())
-                                .projectUrl(x.getProjectUrl())
-                                .build())
-                                .collect(Collectors.toList())
-                )
-                .skills(cv.getSkills().stream()
-                        .map(Skill::getName)
-                        .collect(Collectors.toSet()))
                 .build();
     }
 
@@ -216,42 +174,42 @@ public class CvServiceImpl implements CvService {
         cvRepository.saveAll(cvList);
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Object getStructuredDataForMatching(Long cvId) {
-
-        CV cv = cvRepository.findDetailedById(cvId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy CV với id: " + cvId));
-
-        return mapToMatchingDataDto(cv);
-    }
-    private MatchingDataDto mapToMatchingDataDto(CV cv) {
-        Set<String> skills = cv.getSkills().stream()
-                .map(Skill::getName)
-                .collect(Collectors.toSet());
-
-        List<EducationData> educations = cv.getEducations().stream()
-                .map(e -> EducationData.builder()
-                        .major(e.getMajor())
-                        .normalizedGpa(e.getNormalizedGpa())
-                        .build())
-                .collect(Collectors.toList());
-
-        List<ExperienceData> experiences = cv.getExperiences().stream()
-                .map(e -> ExperienceData.builder()
-                        .position(e.getPosition())
-                        // TODO: Thêm logic tính toán số tháng kinh nghiệm ở đây
-                        // .durationInMonths(ChronoUnit.MONTHS.between(e.getStartDate(), e.getEndDate()))
-                        .build())
-                .collect(Collectors.toList());
-
-        return MatchingDataDto.builder()
-                .cvId(cv.getId())
-                .studentId(cv.getStudentId())
-                .skills(skills)
-                .educations(educations)
-                .experiences(experiences)
-                .build();
-    }
+//    @Override
+//    @Transactional(readOnly = true)
+//    public Object getStructuredDataForMatching(Long cvId) {
+//
+//        CV cv = cvRepository.findDetailedById(cvId)
+//                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy CV với id: " + cvId));
+//
+//        return mapToMatchingDataDto(cv);
+//    }
+//    private MatchingDataDto mapToMatchingDataDto(CV cv) {
+//        Set<String> skills = cv.getSkills().stream()
+//                .map(Skill::getName)
+//                .collect(Collectors.toSet());
+//
+//        List<EducationData> educations = cv.getEducations().stream()
+//                .map(e -> EducationData.builder()
+//                        .major(e.getMajor())
+//                        .normalizedGpa(e.getNormalizedGpa())
+//                        .build())
+//                .collect(Collectors.toList());
+//
+//        List<ExperienceData> experiences = cv.getExperiences().stream()
+//                .map(e -> ExperienceData.builder()
+//                        .position(e.getPosition())
+//                        // TODO: Thêm logic tính toán số tháng kinh nghiệm ở đây
+//                        // .durationInMonths(ChronoUnit.MONTHS.between(e.getStartDate(), e.getEndDate()))
+//                        .build())
+//                .collect(Collectors.toList());
+//
+//        return MatchingDataDto.builder()
+//                .cvId(cv.getId())
+//                .studentId(cv.getStudentId())
+//                .skills(skills)
+//                .educations(educations)
+//                .experiences(experiences)
+//                .build();
+//    }
 }
 

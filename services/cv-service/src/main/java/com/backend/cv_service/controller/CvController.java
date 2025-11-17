@@ -90,10 +90,10 @@ public class CvController {
     }
 
 //API nội bộ
-    @GetMapping("/{cvId}/structured-data")//TODO:chưa test
-    public ResponseEntity<Object> getStructuredDataForMatching(@PathVariable("cvId") Long cvId) {
-        // Lưu ý: Cần có cơ chế bảo mật để đảm bảo chỉ các service nội bộ mới gọi được API này.
-        Object structuredData = cvService.getStructuredDataForMatching(cvId);
-        return ResponseEntity.ok(structuredData);
-    }
+//    @GetMapping("/{cvId}/structured-data")//TODO:chưa test
+//    public ResponseEntity<Object> getStructuredDataForMatching(@PathVariable("cvId") Long cvId) {
+//        // Lưu ý: Cần có cơ chế bảo mật để đảm bảo chỉ các service nội bộ mới gọi được API này.
+//        Object structuredData = cvService.getStructuredDataForMatching(cvId);
+//        return ResponseEntity.ok(structuredData);
+//    }
 }

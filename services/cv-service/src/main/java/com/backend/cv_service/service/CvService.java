@@ -35,7 +35,7 @@ public interface CvService {
 
 
 //  Lấy dữ liệu có cấu trúc của một CV để gửi cho matching-service.
-    Object getStructuredDataForMatching(Long cvId);
+//    Object getStructuredDataForMatching(Long cvId);
 
 
 }

@@ -4,8 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.Set;
+import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Getter
@@ -19,7 +18,7 @@ public class CV {
     private Long id;
 
     @Column(name = "student_id", nullable = false)
-    private UUID studentId; // Hoặc Long, tùy thuộc vào kiểu dữ liệu của user id
+    private UUID studentId;
 
     @Column(name = "cv_name", nullable = false)
     private String cvName;
@@ -27,32 +26,26 @@ public class CV {
     @Column(name = "cv_url", nullable = false)
     private String cvUrl;
 
-    @Column(name = "is_default")
+    @Column(name = "is_default", nullable = false)
     private boolean isDefault = false;
 
     @Lob
     @Column(name = "raw_text", columnDefinition = "TEXT")
     private String rawText;
 
-    // --- Mối quan hệ ---
+    @Column(name = "nlp_status")
+    private String nlpStatus; // PENDING / SUCCESS / FAILED
 
-    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Experience> experiences;
+    @Column(name = "processed_at")
+    private OffsetDateTime processedAt;
 
-    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Education> educations;
+    @Column(name = "created_at", nullable = false)
+    private OffsetDateTime createdAt = OffsetDateTime.now();
 
-    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Project> projects;
+    @Column(name = "updated_at", nullable = false)
+    private OffsetDateTime updatedAt = OffsetDateTime.now();
 
-    @OneToMany(mappedBy = "cv", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Certification> certifications;
-
-    @ManyToMany
-    @JoinTable(
-            name = "cv_skills", schema = "cv_schema",
-            joinColumns = @JoinColumn(name = "cv_id"),
-            inverseJoinColumns = @JoinColumn(name = "skill_id")
-    )
-    private Set<Skill> skills;
+    // Quan hệ 1–1 với CvNorm (optional nhưng hợp lý)
+    @OneToOne(mappedBy = "cv", fetch = FetchType.LAZY)
+    private CvNorm cvNorm;
 }
