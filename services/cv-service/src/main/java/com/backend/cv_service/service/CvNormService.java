@@ -1,4 +1,4 @@
-//package com.backend.cv_service.service;
+package com.backend.cv_service.service;
 //
 //import com.backend.cv_service.dto.CvNlpResult;
 //import com.backend.cv_service.entity.CV;
@@ -110,3 +110,9 @@
 //        return s.trim();
 //    }
 //}
+
+import com.backend.cv_service.dto.CvNlpResultDto;
+
+public interface CvNormService {
+    void upsertFromNlpResult(Long cvId, CvNlpResultDto result);
+}

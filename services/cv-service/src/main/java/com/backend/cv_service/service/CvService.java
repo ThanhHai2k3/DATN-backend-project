@@ -2,19 +2,16 @@ package com.backend.cv_service.service;
 
 import com.backend.cv_service.dto.CvDetailDto;
 import com.backend.cv_service.dto.CvSummaryDto;
-import com.backend.cv_service.entity.CV;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface CvService {
 
 
 //  Tải lên một file CV mới, lưu trữ và trả về thông tin tóm tắt.
-    CvSummaryDto uploadAndSaveCv(UUID studentId, String cvName, MultipartFile file);
+    CvSummaryDto uploadExtractAndSaveCv(UUID studentId, String cvName, MultipartFile file);
 
 
 //  Tìm tất cả CV (dạng tóm tắt) của một sinh viên.

@@ -1,10 +1,12 @@
 package com.backend.cv_service.service.impl;
 
+import com.backend.cv_service.client.AiNlpClient;
 import com.backend.cv_service.dto.*;
 import com.backend.cv_service.entity.CV;
 import com.backend.cv_service.entity.Skill;
 import com.backend.cv_service.exception.ResourceNotFoundException;
 import com.backend.cv_service.repository.*;
+import com.backend.cv_service.service.CvNormService;
 import com.backend.cv_service.service.CvService;
 import com.backend.cv_service.service.S3FileStorageService;
 import com.backend.cv_service.util.CvTextExtractor;
@@ -33,11 +35,13 @@ public class CvServiceImpl implements CvService {
     private final ProjectRepository projectRepository;
     private final SkillRepository skillRepository;
     private final S3FileStorageService s3FileStorageService;
+    private final CvNormService cvNormService;
+    private final AiNlpClient aiNlpClient;
     private static final Logger log = LoggerFactory.getLogger(S3FileStorageService.class);
 
     @Override
     @Transactional
-    public CvSummaryDto uploadAndSaveCv(UUID studentId, String cvName, MultipartFile file) {
+    public CvSummaryDto uploadExtractAndSaveCv(UUID studentId, String cvName, MultipartFile file) {
         String fileUrl;
         String rawText;
         try{
@@ -63,6 +67,31 @@ public class CvServiceImpl implements CvService {
         newCv.setRawText(rawText);
 
         CV savedCv = cvRepository.save(newCv);
+
+        try {
+            CvNlpRequest request = new CvNlpRequest();
+            request.setCvId(savedCv.getId());
+            request.setRawText(rawText);
+
+            CvNlpResultDto nlpResult = aiNlpClient.processCv(request);
+
+            // 4. Lưu vào cv_norm
+            cvNormService.upsertFromNlpResult(savedCv.getId(), nlpResult);
+
+            // cập nhật trạng thái
+//            savedCv.setNlpStatus("SUCCESS");
+//            savedCv.setProcessedAt(OffsetDateTime.now());
+            cvRepository.save(savedCv);
+
+        } catch (Exception ex) {
+            System.out.println(ex);
+            // Không để fail cả luồng upload khi NLP lỗi (tùy em)
+//            savedCv.setNlpStatus("FAILED");
+            cvRepository.save(savedCv);
+            // log lỗi để debug
+            // log.error("Call ai-nlp-service failed for cvId={}", savedCv.getId(), ex);
+        }
+
         return mapToCvSummaryDto(savedCv);
     }
 

@@ -32,29 +32,9 @@ public class CvController {
             @RequestHeader("Authorization") String authorizationHeader
     ) {
         UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
-        CvSummaryDto newCv = cvService.uploadAndSaveCv(studentId, cvName, file);
+        CvSummaryDto newCv = cvService.uploadExtractAndSaveCv(studentId, cvName, file);
         return new ResponseEntity<>(newCv, HttpStatus.CREATED);
     }
-//    @PostMapping("/upload-test")
-//    public ResponseEntity<?> uploadNewCvTest(
-//            @RequestParam("file") MultipartFile file,
-//            @RequestParam("cvName") String cvName,
-//            @RequestParam("studentId") String studentIdString
-//    ) {
-//        UUID studentId;
-//
-//        try {
-//            studentId = UUID.fromString(studentIdString);
-//        } catch (IllegalArgumentException e) {
-//            return new ResponseEntity<>("Định dạng studentId (UUID) không hợp lệ.", HttpStatus.BAD_REQUEST);
-//        }
-//
-//        CvSummaryDto newCv = cvService.uploadAndSaveCv(studentId, cvName, file);
-//
-//        return new ResponseEntity<>(newCv, HttpStatus.CREATED);
-//    }
-
-
 
     @GetMapping("/my-cvs") //TODO:test ròi nhe
     public ResponseEntity<List<CvSummaryDto>> getMyCVs(

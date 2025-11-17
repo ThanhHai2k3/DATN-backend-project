@@ -4,16 +4,12 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class CvNlpResult {
+public class CvNlpResultDto {
 
     private Long cvId;
-
     private List<String> skills;
-
     private ExperiencePart experience;
-
     private EducationPart education;
-
     private String modelVersion;
 
     @Data
