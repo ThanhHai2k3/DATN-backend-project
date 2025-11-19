@@ -55,6 +55,21 @@ public class InternshipPost {
     @Column(name = "posted_by")
     private UUID postedBy;
 
+    @Column(name = "nlp_status")
+    private String nlpStatus;      // PENDING / DONE / ERROR
+
+    @Column(name = "nlp_error")
+    private String nlpError;       // Lưu message lỗi từ ai-nlp-service (nếu có)
+
+    @Column(name = "processed_at")
+    private Instant processedAt;   // Thời điểm NLP xong
+
+    @OneToOne(mappedBy = "internshipPost",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            optional = true)
+    private InternshipPostNorm internshipPostNorm;
+
     @OneToMany(mappedBy = "internshipPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<JobSkill> jobSkills = new ArrayList<>();
 }
