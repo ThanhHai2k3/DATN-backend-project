@@ -325,7 +325,7 @@
             content: content,
             messageType: 'TEXT'
         };
-        fetch(`${GATEWAY_URL}/api/v1/messages`, {
+        fetch(`${GATEWAY_URL}/api/message/v1/messages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(request)
@@ -343,7 +343,7 @@
         formData.append('senderId', CURRENT_USER_ID);
 
         try {
-            const response = await fetch(`${GATEWAY_URL}/api/v1/messages/image`, {
+            const response = await fetch(`${GATEWAY_URL}/api/message/v1/messages/image`, {
                 method: 'POST',
                 body: formData
             });
@@ -356,7 +356,7 @@
 
     // Tải lịch sử tin nhắn
     function loadHistory() {
-    fetch(`${GATEWAY_URL}/api/v1/messages/conversation/${CONVERSATION_ID}?page=0&size=50`)
+    fetch(`${GATEWAY_URL}/api/message/v1/messages/conversation/${CONVERSATION_ID}?page=0&size=50`)
     .then(res => res.json())
     .then(page => { // 'page' ở đây bây giờ là một MẢNG (Array)
         messagesArea.innerHTML = '';
