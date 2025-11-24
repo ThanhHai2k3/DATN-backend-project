@@ -1,6 +1,7 @@
 package com.backend.profileservice.controller;
 
 import com.backend.profileservice.dto.request.student.StudentCreateRequest;
+import com.backend.profileservice.dto.request.student.StudentUpdateRequest;
 import com.backend.profileservice.dto.response.ApiResponse;
 import com.backend.profileservice.dto.response.student.StudentResponse;
 import com.backend.profileservice.enums.SuccessCode;
@@ -16,16 +17,23 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/profile/v1/student-profile")
+@RequestMapping("/api/profile/v2/students/me")
 @RequiredArgsConstructor
 @Slf4j
 public class StudentController {
 
     private final StudentService studentService;
 
-    @GetMapping("/me")
-    public ResponseEntity<ApiResponse<StudentResponse>> getProfile(@RequestParam("userId") UUID userId){
+    private UUID getFakeUserId() {
+        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+    }
+
+    // GET /api/students/me
+    @GetMapping
+    public ResponseEntity<ApiResponse<StudentResponse>> getProfile() {
+        UUID userId = getFakeUserId();
         StudentResponse response = studentService.getByUserId(userId);
+
         return ResponseEntity
                 .status(SuccessCode.PROFILE_FETCHED.getStatus())
                 .body(ApiResponse.success(
@@ -35,68 +43,40 @@ public class StudentController {
                 ));
     }
 
-    @PutMapping("/me")
-    public ResponseEntity<ApiResponse<StudentResponse>> upsertProfile(@Valid @RequestBody StudentCreateRequest request) {
-        StudentResponse response = studentService.upsert(request);
+    // PUT /api/students/me
+    @PutMapping
+    public ResponseEntity<ApiResponse<StudentResponse>> updateProfile(@RequestBody StudentUpdateRequest request) {
+        UUID userId = getFakeUserId();
+
+        StudentResponse response = studentService.updateProfile(userId, request);
+
         return ResponseEntity
-                .status(SuccessCode.PROFILE_UPSERTED.getStatus())
+                .status(SuccessCode.PROFILE_UPDATED.getStatus())
                 .body(ApiResponse.success(
-                        SuccessCode.PROFILE_UPSERTED.getCode(),
-                        SuccessCode.PROFILE_UPSERTED.getMessage(),
+                        SuccessCode.PROFILE_UPDATED.getCode(),
+                        SuccessCode.PROFILE_UPDATED.getMessage(),
                         response
                 ));
     }
 
-    @PutMapping("/me/visibility")
-    public ResponseEntity<ApiResponse<StudentResponse>> updateVisibility(@RequestParam("userId") UUID userId,
-                                                                         @RequestParam("visible") boolean visible) {
+    // PATCH /api/students/me/visibility
+    @PatchMapping("/visibility")
+    public ResponseEntity<ApiResponse<StudentResponse>> updateVisibility(@RequestParam("public") boolean isPublic) {
+        UUID userId = getFakeUserId();
 
-        StudentResponse response = studentService.updateVisibility(userId, visible);
+        StudentResponse response = studentService.updateVisibility(userId, isPublic);
+
         return ResponseEntity
-                .status(SuccessCode.PROFILE_UPSERTED.getStatus())
+                .status(SuccessCode.PROFILE_VISIBILITY_UPDATED.getStatus())
                 .body(ApiResponse.success(
-                        SuccessCode.PROFILE_UPSERTED.getCode(),
-                        SuccessCode.PROFILE_UPSERTED.getMessage(),
+                        SuccessCode.PROFILE_VISIBILITY_UPDATED.getCode(),
+                        SuccessCode.PROFILE_VISIBILITY_UPDATED.getMessage(),
                         response
                 ));
     }
 
-    @PutMapping("/me/educations")
-    public ResponseEntity<ApiResponse<Void>> replaceEducations(@RequestParam("userId") UUID userId, @Valid @RequestBody List<EducationDTO> educations) {
-        studentService.replaceEducations(userId, educations);
-        return ResponseEntity
-                .status(SuccessCode.EDU_UPDATED.getStatus())
-                .body(ApiResponse.success(
-                        SuccessCode.EDU_UPDATED.getCode(),
-                        SuccessCode.EDU_UPDATED.getMessage(),
-                        null
-                ));
-    }
-
-    @PutMapping("/me/experiences")
-    public ResponseEntity<ApiResponse<Void>> replaceExperiences(@RequestParam("userId") UUID userId, @Valid @RequestBody List<ExperienceDTO> experiences) {
-        studentService.replaceExperiences(userId, experiences);
-        return ResponseEntity
-                .status(SuccessCode.EXP_UPDATED.getStatus())
-                .body(ApiResponse.success(
-                        SuccessCode.EXP_UPDATED.getCode(),
-                        SuccessCode.EXP_UPDATED.getMessage(),
-                        null
-                ));
-    }
-
-    @PutMapping("/me/skills")
-    public ResponseEntity<ApiResponse<StudentResponse>> replaceSkills(@RequestParam("userId") UUID userId, @Valid @RequestBody List<StudentSkillDTO> skills) {
-        StudentResponse response = studentService.replaceSkills(userId, skills);
-        return ResponseEntity
-                .status(SuccessCode.SKILLS_UPDATED.getStatus())
-                .body(ApiResponse.success(
-                        SuccessCode.SKILLS_UPDATED.getCode(),
-                        SuccessCode.SKILLS_UPDATED.getMessage(),
-                        response
-                ));
-    }
-
+    // AUTO CREATE PROFILE (Called by Auth-Service)
+    // POST /api/students/me/auto-create
     @PostMapping("/auto-create")
     public ResponseEntity<ApiResponse<Void>> autoCreateProfile(@RequestBody Map<String, Object> payload) {
         UUID userId = UUID.fromString((String) payload.get("userId"));
