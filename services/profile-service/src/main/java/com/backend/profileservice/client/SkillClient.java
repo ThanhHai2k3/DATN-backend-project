@@ -1,0 +1,21 @@
+package com.backend.profileservice.client;
+
+import com.backend.profileservice.dto.external.skill.CreateSkillRequest;
+import com.backend.profileservice.dto.external.skill.SkillResponse;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
+
+@FeignClient(name = "skill-service",url = "${services.skill.base-url}")
+public interface SkillClient {
+
+    @GetMapping("/api/skills/{id}")
+    SkillResponse getSkillById(@PathVariable("id") UUID id);
+
+    @GetMapping("/api/skills/search")
+    SkillResponse getSkillByName(@RequestParam("name") String name);
+
+    @PostMapping("/api/skills")
+    SkillResponse createSkill(@RequestBody CreateSkillRequest request);
+}

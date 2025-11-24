@@ -15,7 +15,20 @@ public enum ErrorCode {
     TOKEN_EXPIRED("AUTH_005", "Token has expired", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID("AUTH_006", "Invalid token", HttpStatus.UNAUTHORIZED),
 
-    PROFILE_NOT_FOUND("STU_001", "Student profile not found", HttpStatus.NOT_FOUND),
+    STUDENT_NOT_FOUND("STU_001", "Student with userId not found", HttpStatus.NOT_FOUND),
+    EDUCATION_NOT_FOUND("STU_002","Education not found", HttpStatus.NOT_FOUND),
+    EXPERIENCE_NOT_FOUND("STU_003", "Experience not found", HttpStatus.NOT_FOUND),
+    PROJECT_NOT_FOUND("STU_004", "Project not found", HttpStatus.NOT_FOUND),
+    SOCIAL_LINK_NOT_FOUND("STU_005", "Social link not found", HttpStatus.NOT_FOUND),
+    STUDENT_SKILL_EXISTS("STU_006", "Student already have this skill", HttpStatus.BAD_REQUEST),
+    STUDENT_SKILL_NOT_FOUND("STU_007", "Student don't have that skill", HttpStatus.BAD_REQUEST),
+
+
+    SKILL_NOT_FOUND("SK_001", "Skill not found", HttpStatus.NOT_FOUND),
+    CATEGORY_REQUIRED("SK_002", "Category required for new skill", HttpStatus.BAD_REQUEST),
+    SKILL_ID_OR_NAME_REQUIRED("SK_003", "Either skillId or skillName must be provided", HttpStatus.BAD_REQUEST),
+
+    FORBIDDEN("STU_", "Access denied", HttpStatus.FORBIDDEN),
 
     EMPLOYER_NOT_FOUND("EMP_001", "Employer with userId not found", HttpStatus.NOT_FOUND),
     EMPLOYER_PROFILE_EXISTED("EMP_002", "Employer profile already exists", HttpStatus.BAD_REQUEST),

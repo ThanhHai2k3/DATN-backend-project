@@ -23,16 +23,19 @@ public class Experience {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    private StudentProfile student;
+    private Student student;
 
-    private String projectName;
+    @Column(name = "company_name")
     private String companyName;
-    private String role;
 
-    @Column(columnDefinition = "TEXT")
+    private String position;
     private String description;
+    private String achievement;
 
+    @Column(name = "start_date")
     private LocalDate startDate;
+
+    @Column(name = "end_date")
     private LocalDate endDate;
 
     @CreationTimestamp

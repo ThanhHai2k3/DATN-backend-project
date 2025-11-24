@@ -24,22 +24,24 @@ public class Education {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    private StudentProfile student;
+    private Student student;
 
     @Column(nullable = false)
-    private String schoolName;
+    private String school;
 
     private String major;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Degree degree;
 
-    private LocalDate startDate;
-    private LocalDate endDate;
-
-    @Column(columnDefinition = "TEXT")
+    private Float gpa;
     private String description;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

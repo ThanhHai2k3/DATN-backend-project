@@ -1,6 +1,6 @@
 package com.backend.profileservice.repository;
 
-import com.backend.profileservice.entity.StudentSkill;
+import com.backend.profileservice.entity.Project;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,8 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface StudentSkillRepository extends JpaRepository<StudentSkill, UUID> {
-    List<StudentSkill> findByStudentId(UUID studentId);
+public interface ProjectRepository extends JpaRepository<Project, UUID> {
+    List<Project> findByStudentId(UUID studentId);
     void deleteByStudentId(UUID studentId);
-    boolean existsByStudentIdAndSkillId(UUID studentId, UUID skillId);
 }

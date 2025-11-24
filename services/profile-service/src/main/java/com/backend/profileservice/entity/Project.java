@@ -1,22 +1,23 @@
 package com.backend.profileservice.entity;
 
-import com.backend.profileservice.enums.SkillLevel;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Entity
-@Table(name = "student_skills", schema = "profile_schema")
+@Table(name = "projects", schema = "profile_schema")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class StudentSkill {
+public class Project {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -25,15 +26,19 @@ public class StudentSkill {
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @Column(name = "skill_id", nullable = false) // reference to skill-service
-    private UUID skillId;
+    @Column(name = "project_name")
+    private String projectName;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "level", nullable = false)
-    private SkillLevel level;
+    @Column(name = "project_url")
+    private String projectUrl;
 
-    private Integer years;
-    private String note;
+    private String description;
+
+    @Column(name = "start_date")
+    private LocalDate startDate;
+
+    @Column(name = "end_date")
+    private LocalDate endDate;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

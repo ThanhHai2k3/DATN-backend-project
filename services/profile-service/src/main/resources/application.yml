@@ -23,3 +23,7 @@ logging:
     org.springframework.web: DEBUG
     org.springframework.http.converter.json: TRACE
     org.springframework.web.servlet.mvc.method.annotation: TRACE
+
+services:
+  skill:
+    base-url: http://localhost:8086
