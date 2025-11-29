@@ -40,12 +40,8 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Override
     public ExperienceResponse update(UUID userId, UUID experienceId, ExperienceUpdateRequest request){
-        Experience exp = experienceRepository.findById(experienceId)
+        Experience exp = experienceRepository.findByIdAndStudentUserId(experienceId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EXPERIENCE_NOT_FOUND));
-
-        if (!exp.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         experienceMapper.updateEntity(exp, request);
 
@@ -66,12 +62,8 @@ public class ExperienceServiceImpl implements ExperienceService {
 
     @Override
     public void delete(UUID userId, UUID experienceId){
-        Experience exp = experienceRepository.findById(experienceId)
+        Experience exp = experienceRepository.findByIdAndStudentUserId(experienceId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EXPERIENCE_NOT_FOUND));
-
-        if (!exp.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         experienceRepository.delete(exp);
     }

@@ -40,12 +40,8 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     public EducationResponse update(UUID userId, UUID educationId, EducationUpdateRequest request){
-        Education education = educationRepository.findById(educationId)
+        Education education = educationRepository.findByIdAndStudentUserId(educationId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EDUCATION_NOT_FOUND));
-
-        if (!education.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         educationMapper.updateEntity(education, request);
 
@@ -66,12 +62,8 @@ public class EducationServiceImpl implements EducationService {
 
     @Override
     public void delete(UUID userId, UUID educationId){
-        Education education = educationRepository.findById(educationId)
+        Education education = educationRepository.findByIdAndStudentUserId(educationId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EDUCATION_NOT_FOUND));
-
-        if (!education.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         educationRepository.delete(education);
     }

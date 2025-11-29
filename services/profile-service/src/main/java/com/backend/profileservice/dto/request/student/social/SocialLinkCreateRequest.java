@@ -1,5 +1,6 @@
 package com.backend.profileservice.dto.request.student.social;
 
+import com.backend.profileservice.enums.SocialType;
 import lombok.*;
 
 @Getter
@@ -9,6 +10,6 @@ import lombok.*;
 @Builder
 public class SocialLinkCreateRequest {
 
-    private String type;
+    private SocialType type;
     private String url;
 }

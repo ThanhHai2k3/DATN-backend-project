@@ -1,5 +1,6 @@
 package com.backend.profileservice.dto.request.student;
 
+import com.backend.profileservice.enums.Gender;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,7 +18,7 @@ public class StudentCreateRequest {
     private String avatarUrl;
     private String headline;
     private LocalDate dob;
-    private String gender;
+    private Gender gender;
     private String phone;
     private String address;
     private String bio;

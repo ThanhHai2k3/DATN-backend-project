@@ -1,6 +1,5 @@
 package com.backend.profileservice.dto.response.student;
 
-import com.backend.profileservice.enums.SocialType;
 import lombok.*;
 
 import java.util.UUID;
@@ -10,9 +9,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SocialLinkResponse {
+public class VisibilityResponse {
 
-    private UUID id;
-    private SocialType type;
-    private String url;
+    private UUID studentId;
+    private boolean publicProfile;
 }

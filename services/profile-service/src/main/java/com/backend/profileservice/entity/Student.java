@@ -61,7 +61,7 @@ public class Student {
     private List<Experience> experiences = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudentSkill> studentSkills = new ArrayList<>();
+    private List<StudentSkill> skills = new ArrayList<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Project> projects = new ArrayList<>();

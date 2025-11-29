@@ -1,5 +1,6 @@
 package com.backend.profileservice.dto.response.student;
 
+import com.backend.profileservice.enums.Degree;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -15,7 +16,7 @@ public class EducationResponse {
     private UUID id;
     private String school;
     private String major;
-    private String degree;
+    private Degree degree;
     private Float gpa;
     private String description;
     private LocalDate startDate;

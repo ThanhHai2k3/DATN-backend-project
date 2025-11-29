@@ -1,5 +1,6 @@
 package com.backend.profileservice.dto.request.student.studentskill;
 
+import com.backend.profileservice.enums.SkillLevel;
 import lombok.*;
 
 @Getter
@@ -12,7 +13,7 @@ public class StudentSkillCreateRequest {
     private String skillId; //Nếu FE chọn từ danh sách → gửi skillId
     private String skillName; //Nếu FE nhập tên mới → gửi skillName
     private String categoryId; //Thêm khi skillName != null để thêm vào category
-    private String level;
+    private SkillLevel level;
     private Integer years;
     private String note;
 }

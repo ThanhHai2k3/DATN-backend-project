@@ -40,12 +40,8 @@ public class SocialLinkServiceImpl implements SocialLinkService {
 
     @Override
     public SocialLinkResponse update(UUID userId, UUID linkId, SocialLinkUpdateRequest request) {
-        SocialLink link = socialLinkRepository.findById(linkId)
+        SocialLink link = socialLinkRepository.findByIdAndStudentUserId(linkId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.SOCIAL_LINK_NOT_FOUND));
-
-        if (!link.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         socialLinkMapper.updateEntity(link, request);
 
@@ -66,13 +62,9 @@ public class SocialLinkServiceImpl implements SocialLinkService {
 
     @Override
     public void delete(UUID userId, UUID linkId) {
-        SocialLink link = socialLinkRepository.findById(linkId)
+        SocialLink link = socialLinkRepository.findByIdAndStudentUserId(linkId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.SOCIAL_LINK_NOT_FOUND));
-
-        if (!link.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
-
+        
         socialLinkRepository.delete(link);
     }
 }

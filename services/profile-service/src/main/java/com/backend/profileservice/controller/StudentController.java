@@ -1,18 +1,16 @@
 package com.backend.profileservice.controller;
 
-import com.backend.profileservice.dto.request.student.StudentCreateRequest;
 import com.backend.profileservice.dto.request.student.StudentUpdateRequest;
 import com.backend.profileservice.dto.response.ApiResponse;
 import com.backend.profileservice.dto.response.student.StudentResponse;
+import com.backend.profileservice.dto.response.student.VisibilityResponse;
 import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.StudentService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -61,10 +59,10 @@ public class StudentController {
 
     // PATCH /api/students/me/visibility
     @PatchMapping("/visibility")
-    public ResponseEntity<ApiResponse<StudentResponse>> updateVisibility(@RequestParam("public") boolean isPublic) {
+    public ResponseEntity<ApiResponse<VisibilityResponse>> updateVisibility(@RequestParam("public") boolean isPublic) {
         UUID userId = getFakeUserId();
 
-        StudentResponse response = studentService.updateVisibility(userId, isPublic);
+        VisibilityResponse response = studentService.updateVisibility(userId, isPublic);
 
         return ResponseEntity
                 .status(SuccessCode.PROFILE_VISIBILITY_UPDATED.getStatus())

@@ -40,12 +40,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public ProjectResponse update(UUID userId, UUID projectId, ProjectUpdateRequest request) {
-        Project project = projectRepository.findById(projectId)
+        Project project = projectRepository.findByIdAndStudentUserId(projectId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));
-
-        if (!project.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         projectMapper.updateEntity(project, request);
 
@@ -66,12 +62,8 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     public void delete(UUID userId, UUID projectId) {
-        Project project = projectRepository.findById(projectId)
+        Project project = projectRepository.findByIdAndStudentUserId(projectId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));
-
-        if (!project.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         projectRepository.delete(project);
     }

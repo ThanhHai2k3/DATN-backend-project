@@ -1,5 +1,6 @@
 package com.backend.profileservice.dto.response.student;
 
+import com.backend.profileservice.enums.SkillLevel;
 import lombok.*;
 
 import java.util.UUID;
@@ -15,7 +16,7 @@ public class StudentSkillResponse {
     private UUID skillId;
     private String skillName;     // optional: fetched from skill-service
     private String category;      // optional
-    private String level;
+    private SkillLevel level;
     private Integer years;
     private String note;
 }

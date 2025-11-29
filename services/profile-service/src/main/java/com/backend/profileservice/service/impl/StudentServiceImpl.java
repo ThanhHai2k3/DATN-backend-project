@@ -1,20 +1,19 @@
 package com.backend.profileservice.service.impl;
 
-import com.backend.profileservice.dto.request.student.StudentCreateRequest;
 import com.backend.profileservice.dto.request.student.StudentUpdateRequest;
 import com.backend.profileservice.dto.response.student.StudentResponse;
+import com.backend.profileservice.dto.response.student.VisibilityResponse;
 import com.backend.profileservice.entity.*;
 import com.backend.profileservice.enums.ErrorCode;
 import com.backend.profileservice.exception.AppException;
 import com.backend.profileservice.mapper.StudentMapper;
 import com.backend.profileservice.repository.*;
 import com.backend.profileservice.service.StudentService;
+import com.backend.profileservice.service.StudentSkillService;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,6 +23,7 @@ public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final StudentMapper studentMapper;
+    private final StudentSkillService studentSkillService;
 
     @Override
     @Transactional(readOnly = true)
@@ -31,7 +31,11 @@ public class StudentServiceImpl implements StudentService {
         Student profile = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
 
-        return studentMapper.toResponse(profile);
+        StudentResponse response = studentMapper.toResponse(profile);
+
+        response.setSkills(studentSkillService.getAllByStudent(userId));
+
+        return response;
     }
 
     @Override
@@ -42,19 +46,26 @@ public class StudentServiceImpl implements StudentService {
         studentMapper.updateEntity(student, request);
 
         Student saved = studentRepository.save(student);
-        return studentMapper.toResponse(saved);
+        StudentResponse response = studentMapper.toResponse(saved);
+
+        response.setSkills(studentSkillService.getAllByStudent(userId));
+
+        return response;
     }
 
     @Override
-    public StudentResponse updateVisibility(UUID userId, boolean isPublic) {
+    public VisibilityResponse updateVisibility(UUID userId, boolean isPublic) {
 
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
 
         student.setPublicProfile(isPublic);
-
         Student saved = studentRepository.save(student);
-        return studentMapper.toResponse(saved);
+
+        return VisibilityResponse.builder()
+                .studentId(saved.getId())
+                .publicProfile(saved.isPublicProfile())
+                .build();
     }
 
     @Override

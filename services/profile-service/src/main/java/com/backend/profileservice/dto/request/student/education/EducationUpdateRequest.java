@@ -1,5 +1,6 @@
 package com.backend.profileservice.dto.request.student.education;
 
+import com.backend.profileservice.enums.Degree;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -13,7 +14,7 @@ public class EducationUpdateRequest {
 
     private String school;
     private String major;
-    private String degree;
+    private Degree degree;
     private Float gpa;
     private String description;
     private LocalDate startDate;

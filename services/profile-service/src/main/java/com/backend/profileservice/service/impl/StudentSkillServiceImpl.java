@@ -5,6 +5,7 @@ import com.backend.profileservice.dto.external.skill.CreateSkillRequest;
 import com.backend.profileservice.dto.external.skill.SkillResponse;
 import com.backend.profileservice.dto.request.student.studentskill.StudentSkillCreateRequest;
 import com.backend.profileservice.dto.request.student.studentskill.StudentSkillUpdateRequest;
+import com.backend.profileservice.dto.response.ApiResponse;
 import com.backend.profileservice.dto.response.student.StudentSkillResponse;
 import com.backend.profileservice.entity.Student;
 import com.backend.profileservice.entity.StudentSkill;
@@ -46,17 +47,14 @@ public class StudentSkillServiceImpl implements StudentSkillService {
         studentSkill.setStudent(student);
 
         StudentSkill saved = studentSkillRepository.save(studentSkill);
-        return studentSkillMapper.toResponse(saved);
+        StudentSkillResponse response = studentSkillMapper.toResponse(saved);
+        return addSkillInfo(response);
     }
 
     @Override
     public StudentSkillResponse update (UUID userId, UUID studentSkillId, StudentSkillUpdateRequest request){
-        StudentSkill studentSkill = studentSkillRepository.findById(studentSkillId)
+        StudentSkill studentSkill = studentSkillRepository.findByIdAndStudentUserId(studentSkillId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_SKILL_NOT_FOUND));
-
-        if (!studentSkill.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
 //        if (request.getSkillId() != null || request.getSkillName() != null) {
 //            throw new AppException(ErrorCode.CANNOT_UPDATE_SKILL_ID_OR_NAME);
@@ -65,17 +63,14 @@ public class StudentSkillServiceImpl implements StudentSkillService {
         studentSkillMapper.updateEntity(studentSkill, request);
 
         StudentSkill saved = studentSkillRepository.save(studentSkill);
-        return studentSkillMapper.toResponse(saved);
+        StudentSkillResponse response = studentSkillMapper.toResponse(saved);
+        return addSkillInfo(response);
     }
 
     @Override
-    public void delete(UUID studentSkillId, UUID userId){
-        StudentSkill studentSkill = studentSkillRepository.findById(studentSkillId)
+    public void delete(UUID userId, UUID studentSkillId){
+        StudentSkill studentSkill = studentSkillRepository.findByIdAndStudentUserId(studentSkillId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_SKILL_NOT_FOUND));
-
-        if (!studentSkill.getStudent().getUserId().equals(userId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
 
         studentSkillRepository.delete(studentSkill);
     }
@@ -88,6 +83,7 @@ public class StudentSkillServiceImpl implements StudentSkillService {
         return studentSkillRepository.findByStudentId(student.getId())
                 .stream()
                 .map(studentSkillMapper::toResponse)
+                .map(this::addSkillInfo)
                 .collect(Collectors.toList());
     }
 
@@ -95,7 +91,9 @@ public class StudentSkillServiceImpl implements StudentSkillService {
         // Case 1 → FE chọn skill từ list (có skillId)
         if(request.getSkillId() != null){
             UUID id = UUID.fromString(request.getSkillId());
-            SkillResponse skill = skillClient.getSkillById(id);
+
+            ApiResponse<SkillResponse> api = skillClient.getSkillById(id);
+            SkillResponse skill = api.getData();
 
             if(skill == null){
                 throw new AppException(ErrorCode.SKILL_NOT_FOUND);
@@ -109,8 +107,10 @@ public class StudentSkillServiceImpl implements StudentSkillService {
                 throw new AppException(ErrorCode.CATEGORY_REQUIRED);
             }
 
+            // Thử tìm skill tồn tại trước
             try{
-                SkillResponse found = skillClient.getSkillByName(request.getSkillName());
+                ApiResponse<SkillResponse> api = skillClient.getSkillByName(request.getSkillName());
+                SkillResponse found = api.getData();
                 if(found != null){
                     return found.getId();
                 }
@@ -118,15 +118,33 @@ public class StudentSkillServiceImpl implements StudentSkillService {
 
             }
 
+            // Tạo mới skill nếu không tìm thấy
             CreateSkillRequest skill = new CreateSkillRequest();
             skill.setName(request.getSkillName());
             skill.setCategoryId(UUID.fromString(request.getCategoryId()));
             skill.setDescription(null);
 
-            SkillResponse created = skillClient.createSkill(skill);
+            ApiResponse<SkillResponse> apiCreated = skillClient.createSkill(skill);
+            SkillResponse created = apiCreated.getData();
+
             return created.getId();
         }
 
         throw new AppException(ErrorCode.SKILL_ID_OR_NAME_REQUIRED);
+    }
+
+    private StudentSkillResponse addSkillInfo(StudentSkillResponse response) {
+        if (response.getSkillId() == null) return response;
+
+        try {
+            ApiResponse<SkillResponse> api = skillClient.getSkillById(response.getSkillId());
+            SkillResponse skill = api.getData();
+            if (skill != null) {
+                response.setSkillName(skill.getName());
+                response.setCategory(skill.getCategory().getName());
+            }
+        } catch (Exception ignored) { }
+
+        return response;
     }
 }
