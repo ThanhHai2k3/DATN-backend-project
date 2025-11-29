@@ -21,14 +21,15 @@ import java.util.List;
 public interface StudentMapper {
 
     @Mapping(target = "gender",
-            expression = "java(Gender.valueOf(request.getGender().toUpperCase()))")
+            expression = "java(request.getGender() != null ? com.backend.profileservice.enums.Gender.valueOf(request.getGender().toUpperCase()) : null)")
     Student toEntity(StudentCreateRequest request);
 
-    @Mapping(target = "gender", expression = "java(entity.getGender() != null ? entity.getGender().name() : null)")
+    @Mapping(target = "gender",
+            expression = "java(entity.getGender() != null ? entity.getGender().name() : null)")
     StudentResponse toResponse(Student entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "gender",
-            expression = "java(request.getGender() != null ? Gender.valueOf(request.getGender().toUpperCase()) : student.getGender())")
+            expression = "java(request.getGender() != null ? com.backend.profileservice.enums.Gender.valueOf(request.getGender().toUpperCase()) : student.getGender())")
     void updateEntity(@MappingTarget Student student, StudentUpdateRequest request);
 }

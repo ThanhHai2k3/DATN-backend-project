@@ -11,12 +11,12 @@ import org.mapstruct.*;
 public interface EducationMapper {
 
     @Mapping(target = "degree",
-            expression = "java(request.getDegree() != null ? Degree.valueOf(request.getDegree().toUpperCase()) : null)")
+            expression = "java(request.getDegree() != null ? com.backend.profileservice.enums.Degree.valueOf(request.getDegree().toUpperCase()) : null)")
     Education toEntity(EducationCreateRequest request);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "degree",
-            expression = "java(request.getDegree() != null ? Degree.valueOf(request.getDegree().toUpperCase()) : entity.getDegree())")
+            expression = "java(request.getDegree() != null ? com.backend.profileservice.enums.Degree.valueOf(request.getDegree().toUpperCase()) : entity.getDegree())")
     void updateEntity(@MappingTarget Education entity, EducationUpdateRequest request);
 
     @Mapping(target = "degree",

@@ -11,7 +11,7 @@ import org.mapstruct.*;
 public interface SocialLinkMapper {
 
     @Mapping(target = "type",
-            expression = "java(request.getType() != null ? SocialType.valueOf(request.getType().toUpperCase()) : null)")
+            expression = "java(request.getType() != null ? com.backend.profileservice.enums.SocialType.valueOf(request.getType().toUpperCase()) : null)")
     SocialLink toEntity(SocialLinkCreateRequest request);
 
     @Mapping(target = "type",
