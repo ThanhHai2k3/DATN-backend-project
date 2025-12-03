@@ -14,6 +14,7 @@ public enum ErrorCode {
     ACCOUNT_INACTIVE("AUTH_004", "Account is not active", HttpStatus.FORBIDDEN),
     TOKEN_EXPIRED("AUTH_005", "Token has expired", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID("AUTH_006", "Invalid token", HttpStatus.UNAUTHORIZED),
+    INVALID_REFRESH_TOKEN("AUTH_007", "Invalid refresh token", HttpStatus.UNAUTHORIZED),
     INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
     ;
 

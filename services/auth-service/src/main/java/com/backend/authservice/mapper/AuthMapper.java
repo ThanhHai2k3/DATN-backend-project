@@ -8,6 +8,7 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring", imports = {java.time.Instant.class})
 public interface AuthMapper {
+
     // Map RegisterRequest -> UserAccount
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "status", constant = "ACTIVE")
@@ -17,12 +18,14 @@ public interface AuthMapper {
     UserAccount toUserAccountEntity(RegisterRequest request);
 
     // Map UserAccount -> AuthResponse
+    @Mapping(target = "userId", source = "id")
+    @Mapping(target = "role", source = "role")
+    @Mapping(target = "fullName", ignore = true)
     @Mapping(target = "accessToken", ignore = true)
     @Mapping(target = "refreshToken", ignore = true)
     @Mapping(target = "tokenType", constant = "Bearer")
     @Mapping(target = "expiresInSeconds", ignore = true)
-    @Mapping(target = "role", source = "role")
-    @Mapping(target = "userId", source = "id")
-    @Mapping(target = "fullName", ignore = true)
+    @Mapping(target = "issuedAt", ignore = true)      // NEW
+    @Mapping(target = "expiresAt", ignore = true)
     AuthResponse toAuthResponse(UserAccount userAccount);
 }

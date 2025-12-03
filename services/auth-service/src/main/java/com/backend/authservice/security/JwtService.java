@@ -28,9 +28,10 @@ public class JwtService {
     public String generateToken(UserAccount userAccount){
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(jwtExpirationMinutes * 60);
+
         return Jwts.builder()
-                .subject(userAccount.getId().toString())
-                //.claim("email", userAccount.getEmail())   //Thêm email để hiển thị hoặc audit
+                .subject(userAccount.getId().toString()) //subject: userId
+                .claim("email", userAccount.getEmail())
                 .claim("role", userAccount.getRole().name())
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(exp))
@@ -45,12 +46,8 @@ public class JwtService {
                 .parseSignedClaims(token);
     }
 
-//
-//    public String extractEmail(String token) {
-//        return parse(token).getPayload().getSubject();
-//    }
-
     public UUID extractUserId(String token) {
+        String subject = parse(token).getPayload().getSubject();
         try {
             return UUID.fromString(parse(token).getPayload().getSubject());
         } catch (IllegalArgumentException e) {

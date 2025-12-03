@@ -11,12 +11,15 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class AuthResponse {
+    private UUID userId;
+    private String role;
+    private String fullName;
+
     private String accessToken;
     private String refreshToken;
     private String tokenType = "Bearer";
     private long expiresInSeconds;
-    private String role;
 
-    private UUID userId;
-    private String fullName;
+    private long issuedAt;
+    private long expiresAt;
 }

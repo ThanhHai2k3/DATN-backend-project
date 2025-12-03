@@ -45,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
 
     private String getFullNameFromProfile(UUID userId) {
         try {
-            String url = "http://localhost:8082/api/profile/v1/student-profile/me?userId=" + userId;
+            String url = "http://localhost:8082/api/profile/v2/students/me?userId=" + userId;
             ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
@@ -80,13 +80,13 @@ public class AuthServiceImpl implements AuthService {
             body.put("userId", user.getId());
             body.put("fullName", request.getFullName());
 
-            String baseUrl = "http://localhost:8082/api/profile/v1";
+            String baseUrl = "http://localhost:8082/api/profile";
             String url;
 
             if (user.getRole() == Role.STUDENT) {
-                url = baseUrl + "/student-profile/auto-create";
+                url = baseUrl + "/v2/students/auto-create";
             } else if (user.getRole() == Role.EMPLOYER) {
-                url = baseUrl + "/employers/auto-create";
+                url = baseUrl + "/v1/employers/auto-create";
             } else {
                 url = null;
             }
