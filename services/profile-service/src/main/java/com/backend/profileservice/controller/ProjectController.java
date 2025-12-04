@@ -20,15 +20,16 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    private UUID getFakeUserId() {
-        // TODO: dùng JWT sau
-        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-    }
+//    private UUID getFakeUserId() {
+//        // TODO: dùng JWT sau
+//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+//    }
 
     // POST /api/students/me/projects
     @PostMapping
-    public ResponseEntity<ApiResponse<ProjectResponse>> create(@RequestBody ProjectCreateRequest request) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<ProjectResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+                                                               @RequestBody ProjectCreateRequest request) {
+        UUID userId = UUID.fromString(userIdHeader);
         ProjectResponse response = projectService.create(userId, request);
 
         return ResponseEntity
@@ -42,10 +43,11 @@ public class ProjectController {
 
     // PUT /api/students/me/projects/{projectId}
     @PutMapping("/{projectId}")
-    public ResponseEntity<ApiResponse<ProjectResponse>> update(@PathVariable("projectId") UUID projectId,
-                                                               @RequestBody ProjectUpdateRequest request
-    ) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<ProjectResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+                                                               @PathVariable("projectId") UUID projectId,
+                                                               @RequestBody ProjectUpdateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         ProjectResponse response = projectService.update(userId, projectId, request);
 
         return ResponseEntity
@@ -59,8 +61,8 @@ public class ProjectController {
 
     // GET /api/students/me/projects
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAll() {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
         List<ProjectResponse> list = projectService.getAllByStudent(userId);
 
         return ResponseEntity
@@ -74,8 +76,9 @@ public class ProjectController {
 
     // DELETE /api/students/me/projects/{projectId}
     @DeleteMapping("/{projectId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("projectId") UUID projectId) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+                                                    @PathVariable("projectId") UUID projectId) {
+        UUID userId = UUID.fromString(userIdHeader);
         projectService.delete(userId, projectId);
 
         return ResponseEntity

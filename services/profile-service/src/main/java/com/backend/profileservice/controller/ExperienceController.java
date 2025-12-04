@@ -20,15 +20,17 @@ public class ExperienceController {
 
     private final ExperienceService experienceService;
 
-    private UUID getFakeUserId() {
-        // TODO: dùng JWT sau
-        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-    }
+//    private UUID getFakeUserId() {
+//        // TODO: dùng JWT sau
+//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+//    }
 
     // POST /api/students/me/experiences
     @PostMapping
-    public ResponseEntity<ApiResponse<ExperienceResponse>> create(@RequestBody ExperienceCreateRequest request) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<ExperienceResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                  @RequestBody ExperienceCreateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         ExperienceResponse response = experienceService.create(userId, request);
 
         return ResponseEntity
@@ -42,10 +44,11 @@ public class ExperienceController {
 
     // PUT /api/students/me/experiences/{experienceId}
     @PutMapping("/{experienceId}")
-    public ResponseEntity<ApiResponse<ExperienceResponse>> update(@PathVariable("experienceId") UUID experienceId,
-                                                                  @RequestBody ExperienceUpdateRequest request
-    ) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<ExperienceResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                  @PathVariable("experienceId") UUID experienceId,
+                                                                  @RequestBody ExperienceUpdateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         ExperienceResponse response = experienceService.update(userId, experienceId, request);
 
         return ResponseEntity
@@ -59,8 +62,8 @@ public class ExperienceController {
 
     // GET /api/students/me/experiences
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ExperienceResponse>>> getAll() {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<List<ExperienceResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
         List<ExperienceResponse> list = experienceService.getAllByStudent(userId);
 
         return ResponseEntity
@@ -74,8 +77,10 @@ public class ExperienceController {
 
     // DELETE /api/students/me/experiences/{experienceId}
     @DeleteMapping("/{experienceId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("experienceId") UUID experienceId) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+                                                    @PathVariable("experienceId") UUID experienceId)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         experienceService.delete(userId, experienceId);
 
         return ResponseEntity

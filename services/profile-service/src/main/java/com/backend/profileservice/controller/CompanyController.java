@@ -21,7 +21,8 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<CompanyResponse>> getCompany(@RequestParam("userId") UUID userId) {
+    public ResponseEntity<ApiResponse<CompanyResponse>> getCompany(@RequestHeader("X-User-Id") String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
         CompanyResponse response = companyService.getByUserId(userId);
         return ResponseEntity
                 .status(SuccessCode.COMPANY_INFO_FETCHED.getStatus())
@@ -34,10 +35,10 @@ public class CompanyController {
 
     // Tạo công ty mới (khi employer đầu tiên chưa có company)
     @PostMapping("/me")
-    public ResponseEntity<ApiResponse<CompanyResponse>> createCompany(
-            @RequestParam("userId") UUID userId,
-            @Valid @RequestBody CompanyRequest request
-    ) {
+    public ResponseEntity<ApiResponse<CompanyResponse>> createCompany(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                      @Valid @RequestBody CompanyRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         CompanyResponse response = companyService.create(userId, request);
         return ResponseEntity
                 .status(SuccessCode.COMPANY_INFO_CREATED.getStatus())
@@ -50,10 +51,10 @@ public class CompanyController {
 
     // Cập nhật thông tin công ty của user
     @PutMapping("/me")
-    public ResponseEntity<ApiResponse<CompanyResponse>> updateCompany(
-            @RequestParam("userId") UUID userId,
-            @Valid @RequestBody CompanyRequest request
-    ) {
+    public ResponseEntity<ApiResponse<CompanyResponse>> updateCompany(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                      @Valid @RequestBody CompanyRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         CompanyResponse response = companyService.updateByUser(userId, request);
         return ResponseEntity
                 .status(SuccessCode.COMPANY_INFO_UPDATED.getStatus())
@@ -79,7 +80,8 @@ public class CompanyController {
 
     // Xoá công ty của user (nếu user là admin)
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> deleteCompany(@RequestParam("userId") UUID userId) {
+    public ResponseEntity<ApiResponse<Void>> deleteCompany(@RequestHeader("X-User-Id") String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
         companyService.deleteByUserId(userId);
         return ResponseEntity
                 .status(SuccessCode.COMPANY_INFO_DELETED.getStatus())

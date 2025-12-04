@@ -16,6 +16,9 @@ import com.backend.authservice.service.AuthService;
 import com.backend.authservice.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -45,8 +48,14 @@ public class AuthServiceImpl implements AuthService {
 
     private String getFullNameFromProfile(UUID userId) {
         try {
-            String url = "http://localhost:8082/api/profile/v2/students/me?userId=" + userId;
-            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+            String url = "http://localhost:8082/api/profile/v2/students/me";
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.set("X-User-Id", userId.toString());
+
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Map<String, Object> apiResponse = response.getBody();
@@ -84,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
             String url;
 
             if (user.getRole() == Role.STUDENT) {
-                url = baseUrl + "/v2/students/auto-create";
+                url = baseUrl + "/v2/students/me/auto-create";
             } else if (user.getRole() == Role.EMPLOYER) {
                 url = baseUrl + "/v1/employers/auto-create";
             } else {

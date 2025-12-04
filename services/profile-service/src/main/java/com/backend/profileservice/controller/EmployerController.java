@@ -24,9 +24,11 @@ public class EmployerController {
     private final EmployerService employerService;
 
     @PostMapping("/me")
-    public ResponseEntity<ApiResponse<EmployerResponse>> createOrJoinCompany(@RequestParam("userId")UUID userId,
-                                                                             @Valid @RequestBody EmployerRequest request){
+    public ResponseEntity<ApiResponse<EmployerResponse>> createOrJoinCompany(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                             @Valid @RequestBody EmployerRequest request)
+    {
 
+        UUID userId = UUID.fromString(userIdHeader);
         EmployerResponse response = employerService.createOrJoinCompany(userId, request);
         log.info("Created or joined company for userId={}, employerId={}", userId, response.getId());
 
@@ -41,7 +43,8 @@ public class EmployerController {
 
     //Lấy thông tin Employer theo userId
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<EmployerResponse>> getByUserId(@RequestParam("userId") UUID userId){
+    public ResponseEntity<ApiResponse<EmployerResponse>> getByUserId(@RequestHeader("X-User-Id") String userIdHeader){
+        UUID userId = UUID.fromString(userIdHeader);
         EmployerResponse response = employerService.getByUserId(userId);
 
         return ResponseEntity
@@ -55,9 +58,10 @@ public class EmployerController {
 
     //Cập nhật thông tin Employer
     @PutMapping("/me")
-    public ResponseEntity<ApiResponse<EmployerResponse>> updateEmployer(@RequestParam("userId") UUID userId,
-                                                                        @Valid @RequestBody EmployerRequest request) {
-
+    public ResponseEntity<ApiResponse<EmployerResponse>> updateEmployer(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                        @Valid @RequestBody EmployerRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         EmployerResponse response = employerService.updateProfile(userId, request);
 
         return ResponseEntity
@@ -72,7 +76,9 @@ public class EmployerController {
     // Xóa Employer profile (rời khỏi công ty)
     // Employer không bị xóa user account; chỉ unlink company
     @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> deleteEmployer(@RequestParam("userId") UUID userId) {
+    public ResponseEntity<ApiResponse<Void>> deleteEmployer(@RequestHeader("X-User-Id") String userIdHeader) {
+
+        UUID userId = UUID.fromString(userIdHeader);
         employerService.delete(userId);
         log.info("Deleted employer profile (detached company) for userId={}", userId);
 

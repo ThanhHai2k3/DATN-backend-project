@@ -22,14 +22,17 @@ public class StudentController {
 
     private final StudentService studentService;
 
-    private UUID getFakeUserId() {
-        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+//    private UUID getFakeUserId() {
+//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+//    }
+    private UUID getUserIdFromHeader(String userIdHeader) {
+        return UUID.fromString(userIdHeader);
     }
 
     // GET /api/students/me
     @GetMapping
-    public ResponseEntity<ApiResponse<StudentResponse>> getProfile() {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<StudentResponse>> getProfile(@RequestHeader("X-User-Id") String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
         StudentResponse response = studentService.getByUserId(userId);
 
         return ResponseEntity
@@ -43,9 +46,10 @@ public class StudentController {
 
     // PUT /api/students/me
     @PutMapping
-    public ResponseEntity<ApiResponse<StudentResponse>> updateProfile(@RequestBody StudentUpdateRequest request) {
-        UUID userId = getFakeUserId();
-
+    public ResponseEntity<ApiResponse<StudentResponse>> updateProfile(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                      @RequestBody StudentUpdateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         StudentResponse response = studentService.updateProfile(userId, request);
 
         return ResponseEntity
@@ -59,9 +63,10 @@ public class StudentController {
 
     // PATCH /api/students/me/visibility
     @PatchMapping("/visibility")
-    public ResponseEntity<ApiResponse<VisibilityResponse>> updateVisibility(@RequestParam("public") boolean isPublic) {
-        UUID userId = getFakeUserId();
-
+    public ResponseEntity<ApiResponse<VisibilityResponse>> updateVisibility(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                            @RequestParam("public") boolean isPublic)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         VisibilityResponse response = studentService.updateVisibility(userId, isPublic);
 
         return ResponseEntity

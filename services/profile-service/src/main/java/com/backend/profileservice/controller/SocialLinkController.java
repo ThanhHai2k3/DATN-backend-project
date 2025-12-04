@@ -20,15 +20,17 @@ public class SocialLinkController {
 
     private final SocialLinkService socialLinkService;
 
-    private UUID getFakeUserId() {
-        // TODO: dùng JWT sau
-        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-    }
+//    private UUID getFakeUserId() {
+//        // TODO: dùng JWT sau
+//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+//    }
 
     // POST /api/students/me/social-links
     @PostMapping
-    public ResponseEntity<ApiResponse<SocialLinkResponse>> create(@RequestBody SocialLinkCreateRequest request) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<SocialLinkResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                  @RequestBody SocialLinkCreateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         SocialLinkResponse response = socialLinkService.create(userId, request);
 
         return ResponseEntity
@@ -42,10 +44,11 @@ public class SocialLinkController {
 
     // PUT /api/students/me/social-links/{linkId}
     @PutMapping("/{linkId}")
-    public ResponseEntity<ApiResponse<SocialLinkResponse>> update(@PathVariable("linkId") UUID linkId,
-                                                                  @RequestBody SocialLinkUpdateRequest request
-    ) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<SocialLinkResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                  @PathVariable("linkId") UUID linkId,
+                                                                  @RequestBody SocialLinkUpdateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         SocialLinkResponse response = socialLinkService.update(userId, linkId, request);
 
         return ResponseEntity
@@ -59,8 +62,8 @@ public class SocialLinkController {
 
     // GET /api/students/me/social-links
     @GetMapping
-    public ResponseEntity<ApiResponse<List<SocialLinkResponse>>> getAll() {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<List<SocialLinkResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
         List<SocialLinkResponse> list = socialLinkService.getAllByStudent(userId);
 
         return ResponseEntity
@@ -74,8 +77,10 @@ public class SocialLinkController {
 
     // DELETE /api/students/me/social-links/{linkId}
     @DeleteMapping("/{linkId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("linkId") UUID linkId) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+                                                    @PathVariable("linkId") UUID linkId)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         socialLinkService.delete(userId, linkId);
 
         return ResponseEntity

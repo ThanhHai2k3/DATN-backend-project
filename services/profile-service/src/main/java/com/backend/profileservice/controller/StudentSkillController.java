@@ -20,14 +20,16 @@ public class StudentSkillController {
 
     private final StudentSkillService studentSkillService;
 
-    private UUID getFakeUserId() {
-        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-    }
+//    private UUID getFakeUserId() {
+//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
+//    }
 
     // POST /api/students/me/skills
     @PostMapping
-    public ResponseEntity<ApiResponse<StudentSkillResponse>> create(@RequestBody StudentSkillCreateRequest request) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<StudentSkillResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                    @RequestBody StudentSkillCreateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         StudentSkillResponse response = studentSkillService.create(userId, request);
 
         return ResponseEntity
@@ -42,10 +44,11 @@ public class StudentSkillController {
     // Update skill level/years/note
     // PUT /api/students/me/skills/{skillId}
     @PutMapping("/{studentSkillId}")
-    public ResponseEntity<ApiResponse<StudentSkillResponse>> update(@PathVariable("studentSkillId") UUID studentSkillId,
-                                                                    @RequestBody StudentSkillUpdateRequest request
-    ) {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<StudentSkillResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+                                                                    @PathVariable("studentSkillId") UUID studentSkillId,
+                                                                    @RequestBody StudentSkillUpdateRequest request)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         StudentSkillResponse response = studentSkillService.update(userId, studentSkillId, request);
 
         return ResponseEntity
@@ -59,8 +62,8 @@ public class StudentSkillController {
 
     // GET /api/students/me/skills
     @GetMapping
-    public ResponseEntity<ApiResponse<List<StudentSkillResponse>>> getAll() {
-        UUID userId = getFakeUserId();
+    public ResponseEntity<ApiResponse<List<StudentSkillResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
         List<StudentSkillResponse> list = studentSkillService.getAllByStudent(userId);
 
         return ResponseEntity
@@ -74,9 +77,10 @@ public class StudentSkillController {
 
     // DELETE /api/students/me/skills/{skillId}
     @DeleteMapping("/{studentSkillId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable("studentSkillId") UUID studentSkillId) {
-        UUID userId = getFakeUserId();
-
+    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+                                                    @PathVariable("studentSkillId") UUID studentSkillId)
+    {
+        UUID userId = UUID.fromString(userIdHeader);
         studentSkillService.delete(userId, studentSkillId);
 
         return ResponseEntity

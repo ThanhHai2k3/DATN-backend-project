@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain){
 
         String path = exchange.getRequest().getURI().getPath();
+        log.info("➡️ Incoming request: {}", path);
 
         // 1. Nếu request nằm trong whitelist -> bỏ qua JWT check
         if (isWhitelisted(path)) {
@@ -45,6 +46,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
         // 2. Lấy header Authorization
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        log.info("➡️ Authorization header: {}", authHeader);
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return unauthorized(exchange, "Missing or invalid Authorization header");
