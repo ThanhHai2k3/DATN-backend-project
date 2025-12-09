@@ -1,12 +1,15 @@
 package com.backend.jobservice.service.impl;
 
+import com.backend.jobservice.client.AiNlpClient;
 import com.backend.jobservice.client.ProfileClient;
 import com.backend.jobservice.client.SkillClient;
 import com.backend.jobservice.dto.request.InternshipPostRequest;
 import com.backend.jobservice.dto.request.InternshipPostUpdateRequest;
 import com.backend.jobservice.dto.request.JobSkillRequest;
+import com.backend.jobservice.dto.request.ProcessPostRequest;
 import com.backend.jobservice.dto.response.*;
 import com.backend.jobservice.entity.InternshipPost;
+import com.backend.jobservice.entity.InternshipPostNorm;
 import com.backend.jobservice.entity.JobSkill;
 import com.backend.jobservice.enums.ErrorCode;
 import com.backend.jobservice.enums.PostStatus;
@@ -16,6 +19,8 @@ import com.backend.jobservice.mapper.JobSkillMapper;
 import com.backend.jobservice.repository.InternshipPostRepository;
 import com.backend.jobservice.repository.JobSkillRepository;
 import com.backend.jobservice.service.InternshipPostService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +42,8 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     private final JobSkillMapper jobSkillMapper;
     private final ProfileClient profileClient;
     private final SkillClient skillClient;
+    private final AiNlpClient aiNlpClient;
+    private final ObjectMapper objectMapper;
 
     @Override
     public InternshipPostResponse createPost(UUID employerId, InternshipPostRequest request){
@@ -52,6 +59,16 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         post.setCompanyId(UUID.randomUUID()); // TODO: profile-client
 
         InternshipPost saved = internshipPostRepository.save(post);
+
+        try {
+            ProcessPostRequest nlpReq = buildProcessPostRequest(saved, request);
+            ProcessPostResponse nlpRes = aiNlpClient.processJob(nlpReq);
+            applyNlpResultToPost(saved, nlpRes);
+        } catch (Exception ex) {
+            saved.setNlpStatus("ERROR");
+            saved.setNlpError(ex.getMessage());
+        }
+
 
         //Validate and save job skills
         List<JobSkill> jobSkills = new ArrayList<>();
@@ -102,6 +119,81 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         fillSkillNames(response.getSkills());
         return response;
     }
+    private ProcessPostRequest buildProcessPostRequest(InternshipPost post,
+                                                       InternshipPostRequest originalReq) {
+
+        return ProcessPostRequest.builder()
+                .postId(post.getId().toString())
+                .title(post.getTitle())
+                .position(post.getPosition())
+                .description(post.getDescription())
+                .duration(post.getDuration())
+                .location(post.getLocation())
+                .workMode(
+                        post.getWorkMode() != null
+                                ? post.getWorkMode().name()
+                                : null
+                )
+//                .salary(originalReq.getSalary())
+                .skills(originalReq.getSkills())
+                .build();
+    }
+
+    private void applyNlpResultToPost(InternshipPost post,
+                                      ProcessPostResponse res) throws JsonProcessingException {
+        if (res == null) return;
+
+        InternshipPostNorm norm = new InternshipPostNorm();
+        norm.setInternshipPostId(post.getId());
+        norm.setInternshipPost(post);
+
+        // skills_norm: lưu JSONB (String)
+        if (res.getSkillsNorm() != null) {
+            String json = objectMapper.writeValueAsString(res.getSkillsNorm());
+            norm.setSkillsNorm(json);
+        }
+
+        norm.setExperienceYearsMin(res.getExperienceYearsMin());
+        norm.setExperienceYearsMax(res.getExperienceYearsMax());
+        norm.setExperienceLevel(res.getExperienceLevel());
+
+        // educationLevels, majors: hiện chưa có từ NLP → để null
+        norm.setEducationLevels(null);
+        norm.setMajors(null);
+
+        if (res.getDomains() != null) {
+            norm.setDomains(res.getDomains().toArray(new String[0]));
+        }
+
+        if (res.getWorkModesNorm() != null) {
+            norm.setWorkModesNorm(res.getWorkModesNorm().toArray(new String[0]));
+        }
+
+        if (res.getLocationsNorm() != null) {
+            norm.setLocationsNorm(res.getLocationsNorm().toArray(new String[0]));
+        }
+
+        norm.setDurationNormMonths(res.getDurationMonthsMin());
+
+        // lat / lon
+        norm.setLat(res.getLat());
+        norm.setLon(res.getLon());
+
+        norm.setModelVersion(res.getModelVersion());
+
+//        if (res.getProcessedAt() != null) {
+//            norm.setProcessedAt(res.getProcessedAt().atOffset(ZoneOffset.UTC));
+//        }
+
+        // gắn norm vào post (OneToOne + cascade = ALL)
+        post.setInternshipPostNorm(norm);
+
+        // cập nhật trạng thái NLP cho post (tuỳ naming của bạn)
+        post.setNlpStatus("DONE");
+        post.setNlpError(null);
+        post.setProcessedAt(res.getProcessedAt());
+    }
+
 
     @Override
     public InternshipPostResponse updatePost(UUID employerId, UUID postId, InternshipPostUpdateRequest request){
