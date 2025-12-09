@@ -39,6 +39,10 @@ public class ProcessPostResponse {
     private String salaryCurrency;       // VND / USD / …
     private String salaryType;           // per_month / fixed / range …
 
+    // location
+    private Double lat;
+    private Double lon;
+
     // ===== Meta =====
     private String modelVersion;
     private Instant processedAt;

@@ -2,6 +2,7 @@ package com.backend.ai_nlp_service.dto;
 
 import lombok.*;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 @Getter
@@ -13,36 +14,36 @@ public class ProcessPostResponse {
 
     private String postId;
 
-    // skills
-    private List<NormalizedSkill> skillsNorm;
+    // ===== Skills chuẩn hoá =====
+    private List<String> skillsNorm;      // Ví dụ ["java", "spring_boot", "rest_api"]
 
+    // ===== Experience =====
     private BigDecimal experienceYearsMin;
     private BigDecimal experienceYearsMax;
-    private String experienceLevel; // INTERN, JUNIOR, ...
+    private String experienceLevel;
 
+    // ===== Domain nghề nghiệp =====
     private List<String> domains;
 
+    // ===== Location & Work mode =====
     private List<String> locationsNorm;
     private List<String> workModesNorm;
 
+    // ===== Duration =====
     private BigDecimal durationMonthsMin;
     private BigDecimal durationMonthsMax;
 
+    // ===== Salary =====
     private BigDecimal salaryMin;
     private BigDecimal salaryMax;
-    private String salaryCurrency;
-    private String salaryType;
+    private String salaryCurrency;       // VND / USD / …
+    private String salaryType;           // per_month / fixed / range …
 
+    // location
+    private Double lat;
+    private Double lon;
+
+    // ===== Meta =====
     private String modelVersion;
-
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class NormalizedSkill {
-        private String skillKey;    // "java"
-        private String canonical;   // "Java"
-        private String importance;  // "MUST" / "NICE"
-    }
+    private Instant processedAt;
 }

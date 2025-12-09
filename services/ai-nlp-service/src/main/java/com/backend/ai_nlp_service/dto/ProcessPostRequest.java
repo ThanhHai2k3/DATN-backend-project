@@ -1,6 +1,4 @@
-package com.backend.jobservice.dto.request;
-
-import com.backend.jobservice.dto.request.JobSkillRequest;
+package com.backend.ai_nlp_service.dto;
 import lombok.*;
 import java.util.List;
 

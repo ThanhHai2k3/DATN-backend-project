@@ -46,6 +46,10 @@ public class InternshipPostNorm {
     @Column(name = "locations_norm")
     private String[] locationsNorm;
 
+    private Double lat;
+    private Double lon;
+
+
     private BigDecimal durationNormMonths;
 
     private String modelVersion;

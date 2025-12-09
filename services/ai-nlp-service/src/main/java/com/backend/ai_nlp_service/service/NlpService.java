@@ -1,9 +1,9 @@
 package com.backend.ai_nlp_service.service;
 
-import com.backend.ai_nlp_service.dto.CvNlpResult;
-import com.backend.ai_nlp_service.dto.ProcessCvRequest;
+import com.backend.ai_nlp_service.dto.*;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class NlpService {
+public class NlpService { //trích skill từ cv
     //hardcore
     private static final List<String> KNOWN_SKILLS =
             Arrays.asList(
@@ -174,4 +174,66 @@ public CvNlpResult processCv(ProcessCvRequest request) {
         if (s.equalsIgnoreCase("docker")) return "Docker";
         return s.substring(0, 1).toUpperCase(Locale.ROOT) + s.substring(1);
     }
+
+//    ========CV ở trên=========
+//    ========Job ở dưới=========
+public ProcessPostResponse processPost(ProcessPostRequest request) {
+
+    // 1. Ghép text lại để trích skill
+    StringBuilder sb = new StringBuilder();
+
+    if (request.getTitle() != null)
+        sb.append(" ").append(request.getTitle());
+
+    if (request.getPosition() != null)
+        sb.append(" ").append(request.getPosition());
+
+    if (request.getDescription() != null)
+        sb.append(" ").append(request.getDescription());
+
+    if (request.getSkills() != null) {
+        for (JobSkillRequest s : request.getSkills()) {
+            if (s.getSkillName() != null)
+                sb.append(" ").append(s.getSkillName());
+        }
+    }
+
+    String fullText = sb.toString();
+
+    // 2. Chuẩn hoá skills bằng SkillExtractor (quy tắc CV)
+    List<String> skillsNorm = SkillExtractor.extractSkills(fullText);
+
+    // 3. Build response (tạm chưa chuẩn hoá các phần khác)
+    ProcessPostResponse response = ProcessPostResponse.builder()
+            .postId(request.getPostId())
+            .skillsNorm(skillsNorm)
+            .experienceYearsMin(null)
+            .experienceYearsMax(null)
+            .experienceLevel(null)
+            .domains(null)
+            .locationsNorm(
+                    request.getLocation() != null
+                            ? List.of(request.getLocation().trim())
+                            : List.of()
+            )
+            .workModesNorm(
+                    request.getWorkMode() != null
+                            ? List.of(request.getWorkMode().toUpperCase())
+                            : List.of()
+            )
+            .durationMonthsMin(null)
+            .durationMonthsMax(null)
+            .salaryMin(null)
+            .salaryMax(null)
+            .salaryCurrency(null)
+            .salaryType(null)
+            .lat(null)  // sẽ được gán sau khi geocode
+            .lon(null)
+            .modelVersion("job-rule-based-0.1.0")
+            .processedAt(Instant.now())
+            .build();
+
+    return response;
+}
+
 }

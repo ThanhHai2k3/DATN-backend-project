@@ -1,197 +1,22 @@
-<!--    <!DOCTYPE html>-->
-<!--    <html>-->
-<!--    <head>-->
-<!--        <title>WebSocket Chat Test</title>-->
-<!--        <style>-->
-<!--            /* CSS không thay đổi, giữ nguyên như cũ */-->
-<!--            body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; }-->
-<!--            #messageForm { margin-top: 20px; display: flex; }-->
-<!--            #messageInput { flex-grow: 1; padding: 8px; }-->
-<!--            #messages { display: flex; flex-direction: column-reverse; height: 500px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; }-->
-<!--            .message-wrapper { position: relative; display: flex; flex-direction: column; }-->
-<!--            .message-container { margin: 5px 0; padding: 8px; border-radius: 8px; background-color: #f1f1f1; max-width: 80%; word-wrap: break-word; }-->
-<!--            .message-container.sent { background-color: #dcf8c6; align-self: flex-end; }-->
-<!--            .reactions { margin-top: 5px; }-->
-<!--            .reaction-item { cursor: pointer; display: inline-block; padding: 2px 5px; border-radius: 10px; background: #eee; margin-right: 5px; font-size: 12px; }-->
-<!--            .add-reaction-btn { visibility: hidden; opacity: 0; transition: opacity 0.2s; cursor: pointer; position: absolute; top: -10px; right: 20px; background: white; border-radius: 50%; padding: 2px 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.2); z-index: 10; }-->
-<!--            .message-wrapper:hover .add-reaction-btn { visibility: visible; opacity: 1; }-->
-<!--            .reaction-picker { display: none; position: absolute; top: -30px; right: 40px; background: white; border-radius: 15px; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.3); z-index: 11; }-->
-<!--            .reaction-picker span { cursor: pointer; margin: 0 4px; font-size: 18px; }-->
-<!--        </style>-->
-<!--        <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>-->
-<!--        <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>-->
-<!--    </head>-->
-<!--    <body>-->
-<!--    <h1>Real-time Chat (Conversation #1)</h1>-->
-<!--    <div id="messages"></div>-->
-<!--    <form id="messageForm" name="messageForm">-->
-<!--        <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off"/>-->
-<!--        <button type="submit">Send as Duke (ID=1)</button>-->
-<!--    </form>-->
-
-<!--    <script type="text/javascript">-->
-<!--        // -&#45;&#45; CẤU HÌNH -&#45;&#45;-->
-<!--        const CONVERSATION_ID = 1;-->
-<!--        const CURRENT_USER_ID = 1;-->
-<!--        const messagesArea = document.getElementById('messages');-->
-<!--        const emojiToEnumMap = {'👍': 'LIKE', '❤️': 'LOVE', '😂': 'HAHA', '😢': 'SAD'};-->
-
-<!--        // -&#45;&#45; HÀM TẠO GIAO DIỆN -&#45;&#45;-->
-<!--        function displayMessage(message, prepend = true) {-->
-<!--    const messageWrapper = document.createElement('div');-->
-<!--    messageWrapper.className = 'message-wrapper';-->
-
-<!--    const messageContainer = document.createElement('div');-->
-<!--    messageContainer.id = `message-${message.id}`;-->
-<!--    messageContainer.className = 'message-container';-->
-
-<!--    const contentElement = document.createElement('p');-->
-<!--    contentElement.innerHTML = `<strong>${message.sender.fullName}:</strong> ${message.content || '<em>Tin nhắn đã được thu hồi</em>'}`;-->
-<!--    messageContainer.appendChild(contentElement);-->
-
-<!--    const reactionsContainer = document.createElement('div');-->
-<!--    reactionsContainer.className = 'reactions';-->
-<!--    messageContainer.appendChild(reactionsContainer);-->
-
-<!--    // ❌ BỎ ĐOẠN GỌI displayNewReaction() Ở ĐÂY-->
-
-<!--    const reactionPicker = document.createElement('div');-->
-<!--    reactionPicker.className = 'reaction-picker';-->
-<!--    Object.keys(emojiToEnumMap).forEach(emoji => {-->
-<!--        const emojiSpan = document.createElement('span');-->
-<!--        emojiSpan.innerText = emoji;-->
-<!--        emojiSpan.onclick = () => {-->
-<!--            const enumValue = emojiToEnumMap[emoji];-->
-<!--            addReaction(message.id, enumValue);-->
-<!--            reactionPicker.style.display = 'none';-->
-<!--        };-->
-<!--        reactionPicker.appendChild(emojiSpan);-->
-<!--    });-->
-
-<!--    const addReactionBtn = document.createElement('span');-->
-<!--    addReactionBtn.className = 'add-reaction-btn';-->
-<!--    addReactionBtn.innerText = '🙂';-->
-<!--    addReactionBtn.onclick = () => {-->
-<!--        reactionPicker.style.display = reactionPicker.style.display === 'block' ? 'none' : 'block';-->
-<!--    };-->
-
-<!--    if (message.sender.id === CURRENT_USER_ID) {-->
-<!--        messageContainer.classList.add('sent');-->
-<!--    }-->
-
-<!--    messageWrapper.appendChild(messageContainer);-->
-<!--    messageWrapper.appendChild(addReactionBtn);-->
-<!--    messageWrapper.appendChild(reactionPicker);-->
-
-<!--    if (prepend) {-->
-<!--        messagesArea.prepend(messageWrapper);-->
-<!--    } else {-->
-<!--        messagesArea.appendChild(messageWrapper);-->
-<!--    }-->
-
-<!--    // ✅ GỌI SAU KHI APPEND (DOM đã sẵn sàng)-->
-<!--    if (message.reactions && message.reactions.length > 0) {-->
-<!--        message.reactions.forEach(reaction => displayNewReaction(reaction));-->
-<!--    }-->
-<!--}-->
-
-
-<!--        // ... (các hàm displayNewReaction, removeReactionFromUI, và các hàm gọi API vẫn giữ nguyên) ...-->
-<!--        function displayNewReaction(reaction) {-->
-<!--            const messageContainer = document.getElementById(`message-${reaction.messageId}`);-->
-<!--            if (!messageContainer) return;-->
-<!--            const reactionElement = document.createElement('span');-->
-<!--            reactionElement.className = 'reaction-item';-->
-<!--            reactionElement.id = `reaction-${reaction.id}`;-->
-<!--            const emojiToShow = Object.keys(emojiToEnumMap).find(key => emojiToEnumMap[key] === reaction.reactionType) || reaction.reactionType;-->
-<!--            reactionElement.innerText = emojiToShow;-->
-<!--            if (reaction.userId === CURRENT_USER_ID) {-->
-<!--                 reactionElement.onclick = () => removeReaction(reaction.id);-->
-<!--            }-->
-<!--            messageContainer.querySelector('.reactions').appendChild(reactionElement);-->
-<!--        }-->
-<!--        function removeReactionFromUI(payload) {-->
-<!--            const reactionElement = document.getElementById(`reaction-${payload.reactionId}`);-->
-<!--            if (reactionElement) {-->
-<!--                reactionElement.remove();-->
-<!--            }-->
-<!--        }-->
-<!--        function addReaction(messageId, reactionEnum) {-->
-<!--            fetch('/api/v1/reactions', {-->
-<!--                method: 'POST',-->
-<!--                headers: { 'Content-Type': 'application/json' },-->
-<!--                body: JSON.stringify({ messageId: messageId, userId: CURRENT_USER_ID, reactionType: reactionEnum })-->
-<!--            }).then(res => res.ok ? console.log('Reaction added') : console.error('Failed to add reaction'));-->
-<!--        }-->
-<!--        function removeReaction(reactionId) {-->
-<!--             fetch(`/api/v1/reactions/${reactionId}?userId=${CURRENT_USER_ID}`, {-->
-<!--                method: 'DELETE'-->
-<!--            }).then(res => res.ok ? console.log('Reaction removed') : console.error('Failed to remove reaction'));-->
-<!--        }-->
-<!--        document.getElementById('messageForm').addEventListener('submit', function(event) {-->
-<!--            event.preventDefault();-->
-<!--            const content = document.getElementById('messageInput').value.trim();-->
-<!--            if (content) {-->
-<!--                fetch('/api/v1/messages', {-->
-<!--                    method: 'POST',-->
-<!--                    headers: { 'Content-Type': 'application/json' },-->
-<!--                    body: JSON.stringify({ conversationId: CONVERSATION_ID, senderId: CURRENT_USER_ID, content, messageType: 'TEXT' })-->
-<!--                }).then(() => document.getElementById('messageInput').value = '');-->
-<!--            }-->
-<!--        });-->
-
-<!--        // -&#45;&#45; LOGIC WEBSOCKET -&#45;&#45;-->
-<!--        const socket = new SockJS('/ws');-->
-<!--        const stompClient = Stomp.over(socket);-->
-
-<!--        const onConnected = function() {-->
-<!--            console.log("Đã kết nối thành công đến WebSocket!");-->
-<!--            stompClient.subscribe('/topic/conversation/' + CONVERSATION_ID, onEventReceived);-->
-<!--            loadHistory(); // Gọi hàm tải lịch sử chat-->
-<!--        };-->
-
-<!--        // Hàm tải lịch sử chat-->
-<!--        function loadHistory() {-->
-<!--             fetch(`/api/v1/messages/conversation/${CONVERSATION_ID}?page=0&size=50`)-->
-<!--                .then(res => res.json())-->
-<!--                .then(page => {-->
-<!--                    messagesArea.innerHTML = ''; // Xóa tin nhắn cũ trước khi tải-->
-<!--                    page.content.reverse().forEach(message => displayMessage(message, false));-->
-<!--                });-->
-<!--        }-->
-
-<!--        const onEventReceived = function(payload) {-->
-<!--            // BƯỚC SỬA LỖI 1: ĐẢM BẢO PAYLOAD LÀ WEBSOCKETEVENT-->
-<!--            const event = JSON.parse(payload.body);-->
-<!--            console.log("Received event: ", event);-->
-
-<!--            switch (event.eventType) {-->
-<!--                case "NEW_MESSAGE":-->
-<!--                    displayMessage(event.payload, true); // Sửa lại prepend thành true-->
-<!--                    break;-->
-<!--                case "ADD_REACTION":-->
-<!--                    displayNewReaction(event.payload);-->
-<!--                    break;-->
-<!--                case "REMOVE_REACTION":-->
-<!--                    removeReactionFromUI(event.payload);-->
-<!--                    break;-->
-<!--            }-->
-<!--        };-->
-
-<!--        stompClient.connect({}, onConnected, () => console.error('Lỗi kết nối WebSocket.'));-->
-<!--    </script>-->
-<!--    </body>-->
-<!--    </html>-->
 <!DOCTYPE html>
 <html>
 <head>
     <title>Real-time Chat</title>
     <style>
-        body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; background-color: #f4f4f4; }
-        h1 { text-align: center; color: #333; }
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
         #messages {
             display: flex;
-            flex-direction: column-reverse; /* Tin nhắn mới nhất luôn ở dưới cùng */
+            flex-direction: column;  /* cũ -> mới từ trên xuống */
             height: 500px;
             overflow-y: auto;
             border: 1px solid #ddd;
@@ -199,19 +24,23 @@
             background-color: white;
             border-radius: 8px;
         }
-        .message-wrapper { display: flex; flex-direction: column; margin: 5px 0; }
+        .message-wrapper {
+            display: flex;
+            flex-direction: column;
+            margin: 5px 0;
+        }
         .message-container {
             padding: 8px 12px;
             border-radius: 18px;
             background-color: #e4e6eb;
             max-width: 70%;
             word-wrap: break-word;
-            align-self: flex-start; /* Tin nhắn nhận được nằm bên trái */
+            align-self: flex-start; /* tin nhắn nhận được bên trái */
         }
         .message-container.sent {
             background-color: #0084ff;
             color: white;
-            align-self: flex-end; /* Tin nhắn gửi đi nằm bên phải */
+            align-self: flex-end;   /* tin nhắn của mình bên phải */
         }
         .message-content img.image-message {
             max-width: 100%;
@@ -244,6 +73,7 @@
 </head>
 <body>
 <h1>Conversation #1</h1>
+
 <div id="messages"></div>
 
 <form id="messageForm" name="messageForm">
@@ -257,17 +87,15 @@
 <script>
     // --- ⚙️ CẤU HÌNH ---
     const CONVERSATION_ID = 1;
-    // !! Quan trọng: Thay ID này bằng ID của người dùng đang đăng nhập (đã đổi sang UUID)
-    const CURRENT_USER_ID = '569e6f40-cd87-432a-bfd0-c257b00b0ddf'; // <<< THAY ĐỔI 1
-    // !! Thay URL này nếu Gateway của bạn chạy ở port khác
+    const CURRENT_USER_ID = '569e6f40-cd87-432a-bfd0-c257b00b0ddf';
     const GATEWAY_URL = 'http://localhost:8084';
 
     const messagesArea = document.getElementById('messages');
     const messageInput = document.getElementById('messageInput');
     const imageInput = document.getElementById('imageInput');
 
-    // --- 🎨 HÀM VẼ GIAO DIỆN ---
-    function displayMessage(message, prepend = true) {
+    // --- 🎨 HIỂN THỊ TIN NHẮN ---
+    function displayMessage(message) {
         const wrapper = document.createElement('div');
         wrapper.className = 'message-wrapper';
 
@@ -277,26 +105,26 @@
         const contentDiv = document.createElement('div');
         contentDiv.className = 'message-content';
 
-        // Lấy tên người gửi từ object sender
         const senderInfo = `<strong>${message.sender?.fullName || 'User'}:</strong><br>`;
 
-        // Xử lý hiển thị tùy theo loại tin nhắn
         switch (message.messageType) {
             case 'IMAGE':
                 container.style.padding = '0';
                 container.style.backgroundColor = 'transparent';
                 contentDiv.innerHTML = `<img src="${message.content}" class="image-message" alt="Image message" />`;
                 break;
+
             case 'RECALLED':
                 contentDiv.innerHTML = '<i>Tin nhắn đã được thu hồi</i>';
                 container.style.backgroundColor = 'transparent';
                 container.style.color = '#888';
                 break;
+
             case 'TEXT':
             default:
-                contentDiv.innerHTML = message.content;
-                // Tin nhắn text không cần hiện tên người gửi nếu là của mình
-                if (message.sender?.id !== CURRENT_USER_ID) {
+                if (message.sender?.id === CURRENT_USER_ID) {
+                    contentDiv.textContent = message.content;
+                } else {
                     contentDiv.innerHTML = senderInfo + message.content;
                 }
                 break;
@@ -309,15 +137,14 @@
         container.appendChild(contentDiv);
         wrapper.appendChild(container);
 
-        if (prepend) {
-            messagesArea.prepend(wrapper);
-        } else {
-            messagesArea.appendChild(wrapper);
-        }
+        // thêm xuống cuối
+        messagesArea.appendChild(wrapper);
+
+        // auto scroll xuống cuối
+        messagesArea.scrollTop = messagesArea.scrollHeight;
     }
 
-    // --- 📞 HÀM GỌI API ---
-    // Gửi tin nhắn text
+    // --- 📞 API: GỬI TIN NHẮN TEXT ---
     function sendTextMessage(content) {
         const request = {
             conversationId: CONVERSATION_ID,
@@ -325,17 +152,21 @@
             content: content,
             messageType: 'TEXT'
         };
+
         fetch(`${GATEWAY_URL}/api/message/v1/messages`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(request)
         }).then(response => {
-            if (response.ok) messageInput.value = '';
-            else alert('Gửi tin nhắn thất bại!');
+            if (response.ok) {
+                messageInput.value = '';
+            } else {
+                alert('Gửi tin nhắn thất bại!');
+            }
         });
     }
 
-    // Gửi tin nhắn ảnh
+    // --- 📞 API: GỬI ẢNH ---
     async function sendImageMessage(file) {
         const formData = new FormData();
         formData.append('file', file);
@@ -347,38 +178,50 @@
                 method: 'POST',
                 body: formData
             });
-            if (!response.ok) alert('Gửi ảnh thất bại!');
+            if (!response.ok) {
+                alert('Gửi ảnh thất bại!');
+            }
         } catch (error) {
             console.error('Lỗi khi tải ảnh lên:', error);
             alert('Đã xảy ra lỗi khi gửi ảnh.');
         }
     }
 
-    // Tải lịch sử tin nhắn
+    // --- 📥 TẢI LỊCH SỬ ---
     function loadHistory() {
-    fetch(`${GATEWAY_URL}/api/message/v1/messages/conversation/${CONVERSATION_ID}?page=0&size=50`)
-    .then(res => res.json())
-    .then(page => { // 'page' ở đây bây giờ là một MẢNG (Array)
-        messagesArea.innerHTML = '';
+        fetch(`${GATEWAY_URL}/api/message/v1/messages/conversation/${CONVERSATION_ID}?page=0&size=50`)
+            .then(res => res.json())
+            .then(page => {
+                messagesArea.innerHTML = '';
 
-        // 👇 SỬA Ở ĐÂY: Lặp trực tiếp qua mảng 'page'
-        page.forEach(message => {
-            // Đảm bảo dữ liệu nhất quán trước khi hiển thị
-            const formattedMessage = {
-                ...message,
-                senderId: message.sender?.id,
-                senderFullName: message.sender?.fullName
-            };
-            displayMessage(formattedMessage, false);
-        });
-    })
-    .catch(err => console.error("Lỗi tải lịch sử chat:", err));
-}
+                if (!Array.isArray(page)) {
+                    console.error("Định dạng lịch sử không như mong đợi:", page);
+                    return;
+                }
 
+                // nếu API trả mới->cũ thì đảo lại
+                const ordered = page.slice().reverse();
 
-    // --- ⚡ LOGIC WEBSOCKET ---
+                ordered.forEach(message => {
+                    const formattedMessage = {
+                        ...message,
+                        senderId: message.sender?.id,
+                        senderFullName: message.sender?.fullName
+                    };
+                    displayMessage(formattedMessage);
+                });
+
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+            })
+            .catch(err => console.error("Lỗi tải lịch sử chat:", err));
+    }
+
+    // --- ⚡ WEBSOCKET / STOMP ---
     const socket = new SockJS(`${GATEWAY_URL}/ws`);
     const stompClient = Stomp.over(socket);
+
+    // (tuỳ thích) bật debug STOMP
+    // stompClient.debug = str => console.log("STOMP:", str);
 
     const onConnected = () => {
         console.log("✅ Đã kết nối WebSocket thành công!");
@@ -387,24 +230,37 @@
     };
 
     const onEventReceived = (payload) => {
-        console.log("📥 Nhận được sự kiện mới:", payload.body);
-        const event = JSON.parse(payload.body);
+        console.log("📥 Nhận được sự kiện mới (raw):", payload.body);
 
-        // <<< THAY ĐỔI 2: Sửa logic để khớp với cấu trúc event đã thống nhất
-        if (event.type === "NEW_MESSAGE") {
-            const newMessage = {
-                ...event.payload,
-                senderId: event.payload.sender?.id,
-                senderFullName: event.payload.sender?.fullName
-            };
-            displayMessage(newMessage, true);
-        } else if (event.type === "MESSAGE_RECALLED") {
-            // TODO: Xử lý sự kiện thu hồi tin nhắn
-            console.log("Tin nhắn đã được thu hồi:", event.payload);
-            // Bạn có thể tải lại lịch sử hoặc tìm và cập nhật tin nhắn cụ thể
-            loadHistory();
+        let event;
+        try {
+            event = JSON.parse(payload.body);
+        } catch (e) {
+            console.error("❌ Không parse được JSON:", e);
+            return;
         }
-        // Thêm các `else if` khác cho ADD_REACTION, REMOVE_REACTION...
+
+        // server gửi: { eventType: "NEW_MESSAGE", payload: { ... } }
+        const type = event.eventType || event.type;
+
+        if (type === "NEW_MESSAGE") {
+            const msg = event.payload;
+            const newMessage = {
+                ...msg,
+                senderId: msg.sender?.id,
+                senderFullName: msg.sender?.fullName
+            };
+            displayMessage(newMessage);
+            return;
+        }
+
+        if (type === "MESSAGE_RECALLED") {
+            console.log("Tin nhắn đã được thu hồi:", event.payload);
+            loadHistory();
+            return;
+        }
+
+        console.warn("⚠ Event type không xử lý:", event);
     };
 
     const onConnectionError = (error) => {
@@ -414,7 +270,7 @@
 
     stompClient.connect({}, onConnected, onConnectionError);
 
-    // --- 👂 BẮT SỰ KIỆN TỪ NGƯỜI DÙNG ---
+    // --- 👂 SỰ KIỆN UI ---
     document.getElementById('messageForm').addEventListener('submit', (event) => {
         event.preventDefault();
         const content = messageInput.value.trim();

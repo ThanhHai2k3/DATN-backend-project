@@ -25,6 +25,7 @@ public class NlpController {
 
     @PostMapping("/process-job")
     public ProcessPostResponse processJob(@RequestBody ProcessPostRequest request) {
-        return jobNlpService.processJob(request);
+        return nlpService.processPost(request);
     }
+
 }

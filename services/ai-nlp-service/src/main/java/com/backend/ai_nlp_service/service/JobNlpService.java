@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JobNlpService {
-    private final ProcessPostResponse processJob(ProcessPostRequest req){
-        return null;
-    };
+//    private final ProcessPostResponse processJob(ProcessPostRequest req){
+//        return null;
+//    };
 }
