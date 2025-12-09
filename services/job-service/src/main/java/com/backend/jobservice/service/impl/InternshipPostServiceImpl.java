@@ -22,6 +22,7 @@ import com.backend.jobservice.service.InternshipPostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +47,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     private final ObjectMapper objectMapper;
 
     @Override
+    @PreAuthorize("hasRole('EMPLOYER')")
     public InternshipPostResponse createPost(UUID employerId, InternshipPostRequest request){
         InternshipPost post = internshipPostMapper.toEntity(request);
         post.setPostedBy(employerId);
@@ -196,6 +198,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
 
     @Override
+    @PreAuthorize("hasRole('EMPLOYER')")
     public InternshipPostResponse updatePost(UUID employerId, UUID postId, InternshipPostUpdateRequest request){
         InternshipPost post = internshipPostRepository.findByIdAndPostedBy(postId, employerId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND_OR_FORBIDDEN));
@@ -268,6 +271,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     }
 
     @Override
+    @PreAuthorize("hasRole('EMPLOYER')")
     public void hidePost(UUID employerId, UUID postId){
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
@@ -286,6 +290,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public InternshipPostResponse approvePost(UUID postId, UUID adminId){
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));

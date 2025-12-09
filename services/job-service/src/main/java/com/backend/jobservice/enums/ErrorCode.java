@@ -13,6 +13,8 @@ public enum ErrorCode {
     INVALID_ENUM("SYS_402", "Invalid enum value", HttpStatus.BAD_REQUEST),
     SERVICE_UNAVAILABLE("SYS_403", "Service unavailable", HttpStatus.BAD_GATEWAY),
     INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNAUTHORIZED("401", "UNAUTHORIZED", HttpStatus.UNAUTHORIZED),
+    FORBIDDEN("403", "FORBIDDEN", HttpStatus.FORBIDDEN),
 
     POST_NOT_FOUND_OR_FORBIDDEN("JOB_001", "Internship post not found or employer not allowed", HttpStatus.FORBIDDEN),
     POST_EXPIRED("JOB_002", "This post already expired", HttpStatus.UNAUTHORIZED),

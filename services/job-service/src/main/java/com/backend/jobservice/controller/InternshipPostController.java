@@ -10,6 +10,7 @@ import com.backend.jobservice.service.InternshipPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,11 +25,13 @@ public class InternshipPostController {
     private final InternshipPostService internshipPostService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<InternshipPostResponse>> createPost(@RequestParam("employerId") UUID employerId,
-                                                                          @RequestBody InternshipPostRequest request){
-
-        InternshipPostResponse response = internshipPostService.createPost(employerId, request);
-        log.info("Created internship post by employerId={}, postId={}", employerId, response.getId());
+    public ResponseEntity<ApiResponse<InternshipPostResponse>> createPost(
+            @AuthenticationPrincipal String employerId,
+            @RequestBody InternshipPostRequest request)
+    {
+        UUID employerUUID = UUID.fromString(employerId);
+        InternshipPostResponse response = internshipPostService.createPost(employerUUID, request);
+        log.info("Created internship post by employerId={}, postId={}", employerUUID, response.getId());
 
         return ResponseEntity
                 .status(SuccessCode.POST_CREATED.getStatus())
@@ -41,12 +44,13 @@ public class InternshipPostController {
 
     @PutMapping("/update")
     public ResponseEntity<ApiResponse<InternshipPostResponse>> updatePost(
-            @RequestParam("employerId") UUID employerId,
+            @AuthenticationPrincipal String employerId,
             @RequestParam("postId") UUID postId,
-            @RequestBody InternshipPostUpdateRequest request){
-
-        InternshipPostResponse response = internshipPostService.updatePost(employerId, postId, request);
-        log.info("Updated internship post postId={} by employerId={}", postId, employerId);
+            @RequestBody InternshipPostUpdateRequest request)
+    {
+        UUID employerUUID = UUID.fromString(employerId);
+        InternshipPostResponse response = internshipPostService.updatePost(employerUUID, postId, request);
+        log.info("Updated internship post postId={} by employerId={}", postId, employerUUID);
 
         return ResponseEntity
                 .status(SuccessCode.POST_UPDATED.getStatus())
@@ -59,9 +63,10 @@ public class InternshipPostController {
 
     @GetMapping("/detail")
     public ResponseEntity<ApiResponse<InternshipPostResponse>> getPostDetail(
-            @RequestParam("postId") UUID postId) {
-
+            @RequestParam("postId") UUID postId)
+    {
         InternshipPostResponse response = internshipPostService.getPostDetail(postId);
+
         return ResponseEntity
                 .status(SuccessCode.INTERNSHIP_POST_FETCHED.getStatus())
                 .body(ApiResponse.success(
@@ -73,11 +78,12 @@ public class InternshipPostController {
 
     @PatchMapping("/hide")
     public ResponseEntity<ApiResponse<Void>> hidePost(
-            @RequestParam("employerId") UUID employerId,
-            @RequestParam("postId") UUID postId) {
-
-        internshipPostService.hidePost(employerId, postId);
-        log.info("Hidden internship post postId={} by employerId={}", postId, employerId);
+            @AuthenticationPrincipal String employerId,
+            @RequestParam("postId") UUID postId)
+    {
+        UUID employerUUID = UUID.fromString(employerId);
+        internshipPostService.hidePost(employerUUID, postId);
+        log.info("Hidden internship post postId={} by employerId={}", postId, employerUUID);
 
         return ResponseEntity
                 .status(SuccessCode.POST_HIDDEN.getStatus())
@@ -90,11 +96,12 @@ public class InternshipPostController {
 
     @PatchMapping("/approve")
     public ResponseEntity<ApiResponse<InternshipPostResponse>> approvePost(
-            @RequestParam("adminId") UUID adminId,
-            @RequestParam("postId") UUID postId) {
-
-        InternshipPostResponse response = internshipPostService.approvePost(postId, adminId);
-        log.info("Admin {} approved post {}", adminId, postId);
+            @AuthenticationPrincipal String adminId,
+            @RequestParam("postId") UUID postId)
+    {
+        UUID adminUUID = UUID.fromString(adminId);
+        InternshipPostResponse response = internshipPostService.approvePost(postId, adminUUID);
+        log.info("Admin {} approved post {}", adminUUID, postId);
 
         return ResponseEntity
                 .status(SuccessCode.POST_APPROVED.getStatus())
@@ -110,8 +117,8 @@ public class InternshipPostController {
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
             @RequestParam(value = "workMode", required = false) String workMode,
             @RequestParam(value = "skillId", required = false) UUID skillId,
-            @RequestParam(value = "companyId", required = false) UUID companyId) {
-
+            @RequestParam(value = "companyId", required = false) UUID companyId)
+    {
         List<InternshipPostSummaryResponse> result = internshipPostService.searchPosts(keyword, workMode, skillId, companyId);
 
         return ResponseEntity
