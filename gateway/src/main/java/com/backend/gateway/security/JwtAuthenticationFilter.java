@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -20,17 +21,31 @@ import java.util.UUID;
 public class JwtAuthenticationFilter implements GlobalFilter {
 
     private final JwtUtils jwtUtils;
+    private final AntPathMatcher matcher = new AntPathMatcher();
 
     // Những route không cần JWT
     private static final List<String> WHITELIST = List.of(
+            // Auth public
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/refresh",
             "/api/auth/logout",
-            "/api/internship-post/detail",
-            "/api/internship-post/search",
+
+            // Job public
+            "/api/internship-post/detail/**",
+            "/api/internship-post/search/**",
+
+            // Skill public
+            "/GET:/api/skill/v1/categories/**",
+            "/GET:/api/skill/v1/skills/**",
+            "/GET:/api/skill/v1/skills/search/**",
+            "/GET:/api/skill/v1/skills/category/**",
+
+            // Swagger
             "/swagger-ui/**",
             "/v3/api-docs/**",
+
+            // System
             "/error",
             "/favicon.ico"
     );
@@ -42,7 +57,9 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         log.info("➡️ Incoming request: {}", path);
 
         // 1. Nếu request nằm trong whitelist -> bỏ qua JWT check
-        if (isWhitelisted(path)) {
+        String method = exchange.getRequest().getMethod().name();
+
+        if (isWhitelisted(path, method)) {
             return chain.filter(exchange);
         }
 
@@ -85,8 +102,15 @@ public class JwtAuthenticationFilter implements GlobalFilter {
         return chain.filter(modifiedExchange);
     }
 
-    private boolean isWhitelisted(String path) {
-        return WHITELIST.stream().anyMatch(path::startsWith);
+    private boolean isWhitelisted(String path, String method) {
+        return WHITELIST.stream().anyMatch(pattern -> {
+            if (pattern.startsWith("/GET:")) {
+                // whitelist GET only
+                String realPattern = pattern.substring(5);
+                return method.equals("GET") && matcher.match(realPattern, path);
+            }
+            return matcher.match(pattern, path);
+        });
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange, String message) {

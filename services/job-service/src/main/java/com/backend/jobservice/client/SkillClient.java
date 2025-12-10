@@ -11,6 +11,6 @@ import java.util.UUID;
 @FeignClient(name = "skill-service", url = "${services.skill.base-url}")
 public interface SkillClient {
 
-    @GetMapping("/api/skills/{id}")
+    @GetMapping("/api/skill/v1/skills/{id}")
     ApiResponse<SkillResponse> getSkillById(@PathVariable("id") UUID id);
 }

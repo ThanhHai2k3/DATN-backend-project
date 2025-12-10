@@ -18,6 +18,7 @@ public enum ErrorCode {
     VALIDATION_FAILED("SYS_400", "Request validation failed", HttpStatus.BAD_REQUEST),
     INVALID_UUID("SYS_401", "Invalid UUID", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    FORBIDDEN("403", "FORBIDDEN", HttpStatus.FORBIDDEN),
     ;
 
     private final String code;

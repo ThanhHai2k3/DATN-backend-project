@@ -13,6 +13,7 @@ import com.backend.skillservice.repository.SkillCategoryRepository;
 import com.backend.skillservice.repository.SkillRepository;
 import com.backend.skillservice.service.SkillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class SkillServiceImpl implements SkillService {
     private final SkillCategoryMapper categoryMapper;
 
     @Override
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public SkillResponse createSkill(CreateSkillRequest request){
         if(skillRepository.findByNameIgnoreCase(request.getName()).isPresent()){
             throw new AppException(ErrorCode.SKILL_ALREADY_EXIST);
@@ -45,6 +47,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public SkillResponse updateSkill(UUID id, UpdateSkillRequest request){
         Skill skill = skillRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SKILL_NOT_FOUND));
@@ -69,6 +72,7 @@ public class SkillServiceImpl implements SkillService {
     }
 
     @Override
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public void deleteSkill(UUID id) {
         Skill skill = skillRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.SKILL_NOT_FOUND));
