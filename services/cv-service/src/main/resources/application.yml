@@ -51,4 +51,4 @@ aws:
   access-key-id: ${AWS_ACCESS_KEY_ID}
   secret-access-key: ${AWS_SECRET_ACCESS_KEY}
 
-URL_AI_NLP: http://localhost:8086
+URL_AI_NLP: http://localhost:8087

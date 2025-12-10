@@ -31,4 +31,4 @@ services:
   skill:
     base-url: http://localhost:8086
 
-URL_AI_NLP: http://localhost:8086
+URL_AI_NLP: http://localhost:8087
