@@ -121,6 +121,138 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         fillSkillNames(response.getSkills());
         return response;
     }
+
+    @Override
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public InternshipPostResponse updatePost(UUID employerId, UUID postId, InternshipPostUpdateRequest request){
+        InternshipPost post = internshipPostRepository.findByIdAndPostedBy(postId, employerId)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND_OR_FORBIDDEN));
+
+        if(post.getStatus().equals(PostStatus.EXPIRED)){
+            throw new AppException(ErrorCode.POST_EXPIRED);
+        }
+
+        internshipPostMapper.updateEntityFromDto(request, post);
+        post.setUpdatedAt(Instant.now());
+
+        if (post.getStatus().equals(PostStatus.ACTIVE)) {
+            post.setStatus(PostStatus.PENDING);
+        }
+
+        List<JobSkill> newSkills = new ArrayList<>();
+
+        if (request.getSkills() != null) {
+            // Xóa toàn bộ skill cũ trong entity
+            post.getJobSkills().clear();
+
+            // Xóa trong DB
+            jobSkillRepository.deleteByInternshipPostId(post.getId());
+
+            for(JobSkillRequest skillRequest : request.getSkills()){
+                if(skillRequest.getSkillId() == null){
+                    throw new AppException(ErrorCode.SKILL_ID_REQUIRED);
+                }
+
+                UUID skillId;
+                try{
+                    skillId = UUID.fromString(skillRequest.getSkillId());
+                } catch (Exception e){
+                    throw new AppException(ErrorCode.INVALID_UUID);
+                }
+
+                ApiResponse<SkillResponse> api = skillClient.getSkillById(skillId);
+                SkillResponse skillResponse = api.getData();
+                if (skillResponse == null) {
+                    throw new AppException(ErrorCode.SKILL_NOT_FOUND);
+                }
+
+                JobSkill jobSkill = new JobSkill();
+                jobSkill.setSkillId(skillId);
+                jobSkill.setInternshipPost(post);
+                jobSkill.setImportanceLevel(skillRequest.getImportanceLevel());
+                jobSkill.setNote(skillRequest.getNote());
+
+                newSkills.add(jobSkill);
+            }
+            post.getJobSkills().addAll(newSkills);
+            jobSkillRepository.saveAll(newSkills);
+        }
+
+        InternshipPostResponse response = internshipPostMapper.toResponse(post);
+        fillSkillNames(response.getSkills());
+        return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public InternshipPostResponse getPostDetail(UUID postId){
+        InternshipPost post = internshipPostRepository.findByIdAndStatus(postId, PostStatus.ACTIVE)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        InternshipPostResponse response = internshipPostMapper.toResponse(post);
+        fillSkillNames(response.getSkills());
+
+        return response;
+    }
+
+    @Override
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public void hidePost(UUID employerId, UUID postId){
+        InternshipPost post = internshipPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        if (!post.getPostedBy().equals(employerId)) {
+            throw new AppException(ErrorCode.HIDE_POST_DENIED);
+        }
+
+        if(post.getStatus().equals(PostStatus.HIDDEN)){
+            throw new AppException(ErrorCode.POST_ALREADY_HIDDEN);
+        }
+
+        post.setStatus(PostStatus.HIDDEN);
+        post.setUpdatedAt(Instant.now());
+        internshipPostRepository.save(post);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public InternshipPostResponse approvePost(UUID postId, UUID adminId){
+        InternshipPost post = internshipPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        post.setStatus(PostStatus.ACTIVE);
+        post.setUpdatedAt(Instant.now());
+        InternshipPost saved = internshipPostRepository.save(post);
+
+        // TODO: gửi notification tới Employer
+        InternshipPostResponse response = internshipPostMapper.toResponse(saved);
+        fillSkillNames(response.getSkills());
+
+        return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId){
+        List<InternshipPost> found = internshipPostRepository
+                .findByTitleContainingIgnoreCaseAndStatus(keyword, PostStatus.ACTIVE);
+
+        // TODO: mở rộng filter workMode, skillId, companyId
+        return internshipPostMapper.toSummaryResponseList(found);
+    }
+
+    private void fillSkillNames(List<JobSkillResponse> skills) {
+        if (skills == null) return;
+
+        for (JobSkillResponse js : skills) {
+            ApiResponse<SkillResponse> api = skillClient.getSkillById(js.getSkillId());
+            SkillResponse skill = api.getData();
+            if (skill != null) {
+                js.setSkillName(skill.getName());
+            }
+        }
+    }
+
     private ProcessPostRequest buildProcessPostRequest(InternshipPost post,
                                                        InternshipPostRequest originalReq) {
 
@@ -194,137 +326,5 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         post.setNlpStatus("DONE");
         post.setNlpError(null);
         post.setProcessedAt(res.getProcessedAt());
-    }
-
-
-    @Override
-    @PreAuthorize("hasRole('EMPLOYER')")
-    public InternshipPostResponse updatePost(UUID employerId, UUID postId, InternshipPostUpdateRequest request){
-        InternshipPost post = internshipPostRepository.findByIdAndPostedBy(postId, employerId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND_OR_FORBIDDEN));
-
-        if(post.getStatus().equals(PostStatus.EXPIRED)){
-            throw new AppException(ErrorCode.POST_EXPIRED);
-        }
-
-        internshipPostMapper.updateEntityFromDto(request, post);
-        post.setUpdatedAt(Instant.now());
-
-        if (post.getStatus().equals(PostStatus.ACTIVE)) {
-            post.setStatus(PostStatus.PENDING);
-        }
-
-        List<JobSkill> newSkills = new ArrayList<>();
-
-        if (request.getSkills() != null) {
-            // Xóa toàn bộ skill cũ trong entity
-            post.getJobSkills().clear();
-
-            // Xóa trong DB
-            jobSkillRepository.deleteByInternshipPostId(post.getId());
-
-            for(JobSkillRequest skillRequest : request.getSkills()){
-                if(skillRequest.getSkillId() == null){
-                    throw new AppException(ErrorCode.SKILL_ID_REQUIRED);
-                }
-
-                UUID skillId;
-                try{
-                    skillId = UUID.fromString(skillRequest.getSkillId());
-                } catch (Exception e){
-                    throw new AppException(ErrorCode.INVALID_UUID);
-                }
-
-                ApiResponse<SkillResponse> api = skillClient.getSkillById(skillId);
-                SkillResponse skillResponse = api.getData();
-                if (skillResponse == null) {
-                    throw new AppException(ErrorCode.SKILL_NOT_FOUND);
-                }
-
-                JobSkill jobSkill = new JobSkill();
-                jobSkill.setSkillId(skillId);
-                jobSkill.setInternshipPost(post);
-                jobSkill.setImportanceLevel(skillRequest.getImportanceLevel());
-                jobSkill.setNote(skillRequest.getNote());
-
-                newSkills.add(jobSkill);
-            }
-            post.getJobSkills().addAll(newSkills);
-            jobSkillRepository.saveAll(newSkills);
-        }
-
-        InternshipPostResponse response = internshipPostMapper.toResponse(post);
-        fillSkillNames(response.getSkills());
-        return response;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public InternshipPostResponse getPostDetail(UUID postId){
-        InternshipPost post = internshipPostRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-
-        InternshipPostResponse response = internshipPostMapper.toResponse(post);
-        fillSkillNames(response.getSkills());
-
-        return response;
-    }
-
-    @Override
-    @PreAuthorize("hasRole('EMPLOYER')")
-    public void hidePost(UUID employerId, UUID postId){
-        InternshipPost post = internshipPostRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-
-        if (!post.getPostedBy().equals(employerId)) {
-            throw new AppException(ErrorCode.HIDE_POST_DENIED);
-        }
-
-        if(post.getStatus().equals(PostStatus.HIDDEN)){
-            throw new AppException(ErrorCode.POST_ALREADY_HIDDEN);
-        }
-
-        post.setStatus(PostStatus.HIDDEN);
-        post.setUpdatedAt(Instant.now());
-        internshipPostRepository.save(post);
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public InternshipPostResponse approvePost(UUID postId, UUID adminId){
-        InternshipPost post = internshipPostRepository.findById(postId)
-                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-
-        post.setStatus(PostStatus.ACTIVE);
-        post.setUpdatedAt(Instant.now());
-        InternshipPost saved = internshipPostRepository.save(post);
-
-        // TODO: gửi notification tới Employer
-        InternshipPostResponse response = internshipPostMapper.toResponse(saved);
-        fillSkillNames(response.getSkills());
-
-        return response;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId){
-        List<InternshipPost> found = internshipPostRepository
-                .findByTitleContainingIgnoreCaseAndStatus(keyword, PostStatus.ACTIVE);
-
-        // TODO: mở rộng filter workMode, skillId, companyId
-        return internshipPostMapper.toSummaryResponseList(found);
-    }
-
-    private void fillSkillNames(List<JobSkillResponse> skills) {
-        if (skills == null) return;
-
-        for (JobSkillResponse js : skills) {
-            ApiResponse<SkillResponse> api = skillClient.getSkillById(js.getSkillId());
-            SkillResponse skill = api.getData();
-            if (skill != null) {
-                js.setSkillName(skill.getName());
-            }
-        }
     }
 }

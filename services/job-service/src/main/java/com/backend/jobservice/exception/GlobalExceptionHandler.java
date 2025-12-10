@@ -8,6 +8,8 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -105,6 +107,17 @@ public class GlobalExceptionHandler {
                         ErrorCode.SERVICE_UNAVAILABLE.getMessage()
                 ));
     }
+
+    @ExceptionHandler({ AccessDeniedException.class, AuthorizationDeniedException.class })
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(Exception ex) {
+        return ResponseEntity
+                .status(ErrorCode.FORBIDDEN.getStatus())
+                .body(ApiResponse.error(
+                        ErrorCode.FORBIDDEN.getCode(),
+                        "Access denied for this action"
+                ));
+    }
+
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGeneralException(Exception exception){

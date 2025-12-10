@@ -27,6 +27,8 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             "/api/auth/register",
             "/api/auth/refresh",
             "/api/auth/logout",
+            "/api/internship-post/detail",
+            "/api/internship-post/search",
             "/swagger-ui/**",
             "/v3/api-docs/**",
             "/error",
@@ -79,7 +81,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
                 .build();
 
         ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
-
+        log.info("Forwarding X-User-Id = {}", userId);
         return chain.filter(modifiedExchange);
     }
 

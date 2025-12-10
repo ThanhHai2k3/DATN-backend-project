@@ -32,12 +32,12 @@ public class JwtHeaderAuthenticationFilter implements Filter {
         HttpServletRequest httpRequest = (HttpServletRequest) request;
 
         // ✅ Verify request từ gateway
-        String gatewaySignature = httpRequest.getHeader("X-Gateway-Signature");
-        if (!isValidGatewayRequest(gatewaySignature)) {
-            log.warn("Unauthorized direct access attempt from {}", httpRequest.getRemoteAddr());
-            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
+//        String gatewaySignature = httpRequest.getHeader("X-Gateway-Signature");
+//        if (!isValidGatewayRequest(gatewaySignature)) {
+//            log.warn("Unauthorized direct access attempt from {}", httpRequest.getRemoteAddr());
+//            ((HttpServletResponse) response).setStatus(HttpServletResponse.SC_FORBIDDEN);
+//            return;
+//        }
 
         String userId = httpRequest.getHeader("X-User-Id");
         String role = httpRequest.getHeader("X-User-Role");

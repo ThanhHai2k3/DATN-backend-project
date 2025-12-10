@@ -1,5 +1,6 @@
 server:
   port: 8080
+  forward-headers-strategy: framework
 
 app:
   jwt:
@@ -8,9 +9,12 @@ app:
 spring:
   application:
     name: gateway
+
   cloud:
     gateway:
+      forwarded-headers-strategy: framework
       default-filters:
+        - PreserveHostHeader
         - AddResponseHeader=X-Gateway, InternshipGateway
       routes:
         - id: auth-service
@@ -22,11 +26,15 @@ spring:
           uri: http://localhost:8082
           predicates:
             - Path=/api/profile/**
+          filters:
+            - PreserveHostHeader
 
         - id: job-service
           uri: http://localhost:8083
           predicates:
-            - Path=/api/job/**
+            - Path=/api/internship-post/**
+          filters:
+            - PreserveHostHeader
 
         - id: message-service
           uri: http://localhost:8084
@@ -34,6 +42,7 @@ spring:
             - Path=/api/message/**
           filters:
             - StripPrefix=1
+            - PreserveHostHeader
 
         - id: cv-service
           uri: http://localhost:8085
@@ -41,3 +50,11 @@ spring:
             - Path=/api/cv/**
           filters:
             - StripPrefix=1
+            - PreserveHostHeader
+
+        - id: skill-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/skill/**
+          filters:
+            - PreserveHostHeader
