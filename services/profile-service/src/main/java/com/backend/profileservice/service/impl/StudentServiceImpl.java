@@ -11,6 +11,7 @@ import com.backend.profileservice.repository.*;
 import com.backend.profileservice.service.StudentService;
 import com.backend.profileservice.service.StudentSkillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,10 +26,12 @@ public class StudentServiceImpl implements StudentService {
     private final StudentMapper studentMapper;
     private final StudentSkillService studentSkillService;
 
+    // SELF PROFILE
     @Override
     @Transactional(readOnly = true)
+    @PreAuthorize("isAuthenticated()")
     public StudentResponse getByUserId(UUID userId){
-        Student profile = studentRepository.findByUserId(userId)
+        Student profile = studentRepository.findByUserIdWithAllRelations(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
 
         StudentResponse response = studentMapper.toResponse(profile);
@@ -39,6 +42,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public StudentResponse updateProfile(UUID userId, StudentUpdateRequest request){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -54,6 +58,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public VisibilityResponse updateVisibility(UUID userId, boolean isPublic) {
 
         Student student = studentRepository.findByUserId(userId)
@@ -66,6 +71,26 @@ public class StudentServiceImpl implements StudentService {
                 .studentId(saved.getId())
                 .publicProfile(saved.isPublicProfile())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("isAuthenticated()")
+    public StudentResponse getPublicProfile(UUID viewerUserId, UUID targetUserId) {
+
+        Student student = studentRepository.findByUserIdWithAllRelations(targetUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
+
+        boolean isOwner = student.getUserId().equals(viewerUserId);
+
+        if (!student.isPublicProfile() && !isOwner) {
+            throw new AppException(ErrorCode.PROFILE_NOT_PUBLIC);
+        }
+
+        StudentResponse response = studentMapper.toResponse(student);
+        response.setSkills(studentSkillService.getAllByStudent(targetUserId));
+
+        return response;
     }
 
     @Override

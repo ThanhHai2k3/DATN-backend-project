@@ -12,6 +12,7 @@ import com.backend.profileservice.repository.ExperienceRepository;
 import com.backend.profileservice.repository.StudentRepository;
 import com.backend.profileservice.service.ExperienceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     private final StudentRepository studentRepository;
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ExperienceResponse create(UUID userId, ExperienceCreateRequest request){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -39,6 +41,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ExperienceResponse update(UUID userId, UUID experienceId, ExperienceUpdateRequest request){
         Experience exp = experienceRepository.findByIdAndStudentUserId(experienceId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EXPERIENCE_NOT_FOUND));
@@ -50,6 +53,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<ExperienceResponse> getAllByStudent(UUID userId){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -61,6 +65,7 @@ public class ExperienceServiceImpl implements ExperienceService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public void delete(UUID userId, UUID experienceId){
         Experience exp = experienceRepository.findByIdAndStudentUserId(experienceId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EXPERIENCE_NOT_FOUND));

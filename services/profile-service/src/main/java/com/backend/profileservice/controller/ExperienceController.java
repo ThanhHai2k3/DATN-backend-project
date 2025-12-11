@@ -8,6 +8,7 @@ import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.ExperienceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,14 +21,9 @@ public class ExperienceController {
 
     private final ExperienceService experienceService;
 
-//    private UUID getFakeUserId() {
-//        // TODO: dùng JWT sau
-//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-//    }
-
     // POST /api/students/me/experiences
     @PostMapping
-    public ResponseEntity<ApiResponse<ExperienceResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<ExperienceResponse>> create(@AuthenticationPrincipal String userIdHeader,
                                                                   @RequestBody ExperienceCreateRequest request)
     {
         UUID userId = UUID.fromString(userIdHeader);
@@ -44,7 +40,7 @@ public class ExperienceController {
 
     // PUT /api/students/me/experiences/{experienceId}
     @PutMapping("/{experienceId}")
-    public ResponseEntity<ApiResponse<ExperienceResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<ExperienceResponse>> update(@AuthenticationPrincipal String userIdHeader,
                                                                   @PathVariable("experienceId") UUID experienceId,
                                                                   @RequestBody ExperienceUpdateRequest request)
     {
@@ -62,7 +58,7 @@ public class ExperienceController {
 
     // GET /api/students/me/experiences
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ExperienceResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+    public ResponseEntity<ApiResponse<List<ExperienceResponse>>> getAll(@AuthenticationPrincipal String userIdHeader) {
         UUID userId = UUID.fromString(userIdHeader);
         List<ExperienceResponse> list = experienceService.getAllByStudent(userId);
 
@@ -77,7 +73,7 @@ public class ExperienceController {
 
     // DELETE /api/students/me/experiences/{experienceId}
     @DeleteMapping("/{experienceId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal String userIdHeader,
                                                     @PathVariable("experienceId") UUID experienceId)
     {
         UUID userId = UUID.fromString(userIdHeader);

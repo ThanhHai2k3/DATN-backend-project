@@ -8,6 +8,7 @@ import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.StudentSkillService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,13 +21,9 @@ public class StudentSkillController {
 
     private final StudentSkillService studentSkillService;
 
-//    private UUID getFakeUserId() {
-//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-//    }
-
     // POST /api/students/me/skills
     @PostMapping
-    public ResponseEntity<ApiResponse<StudentSkillResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<StudentSkillResponse>> create(@AuthenticationPrincipal String userIdHeader,
                                                                     @RequestBody StudentSkillCreateRequest request)
     {
         UUID userId = UUID.fromString(userIdHeader);
@@ -44,7 +41,7 @@ public class StudentSkillController {
     // Update skill level/years/note
     // PUT /api/students/me/skills/{skillId}
     @PutMapping("/{studentSkillId}")
-    public ResponseEntity<ApiResponse<StudentSkillResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<StudentSkillResponse>> update(@AuthenticationPrincipal String userIdHeader,
                                                                     @PathVariable("studentSkillId") UUID studentSkillId,
                                                                     @RequestBody StudentSkillUpdateRequest request)
     {
@@ -62,7 +59,7 @@ public class StudentSkillController {
 
     // GET /api/students/me/skills
     @GetMapping
-    public ResponseEntity<ApiResponse<List<StudentSkillResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+    public ResponseEntity<ApiResponse<List<StudentSkillResponse>>> getAll(@AuthenticationPrincipal String userIdHeader) {
         UUID userId = UUID.fromString(userIdHeader);
         List<StudentSkillResponse> list = studentSkillService.getAllByStudent(userId);
 
@@ -77,7 +74,7 @@ public class StudentSkillController {
 
     // DELETE /api/students/me/skills/{skillId}
     @DeleteMapping("/{studentSkillId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal String userIdHeader,
                                                     @PathVariable("studentSkillId") UUID studentSkillId)
     {
         UUID userId = UUID.fromString(userIdHeader);

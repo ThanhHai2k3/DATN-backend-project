@@ -22,7 +22,7 @@ public enum ErrorCode {
     SOCIAL_LINK_NOT_FOUND("STU_005", "Social link not found", HttpStatus.NOT_FOUND),
     STUDENT_SKILL_EXISTS("STU_006", "Student already have this skill", HttpStatus.BAD_REQUEST),
     STUDENT_SKILL_NOT_FOUND("STU_007", "Student don't have that skill", HttpStatus.BAD_REQUEST),
-
+    PROFILE_NOT_PUBLIC("STU_008", "Profile is private", HttpStatus.FORBIDDEN),
 
     SKILL_NOT_FOUND("SK_001", "Skill not found", HttpStatus.NOT_FOUND),
     CATEGORY_REQUIRED("SK_002", "Category required for new skill", HttpStatus.BAD_REQUEST),

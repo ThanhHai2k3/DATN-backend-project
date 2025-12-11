@@ -12,6 +12,7 @@ import com.backend.profileservice.repository.EducationRepository;
 import com.backend.profileservice.repository.StudentRepository;
 import com.backend.profileservice.service.EducationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class EducationServiceImpl implements EducationService {
     private final StudentRepository studentRepository;
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public EducationResponse create(UUID userId, EducationCreateRequest request){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -39,6 +41,8 @@ public class EducationServiceImpl implements EducationService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
+    // chỉ cần check login chưa, không cần check role vì findByIdAndStudentUserId đã check self-permission
     public EducationResponse update(UUID userId, UUID educationId, EducationUpdateRequest request){
         Education education = educationRepository.findByIdAndStudentUserId(educationId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EDUCATION_NOT_FOUND));
@@ -50,6 +54,7 @@ public class EducationServiceImpl implements EducationService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<EducationResponse> getAllByStudent(UUID userId){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -61,6 +66,7 @@ public class EducationServiceImpl implements EducationService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public void delete(UUID userId, UUID educationId){
         Education education = educationRepository.findByIdAndStudentUserId(educationId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EDUCATION_NOT_FOUND));

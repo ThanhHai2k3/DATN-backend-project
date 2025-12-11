@@ -8,6 +8,7 @@ import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.EducationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,18 +21,9 @@ public class EducationController {
 
     private final EducationService educationService;
 
-    //Fake userId for testing before JWT integration
-//    private UUID getFakeUserId() {
-//        // TODO: dùng JWT sau
-//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-//    }
-    private UUID getUserIdFromHeader(String userIdHeader) {
-        return UUID.fromString(userIdHeader);
-    }
-
     // POST /api/students/me/educations
     @PostMapping
-    public ResponseEntity<ApiResponse<EducationResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<EducationResponse>> create(@AuthenticationPrincipal String userIdHeader,
                                                                  @RequestBody EducationCreateRequest request)
     {
         UUID userId = UUID.fromString(userIdHeader);
@@ -48,7 +40,7 @@ public class EducationController {
 
     // PUT /api/students/me/educations/{educationId}
     @PutMapping("/{educationId}")
-    public ResponseEntity<ApiResponse<EducationResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<EducationResponse>> update(@AuthenticationPrincipal String userIdHeader,
                                                                  @PathVariable("educationId") UUID educationId,
                                                                  @RequestBody EducationUpdateRequest request
     ) {
@@ -66,7 +58,7 @@ public class EducationController {
 
     // GET /api/students/me/educations
     @GetMapping
-    public ResponseEntity<ApiResponse<List<EducationResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader){
+    public ResponseEntity<ApiResponse<List<EducationResponse>>> getAll(@AuthenticationPrincipal String userIdHeader){
         UUID userId = UUID.fromString(userIdHeader);
         List<EducationResponse> educations = educationService.getAllByStudent(userId);
 
@@ -81,7 +73,7 @@ public class EducationController {
 
     // DELETE /api/students/me/educations/{educationId}
     @DeleteMapping("/{educationId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal String userIdHeader,
                                                     @PathVariable("educationId") UUID educationId)
     {
         UUID userId = UUID.fromString(userIdHeader);

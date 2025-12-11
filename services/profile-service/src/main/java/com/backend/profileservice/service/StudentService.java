@@ -14,5 +14,7 @@ public interface StudentService {
 
     VisibilityResponse updateVisibility(UUID userId, boolean isPublic);
 
+    StudentResponse getPublicProfile(UUID viewerUserId, UUID targetUserId);
+
     void autoCreateProfile(UUID userId, String fullName);
 }

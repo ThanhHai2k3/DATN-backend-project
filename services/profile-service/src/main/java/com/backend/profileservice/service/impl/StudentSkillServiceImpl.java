@@ -16,6 +16,7 @@ import com.backend.profileservice.repository.StudentRepository;
 import com.backend.profileservice.repository.StudentSkillRepository;
 import com.backend.profileservice.service.StudentSkillService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class StudentSkillServiceImpl implements StudentSkillService {
     private final SkillClient skillClient;
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public StudentSkillResponse create(UUID userId, StudentSkillCreateRequest request){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -52,6 +54,7 @@ public class StudentSkillServiceImpl implements StudentSkillService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public StudentSkillResponse update (UUID userId, UUID studentSkillId, StudentSkillUpdateRequest request){
         StudentSkill studentSkill = studentSkillRepository.findByIdAndStudentUserId(studentSkillId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_SKILL_NOT_FOUND));
@@ -68,6 +71,7 @@ public class StudentSkillServiceImpl implements StudentSkillService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public void delete(UUID userId, UUID studentSkillId){
         StudentSkill studentSkill = studentSkillRepository.findByIdAndStudentUserId(studentSkillId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_SKILL_NOT_FOUND));
@@ -76,6 +80,7 @@ public class StudentSkillServiceImpl implements StudentSkillService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<StudentSkillResponse> getAllByStudent(UUID userId){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));

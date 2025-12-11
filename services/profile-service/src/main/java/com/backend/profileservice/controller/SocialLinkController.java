@@ -8,6 +8,7 @@ import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.SocialLinkService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,14 +21,9 @@ public class SocialLinkController {
 
     private final SocialLinkService socialLinkService;
 
-//    private UUID getFakeUserId() {
-//        // TODO: dùng JWT sau
-//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-//    }
-
     // POST /api/students/me/social-links
     @PostMapping
-    public ResponseEntity<ApiResponse<SocialLinkResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<SocialLinkResponse>> create(@AuthenticationPrincipal String userIdHeader,
                                                                   @RequestBody SocialLinkCreateRequest request)
     {
         UUID userId = UUID.fromString(userIdHeader);
@@ -44,7 +40,7 @@ public class SocialLinkController {
 
     // PUT /api/students/me/social-links/{linkId}
     @PutMapping("/{linkId}")
-    public ResponseEntity<ApiResponse<SocialLinkResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<SocialLinkResponse>> update(@AuthenticationPrincipal String userIdHeader,
                                                                   @PathVariable("linkId") UUID linkId,
                                                                   @RequestBody SocialLinkUpdateRequest request)
     {
@@ -62,7 +58,7 @@ public class SocialLinkController {
 
     // GET /api/students/me/social-links
     @GetMapping
-    public ResponseEntity<ApiResponse<List<SocialLinkResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+    public ResponseEntity<ApiResponse<List<SocialLinkResponse>>> getAll(@AuthenticationPrincipal String userIdHeader) {
         UUID userId = UUID.fromString(userIdHeader);
         List<SocialLinkResponse> list = socialLinkService.getAllByStudent(userId);
 
@@ -77,7 +73,7 @@ public class SocialLinkController {
 
     // DELETE /api/students/me/social-links/{linkId}
     @DeleteMapping("/{linkId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal String userIdHeader,
                                                     @PathVariable("linkId") UUID linkId)
     {
         UUID userId = UUID.fromString(userIdHeader);

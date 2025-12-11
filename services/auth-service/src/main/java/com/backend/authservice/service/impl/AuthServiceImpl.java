@@ -93,7 +93,7 @@ public class AuthServiceImpl implements AuthService {
             String url;
 
             if (user.getRole() == Role.STUDENT) {
-                url = baseUrl + "/v2/students/me/auto-create";
+                url = baseUrl + "/v2/students/auto-create";
             } else if (user.getRole() == Role.EMPLOYER) {
                 url = baseUrl + "/v1/employers/auto-create";
             } else {

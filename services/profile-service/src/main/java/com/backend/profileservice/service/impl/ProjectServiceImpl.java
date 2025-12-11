@@ -12,6 +12,7 @@ import com.backend.profileservice.repository.ProjectRepository;
 import com.backend.profileservice.repository.StudentRepository;
 import com.backend.profileservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class ProjectServiceImpl implements ProjectService {
     private final StudentRepository studentRepository;
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ProjectResponse create(UUID userId, ProjectCreateRequest request){
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -39,6 +41,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public ProjectResponse update(UUID userId, UUID projectId, ProjectUpdateRequest request) {
         Project project = projectRepository.findByIdAndStudentUserId(projectId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));
@@ -50,6 +53,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<ProjectResponse> getAllByStudent(UUID userId) {
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -61,6 +65,7 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public void delete(UUID userId, UUID projectId) {
         Project project = projectRepository.findByIdAndStudentUserId(projectId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROJECT_NOT_FOUND));

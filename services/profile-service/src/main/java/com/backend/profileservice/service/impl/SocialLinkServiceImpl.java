@@ -12,6 +12,7 @@ import com.backend.profileservice.repository.SocialLinkRepository;
 import com.backend.profileservice.repository.StudentRepository;
 import com.backend.profileservice.service.SocialLinkService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class SocialLinkServiceImpl implements SocialLinkService {
     private final StudentRepository studentRepository;
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public SocialLinkResponse create(UUID userId, SocialLinkCreateRequest request) {
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -39,6 +41,7 @@ public class SocialLinkServiceImpl implements SocialLinkService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public SocialLinkResponse update(UUID userId, UUID linkId, SocialLinkUpdateRequest request) {
         SocialLink link = socialLinkRepository.findByIdAndStudentUserId(linkId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.SOCIAL_LINK_NOT_FOUND));
@@ -50,6 +53,7 @@ public class SocialLinkServiceImpl implements SocialLinkService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public List<SocialLinkResponse> getAllByStudent(UUID userId) {
         Student student = studentRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
@@ -61,6 +65,7 @@ public class SocialLinkServiceImpl implements SocialLinkService {
     }
 
     @Override
+    @PreAuthorize("isAuthenticated()")
     public void delete(UUID userId, UUID linkId) {
         SocialLink link = socialLinkRepository.findByIdAndStudentUserId(linkId, userId)
                 .orElseThrow(() -> new AppException(ErrorCode.SOCIAL_LINK_NOT_FOUND));

@@ -8,6 +8,7 @@ import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.ProjectService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,14 +21,9 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-//    private UUID getFakeUserId() {
-//        // TODO: dùng JWT sau
-//        return UUID.fromString("11111111-1111-1111-1111-111111111111");
-//    }
-
     // POST /api/students/me/projects
     @PostMapping
-    public ResponseEntity<ApiResponse<ProjectResponse>> create(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<ProjectResponse>> create(@AuthenticationPrincipal String userIdHeader,
                                                                @RequestBody ProjectCreateRequest request) {
         UUID userId = UUID.fromString(userIdHeader);
         ProjectResponse response = projectService.create(userId, request);
@@ -43,7 +39,7 @@ public class ProjectController {
 
     // PUT /api/students/me/projects/{projectId}
     @PutMapping("/{projectId}")
-    public ResponseEntity<ApiResponse<ProjectResponse>> update(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<ProjectResponse>> update(@AuthenticationPrincipal String userIdHeader,
                                                                @PathVariable("projectId") UUID projectId,
                                                                @RequestBody ProjectUpdateRequest request)
     {
@@ -61,7 +57,7 @@ public class ProjectController {
 
     // GET /api/students/me/projects
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAll(@RequestHeader("X-User-Id") String userIdHeader) {
+    public ResponseEntity<ApiResponse<List<ProjectResponse>>> getAll(@AuthenticationPrincipal String userIdHeader) {
         UUID userId = UUID.fromString(userIdHeader);
         List<ProjectResponse> list = projectService.getAllByStudent(userId);
 
@@ -76,7 +72,7 @@ public class ProjectController {
 
     // DELETE /api/students/me/projects/{projectId}
     @DeleteMapping("/{projectId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@RequestHeader("X-User-Id") String userIdHeader,
+    public ResponseEntity<ApiResponse<Void>> delete(@AuthenticationPrincipal String userIdHeader,
                                                     @PathVariable("projectId") UUID projectId) {
         UUID userId = UUID.fromString(userIdHeader);
         projectService.delete(userId, projectId);
