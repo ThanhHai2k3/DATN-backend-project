@@ -48,9 +48,9 @@ spring:
           uri: http://localhost:8085
           predicates:
             - Path=/api/cv/**
-          filters:
-            - StripPrefix=1
-            - PreserveHostHeader
+#          filters:
+#            - StripPrefix=1
+#            - PreserveHostHeader
 
         - id: skill-service
           uri: http://localhost:8086

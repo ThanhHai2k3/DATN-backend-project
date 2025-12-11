@@ -5,6 +5,7 @@ import com.backend.cv_service.dto.CvSummaryDto;
 import com.backend.cv_service.dto.UpdateCvNameRequest;
 import com.backend.cv_service.service.CvService;
 import com.backend.cv_service.util.JwtUtil; // Giả sử bạn có một lớp tiện ích để xử lý JWT
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,75 +17,63 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cv/v1")
+@RequiredArgsConstructor
 public class CvController {
 
-    @Autowired
-    private CvService cvService;
+    private final CvService cvService;
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-
-    @PostMapping("/upload")//TODO:test ròi nhe
+    @PostMapping("/upload") // TODO: tested
     public ResponseEntity<CvSummaryDto> uploadNewCv(
             @RequestParam("file") MultipartFile file,
             @RequestParam("cvName") String cvName,
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("X-User-Id") UUID studentId
     ) {
-        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         CvSummaryDto newCv = cvService.uploadExtractAndSaveCv(studentId, cvName, file);
         return new ResponseEntity<>(newCv, HttpStatus.CREATED);
     }
 
-    @GetMapping("/my-cvs") //TODO:test ròi nhe
+    @GetMapping("/my-cvs") // TODO: tested
     public ResponseEntity<List<CvSummaryDto>> getMyCVs(
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("X-User-Id") UUID studentId
     ) {
-        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         List<CvSummaryDto> cvs = cvService.findAllByStudentId(studentId);
         return ResponseEntity.ok(cvs);
     }
 
-
-    @GetMapping("/{cvId}") //TODO:đã test, 1 bug studentId=null
+    @GetMapping("/{cvId}") // TODO: test lại, bug studentId=null sẽ hết
     public ResponseEntity<CvDetailDto> getCvById(
             @PathVariable("cvId") Long cvId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("X-User-Id") UUID studentId
     ) {
-        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         CvDetailDto cvDetail = cvService.findCvDetailById(cvId, studentId);
         return ResponseEntity.ok(cvDetail);
     }
 
-
-    @PutMapping("/{cvId}") //TODO:đã test
+    @PutMapping("/{cvId}") // TODO: test lại
     public ResponseEntity<CvSummaryDto> updateCvName(
             @PathVariable("cvId") Long cvId,
             @RequestBody UpdateCvNameRequest request,
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("X-User-Id") UUID studentId
     ) {
-        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         CvSummaryDto updatedCv = cvService.updateCvName(cvId, studentId, request.getNewCvName());
         return ResponseEntity.ok(updatedCv);
     }
 
-    @DeleteMapping("/{cvId}") //TODO:đã test
+    @DeleteMapping("/{cvId}") // TODO: test lại
     public ResponseEntity<Void> deleteCv(
             @PathVariable("cvId") Long cvId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("X-User-Id") UUID studentId
     ) {
-        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         cvService.deleteCv(cvId, studentId);
-        return ResponseEntity.noContent().build(); //204
-        //TODO: xử lý trường hợp xóa CV mặc định
+        return ResponseEntity.noContent().build(); // 204
+        // TODO: xử lý trường hợp xóa CV mặc định
     }
 
-    @PutMapping("/{cvId}/set-default") //TODO:đã test
+    @PutMapping("/{cvId}/set-default") // TODO: test lại
     public ResponseEntity<String> setDefaultCv(
             @PathVariable("cvId") Long cvId,
-            @RequestHeader("Authorization") String authorizationHeader
+            @RequestHeader("X-User-Id") UUID studentId
     ) {
-        UUID studentId = jwtUtil.extractUserIdFromToken(authorizationHeader);
         cvService.setDefaultCv(cvId, studentId);
         return ResponseEntity.ok("CV với id " + cvId + " đã được đặt làm mặc định.");
     }
