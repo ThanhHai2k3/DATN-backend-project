@@ -7,10 +7,10 @@ import com.backend.message_service.dto.response.UserResponse;
 import com.backend.message_service.entity.Conversation;
 import com.backend.message_service.entity.Message;
 import com.backend.message_service.enums.MessageType;
-import com.backend.message_service.entity.User;
+//import com.backend.message_service.entity.User;
 import com.backend.message_service.repository.ConversationRepository;
 import com.backend.message_service.repository.MessageRepository;
-import com.backend.message_service.repository.UserRepository;
+//import com.backend.message_service.repository.UserRepository;
 import com.backend.message_service.service.ConversationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -25,73 +26,61 @@ import java.util.UUID;
 public class ConversationServiceImpl implements ConversationService {
 
     private final ConversationRepository conversationRepository;
-    private final UserRepository userRepository;
+//    private final UserRepository userRepository;
     private final MessageRepository messageRepository;
     // (Sau này cần MessageRepository và Mapper)
-
+    @Override
     @Transactional
-    public ConversationResponse findOrCreateConversation(FindConversationRequest request) {
-        // Sắp xếp ID để đảm bảo user1Id < user2Id
-//        Long user1Id = Math.min(request.getUser1Id(), request.getUser2Id());
-//        Long user2Id = Math.max(request.getUser1Id(), request.getUser2Id());
-        UUID user1Id = request.getUser1Id();
-        UUID user2Id = request.getUser2Id();
+    public ConversationResponse findOrCreateConversation(UUID UID1, FindConversationRequest request) {
 
-// Sắp xếp để đảm bảo firstId < secondId theo natural order của UUID
-        UUID firstId;
-        UUID secondId;
+        UUID other = request.getUser2Id();
+        UUID min = UID1.compareTo(other) <= 0 ? UID1 : other;
+        UUID max = UID1.compareTo(other) <= 0 ? other : UID1;
 
-        if (user1Id.compareTo(user2Id) < 0) {
-            firstId = user1Id;
-            secondId = user2Id;
-        } else {
-            firstId = user2Id;
-            secondId = user1Id;
+        request.setUser1Id(min);
+        request.setUser2Id(max);
+
+        Optional<Conversation> opt =
+                conversationRepository.findByUser1IdAndUser2Id(request.getUser1Id(), request.getUser2Id());
+
+        if (opt.isPresent()) {
+            return convertToConversationResponse(opt.get(), UID1);
         }
 
+        Conversation newConversation = new Conversation();
+        newConversation.setUser1Id(request.getUser1Id());
+        newConversation.setUser2Id(request.getUser2Id());
 
-        // Tìm kiếm cuộc trò chuyện
-        Conversation conversation = conversationRepository.findByUser1IdAndUser2Id(user1Id, user2Id)
-                .orElseGet(() -> {
-                    //user1 và user2 là 2 user trong đoạn chat
-                    User user1 = userRepository.findById(user1Id).orElseThrow(()->new RuntimeException("Không tin thấy người dùng với id = "+user1Id.toString()));
-                    User user2 = userRepository.findById(user2Id).orElseThrow(()->new RuntimeException("Không tin thấy người dùng với id = "+user2Id.toString()));
-
-                    Conversation newConversation = new Conversation();
-                    newConversation.setUser1(user1);
-                    newConversation.setUser2(user2);
-                    return conversationRepository.save(newConversation);
-                });
-
-        // Chuyển đổi sang DTO để trả về (cần viết hàm convert)
-        return convertToConversationResponse(conversation, request.getUser1Id());
+        Conversation saved = conversationRepository.save(newConversation);
+        return convertToConversationResponse(saved, UID1);
     }
 
-    private ConversationResponse convertToConversationResponse(Conversation conversation, UUID user1Id) {
-        if(conversation == null) return null;
+
+    private ConversationResponse convertToConversationResponse(Conversation conversation, UUID currentUserId) {
         ConversationResponse res = new ConversationResponse();
         res.setId(conversation.getId());
 
-        //receiver là người nhận tin nhắn
-        User receiver = conversation.getUser1().equals(user1Id) ? conversation.getUser2() : conversation.getUser1();
+        UUID receiverId = conversation.getUser1Id().equals(currentUserId)
+                ? conversation.getUser2Id()
+                : conversation.getUser1Id();
 
-        UserResponse receiverResponse = new UserResponse();
-        receiverResponse.setId(receiver.getId());
-        receiverResponse.setFullName(receiver.getFullName());
-        receiverResponse.setAvatarUrl(receiver.getAvatarUrl());
-        res.setReceiver(receiverResponse);
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(receiverId);
+        // fullName/avatar FE tự fetch từ profile-service
+        res.setReceiver(userResponse);
 
-//        res.setLastMessage(convertToMessageResponse(messageRepository.findById(conversation.getLastMessageId())));
-        if(conversation.getLastMessageId()!=null){
-            Message lastMesEntity = messageRepository.findById(conversation.getLastMessageId()).orElse(null);
-            res.setLastMessage(convertToMessageResponse(lastMesEntity));
-        }
-        else{
+        if (conversation.getLastMessageId() != null) {
+            Message last = messageRepository.findById(conversation.getLastMessageId()).orElse(null);
+            res.setLastMessage(convertToMessageResponse(last));
+        } else {
             res.setLastMessage(null);
         }
-        res.setUnreadCount(0); // TODO: Triển khai logic đếm tin nhắn chưa đọc sau
+
+        res.setUnreadCount(0);
         return res;
     }
+
+
     private MessageResponse convertToMessageResponse(Message message) {
         if (message == null) return null;
 
@@ -99,27 +88,17 @@ public class ConversationServiceImpl implements ConversationService {
         response.setId(message.getId());
         response.setConversationId(message.getConversation().getId());
 
-
-        if (message.getMessageType() == MessageType.RECALLED) {
-            response.setContent("");
-        } else {
-            response.setContent(message.getContent());
-        }
-
+        response.setContent(message.getMessageType() == MessageType.RECALLED ? "" : message.getContent());
         response.setMessageType(message.getMessageType().name());
         response.setSentAt(message.getSentAt());
 
-
-        User sender = message.getSender();
         UserResponse senderResponse = new UserResponse();
-        senderResponse.setId(sender.getId());
-        senderResponse.setFullName(sender.getFullName());
-        senderResponse.setAvatarUrl(sender.getAvatarUrl());
-        response.setSender(senderResponse);
+        senderResponse.setId(message.getConversation().getUser1Id()); // UUID // đang ????
+        response.setSenderId(message.getSenderId());
 
-        // TODO: Lấy và chuyển đổi danh sách reactions sau này, copy từ messageService, sau có thời gian thì triển khai mapper và xóa hàm này đi
         return response;
     }
+
 
     @Transactional
     public List<ConversationResponse> getConversationsByUserId(UUID userId){

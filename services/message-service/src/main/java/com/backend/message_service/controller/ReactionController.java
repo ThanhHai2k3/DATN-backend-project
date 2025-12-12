@@ -5,6 +5,8 @@ import com.backend.message_service.dto.response.ReactionResponse;
 import com.backend.message_service.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -16,13 +18,26 @@ public class ReactionController {
 
     private final MessageService messageService; // Hoặc ReactionService
 
+//    @PostMapping
+//    public ResponseEntity<ReactionResponse> addReaction(@RequestBody CreateReactionRequest request) {
+//        return ResponseEntity.ok(messageService.addReaction(request));
+//    }
+
     @PostMapping
-    public ResponseEntity<ReactionResponse> addReaction(@RequestBody CreateReactionRequest request) {
-        return ResponseEntity.ok(messageService.addReaction(request));
+    @PreAuthorize("hasAuthorized()")
+    public ResponseEntity<ReactionResponse> addReaction(
+            @AuthenticationPrincipal UUID currentUserId,
+            @RequestBody CreateReactionRequest request
+    ) {
+        return ResponseEntity.ok(messageService.addReaction(currentUserId, request));
     }
 
+
     @DeleteMapping("/{reactionId}")
-    public ResponseEntity<Void> removeReaction(@PathVariable("reactionId") Long reactionId, @RequestParam("userId") UUID userId) { // userId sẽ lấy từ token sau
+    @PreAuthorize("hasAuthorized()")
+    public ResponseEntity<Void> removeReaction(
+            @PathVariable("reactionId") Long reactionId,
+            @AuthenticationPrincipal UUID userId) { // userId sẽ lấy từ token sau
         messageService.removeReaction(reactionId, userId);
         return ResponseEntity.noContent().build();
     }

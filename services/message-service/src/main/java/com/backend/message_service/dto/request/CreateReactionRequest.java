@@ -12,6 +12,6 @@ import java.util.UUID;
 @Setter
 public class CreateReactionRequest {
     private Long messageId;
-    private UUID userId;
+    private UUID userId;//todo: sẽ bị bỏ đi nhé
     private String reactionType;
 }

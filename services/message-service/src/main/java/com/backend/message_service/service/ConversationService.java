@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface ConversationService {
-    ConversationResponse findOrCreateConversation(FindConversationRequest request);
+    ConversationResponse findOrCreateConversation(UUID UID1, FindConversationRequest request);
     List<ConversationResponse> getConversationsByUserId(UUID userId);
 }

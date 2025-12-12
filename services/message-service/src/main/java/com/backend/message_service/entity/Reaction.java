@@ -4,14 +4,15 @@ import com.backend.message_service.enums.ReactionType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(
         name = "reactions",
         schema = "message_schema",
         uniqueConstraints = {
-                // Một user chỉ được thả 1 loại reaction trên 1 message
                 @UniqueConstraint(columnNames = {"message_id", "user_id", "reaction_type"})
         }
 )
@@ -34,15 +35,11 @@ public class Reaction {
     )
     private Message message;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user_id",
-            nullable = false,
-            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
-    )
-    private User user;
+    // userId (UUID) thay cho User entity
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
-    @Enumerated(EnumType.STRING) // <-- enum reaction type
+    @Enumerated(EnumType.STRING)
     @Column(name = "reaction_type", nullable = false, length = 50)
     private ReactionType reactionType;
 

@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "messages", schema = "message_schema")
@@ -21,17 +23,13 @@ public class Message {
     @JoinColumn(
             name = "conversation_id",
             nullable = false,
-            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT) // không tạo FK
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
     )
     private Conversation conversation;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "sender_id",
-            nullable = false,
-            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT) // không tạo FK
-    )
-    private User sender;
+    // senderId (UUID) thay cho User sender
+    @Column(name = "sender_id", nullable = false)
+    private UUID senderId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "message_type", nullable = false, length = 20)

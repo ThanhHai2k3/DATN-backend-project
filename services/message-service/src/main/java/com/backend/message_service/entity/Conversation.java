@@ -4,13 +4,14 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(
         name = "conversations",
         schema = "message_schema",
-        // đảm bảo không có cặp (user1, user2) nào bị trùng
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = {"user1_id", "user2_id"})
         }
@@ -23,21 +24,12 @@ public class Conversation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user1_id",
-            nullable = false,
-            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
-    )
-    private User user1;
+    // user1Id luôn là UUID nhỏ hơn (normalize ở service)
+    @Column(name = "user1_id", nullable = false)
+    private UUID user1Id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "user2_id",
-            nullable = false,
-            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT)
-    )
-    private User user2;
+    @Column(name = "user2_id", nullable = false)
+    private UUID user2Id;
 
     @Column(name = "user1_last_read_message_id")
     private Long user1LastReadMessageId;
@@ -51,6 +43,4 @@ public class Conversation {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
-
-    // note: nhớ nhắc duke bổ sung code kiểm tra userid1 < userid2 trong service nhé
 }

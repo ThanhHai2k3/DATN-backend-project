@@ -14,7 +14,7 @@ import java.util.UUID;
 public class MessageResponse {
     private Long id;
     private Long conversationId;
-    private UserResponse sender;
+    private UUID senderId;
     private String content;
     private String messageType;
     private Instant sentAt;

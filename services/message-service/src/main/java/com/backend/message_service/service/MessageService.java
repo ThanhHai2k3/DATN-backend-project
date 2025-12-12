@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface MessageService {
-    MessageResponse sendMessage(SendMessageRequest request);
+    MessageResponse sendMessage(UUID senderId, SendMessageRequest request);
+
     MessageResponse recallMessage(Long messageId, UUID userId);
 //    Page<MessageResponse> getMessagesByConversation(Long conversationId, int pageNumber, int pageSize);
-    List<MessageResponse> getMessagesByConversation(Long conversationId);
-    ReactionResponse addReaction(CreateReactionRequest request);
+    List<MessageResponse> getMessagesByConversation(UUID senderId, Long conversationId);
+//    ReactionResponse addReaction(CreateReactionRequest request);
+    ReactionResponse addReaction(UUID currentUserId, CreateReactionRequest request);
+
     void removeReaction(Long reactionId, UUID userId);
 }
