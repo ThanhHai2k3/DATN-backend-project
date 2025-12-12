@@ -19,19 +19,8 @@ public interface CVRepository extends JpaRepository<CV, Long> {
     boolean existsByStudentId(UUID studentId);
 
     boolean existsByIdAndStudentId(Long id, UUID studentId);
-    @EntityGraph(attributePaths = {
-            "educations",
-            "experiences",
-            "certifications",
-            "projects",
-            "skills"
-    })
+
     Optional<CV> findDetailedByIdAndStudentId(Long id, UUID studentId);
 
-    @EntityGraph(attributePaths = {
-            "educations",
-            "experiences",
-            "skills"
-    })
     Optional<CV> findDetailedById(Long id);
 }

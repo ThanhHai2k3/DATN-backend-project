@@ -116,7 +116,7 @@ public class CvServiceImpl implements CvService {
     @Transactional(readOnly = true)
     public CvDetailDto findCvDetailById(Long cvId, UUID studentId) {
 //        CV cv = cvRepository.findById(cvId).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy CV"));
-        CV cv = cvRepository.findDetailedByIdAndStudentId(cvId, studentId)
+        CV cv = cvRepository.findById(cvId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy CV hoặc bạn không có quyền xem CV này."));
 //        if(!cv.getStudentId().equals(studentId)) throw new SecurityException("Bạn không có quyền truy cập CV này");
         return mapToCvDetailDto(cv);

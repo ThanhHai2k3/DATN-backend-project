@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,46 +25,54 @@ public class CvController {
     private final CvService cvService;
 
     @PostMapping("/upload") // TODO: tested
+    @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<CvSummaryDto> uploadNewCv(
             @RequestParam("file") MultipartFile file,
             @RequestParam("cvName") String cvName,
-            @RequestHeader("X-User-Id") UUID studentId
+            @AuthenticationPrincipal UUID studentId
     ) {
         CvSummaryDto newCv = cvService.uploadExtractAndSaveCv(studentId, cvName, file);
         return new ResponseEntity<>(newCv, HttpStatus.CREATED);
     }
 
     @GetMapping("/my-cvs") // TODO: tested
+    @PreAuthorize("hasAuthority('STUDENT')")
+
     public ResponseEntity<List<CvSummaryDto>> getMyCVs(
-            @RequestHeader("X-User-Id") UUID studentId
+            @AuthenticationPrincipal UUID studentId
     ) {
         List<CvSummaryDto> cvs = cvService.findAllByStudentId(studentId);
         return ResponseEntity.ok(cvs);
     }
 
     @GetMapping("/{cvId}") // TODO: test lại, bug studentId=null sẽ hết
+    @PreAuthorize("hasAuthority('STUDENT')")
+
     public ResponseEntity<CvDetailDto> getCvById(
             @PathVariable("cvId") Long cvId,
-            @RequestHeader("X-User-Id") UUID studentId
+            @AuthenticationPrincipal UUID studentId
     ) {
         CvDetailDto cvDetail = cvService.findCvDetailById(cvId, studentId);
         return ResponseEntity.ok(cvDetail);
     }
 
     @PutMapping("/{cvId}") // TODO: test lại
+    @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<CvSummaryDto> updateCvName(
             @PathVariable("cvId") Long cvId,
             @RequestBody UpdateCvNameRequest request,
-            @RequestHeader("X-User-Id") UUID studentId
+            @AuthenticationPrincipal UUID studentId
     ) {
         CvSummaryDto updatedCv = cvService.updateCvName(cvId, studentId, request.getNewCvName());
         return ResponseEntity.ok(updatedCv);
     }
 
     @DeleteMapping("/{cvId}") // TODO: test lại
+    @PreAuthorize("hasAuthority('STUDENT')")
+
     public ResponseEntity<Void> deleteCv(
             @PathVariable("cvId") Long cvId,
-            @RequestHeader("X-User-Id") UUID studentId
+            @AuthenticationPrincipal UUID studentId
     ) {
         cvService.deleteCv(cvId, studentId);
         return ResponseEntity.noContent().build(); // 204
@@ -70,9 +80,10 @@ public class CvController {
     }
 
     @PutMapping("/{cvId}/set-default") // TODO: test lại
+    @PreAuthorize("hasAuthority('STUDENT')")
     public ResponseEntity<String> setDefaultCv(
             @PathVariable("cvId") Long cvId,
-            @RequestHeader("X-User-Id") UUID studentId
+            @AuthenticationPrincipal UUID studentId
     ) {
         cvService.setDefaultCv(cvId, studentId);
         return ResponseEntity.ok("CV với id " + cvId + " đã được đặt làm mặc định.");
