@@ -108,4 +108,13 @@ public class StudentServiceImpl implements StudentService {
 
         studentRepository.save(student);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public String getFullNameByUserId(UUID userId) {
+
+        return studentRepository.findByUserId(userId)
+                .map(Student::getFullName)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
+    }
 }

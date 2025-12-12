@@ -17,4 +17,6 @@ public interface StudentService {
     StudentResponse getPublicProfile(UUID viewerUserId, UUID targetUserId);
 
     void autoCreateProfile(UUID userId, String fullName);
+
+    String getFullNameByUserId(UUID userId);
 }

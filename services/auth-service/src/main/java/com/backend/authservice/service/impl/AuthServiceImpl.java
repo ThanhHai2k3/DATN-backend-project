@@ -46,33 +46,6 @@ public class AuthServiceImpl implements AuthService {
     private final TokenService tokenService;
     private final RestTemplate restTemplate;
 
-    private String getFullNameFromProfile(UUID userId) {
-        try {
-            String url = "http://localhost:8082/api/profile/v2/students/me";
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("X-User-Id", userId.toString());
-
-            HttpEntity<Void> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
-
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, Object> apiResponse = response.getBody();
-                if (apiResponse.containsKey("data")) {
-                    Map<String, Object> apiData = (Map<String, Object>) apiResponse.get("data");
-                    if (apiData != null && apiData.containsKey("fullName") && apiData.get("fullName") != null) {
-                        return (String) apiData.get("fullName");
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.warn("Could not fetch full name for user {}: {}", userId, e.getMessage());
-        }
-        return "User";
-    }
-
-
     @Override
     public AuthResponse register(RegisterRequest request){
         if(userAccountRepository.existsByEmailIgnoreCase(request.getEmail())){
@@ -150,5 +123,26 @@ public class AuthServiceImpl implements AuthService {
             token.setRevoked(true);
             refreshTokenRepository.save(token);
         });
+    }
+
+    private String getFullNameFromProfile(UUID userId) {
+        try {
+            String url = "http://localhost:8082/api/profile/internal/students/"
+                    + userId + "/full-name";
+
+            ResponseEntity<Map> response =
+                    restTemplate.getForEntity(url, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful()
+                    && response.getBody() != null) {
+
+                Map<String, Object> apiResponse = response.getBody();
+                return (String) apiResponse.get("data");
+            }
+        } catch (Exception e) {
+            log.warn("Could not fetch full name for user {}: {}", userId, e.getMessage());
+        }
+
+        return "User";
     }
 }

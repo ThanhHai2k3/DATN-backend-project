@@ -8,9 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "students", schema = "profile_schema")
@@ -54,18 +52,20 @@ public class Student {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    //Dùng Set tránh lỗi MultipleBagFetchException
+    //Hibernate cho phép fetch nhiều Set
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Education> educations = new ArrayList<>();
+    private Set<Education> educations = new HashSet<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Experience> experiences = new ArrayList<>();
+    private Set<Experience> experiences = new HashSet<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudentSkill> skills = new ArrayList<>();
+    private Set<StudentSkill> skills = new HashSet<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Project> projects = new ArrayList<>();
+    private Set<Project> projects = new HashSet<>();
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SocialLink> socialLinks = new ArrayList<>();
+    private Set<SocialLink> socialLinks = new HashSet<>();
 }
