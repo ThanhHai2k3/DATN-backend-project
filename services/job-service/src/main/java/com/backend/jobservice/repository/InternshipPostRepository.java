@@ -12,9 +12,9 @@ import java.util.UUID;
 @Repository
 public interface InternshipPostRepository extends JpaRepository<InternshipPost, UUID> {
 
+    List<InternshipPost> findAllByOrderByCreatedAtDesc();
     List<InternshipPost> findByStatus(PostStatus status);
     List<InternshipPost> findByCompanyId(UUID companyId);
     Optional<InternshipPost> findByIdAndPostedBy(UUID id, UUID postedBy);
     Optional<InternshipPost> findByIdAndStatus(UUID id, PostStatus status);
-    List<InternshipPost> findByTitleContainingIgnoreCaseAndStatus(String keyword, PostStatus status);
-}
+    List<InternshipPost> findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(String keyword, PostStatus status);}

@@ -235,9 +235,9 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     @Transactional(readOnly = true)
     public List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId){
         List<InternshipPost> found = internshipPostRepository
-                .findByTitleContainingIgnoreCaseAndStatus(keyword, PostStatus.ACTIVE);
+                .findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(keyword, PostStatus.ACTIVE);
 
-        // TODO: mở rộng filter workMode, skillId, companyId
+        // TODO: logic filter workMode, skillId... (như cũ)
         return internshipPostMapper.toSummaryResponseList(found);
     }
 
