@@ -116,10 +116,17 @@ public class InternshipPostController {
     public ResponseEntity<ApiResponse<List<InternshipPostSummaryResponse>>> searchPosts(
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
             @RequestParam(value = "workMode", required = false) String workMode,
+            @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "skillId", required = false) UUID skillId,
             @RequestParam(value = "companyId", required = false) UUID companyId)
     {
-        List<InternshipPostSummaryResponse> result = internshipPostService.searchPosts(keyword, workMode, skillId, companyId);
+        List<InternshipPostSummaryResponse> result = internshipPostService.searchPosts(
+                keyword,
+                workMode,
+                skillId,
+                companyId,
+                location
+        );
 
         return ResponseEntity
                 .status(SuccessCode.INTERNSHIP_POST_FETCHED.getStatus())

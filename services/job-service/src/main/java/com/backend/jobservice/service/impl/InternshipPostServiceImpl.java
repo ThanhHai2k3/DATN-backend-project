@@ -18,10 +18,13 @@ import com.backend.jobservice.mapper.InternshipPostMapper;
 import com.backend.jobservice.mapper.JobSkillMapper;
 import com.backend.jobservice.repository.InternshipPostRepository;
 import com.backend.jobservice.repository.JobSkillRepository;
+import com.backend.jobservice.repository.specification.InternshipPostSpecification;
 import com.backend.jobservice.service.InternshipPostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -233,11 +236,22 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId){
-        List<InternshipPost> found = internshipPostRepository
-                .findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(keyword, PostStatus.ACTIVE);
+    public List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location) {
 
-        // TODO: logic filter workMode, skillId... (như cũ)
+        Specification<InternshipPost> spec = Specification.where(InternshipPostSpecification.hasStatus(PostStatus.ACTIVE));
+
+        spec = spec.and(InternshipPostSpecification.hasKeyword(keyword))
+                .and(InternshipPostSpecification.hasWorkMode(workMode))
+                .and(InternshipPostSpecification.hasSkill(skillId))
+                .and(InternshipPostSpecification.hasLocation(location));
+
+        if (companyId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("companyId"), companyId));
+        }
+
+
+        List<InternshipPost> found = internshipPostRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
+
         return internshipPostMapper.toSummaryResponseList(found);
     }
 

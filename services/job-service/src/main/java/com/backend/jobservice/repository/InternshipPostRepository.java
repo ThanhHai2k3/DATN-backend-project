@@ -3,6 +3,7 @@ package com.backend.jobservice.repository;
 import com.backend.jobservice.entity.InternshipPost;
 import com.backend.jobservice.enums.PostStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface InternshipPostRepository extends JpaRepository<InternshipPost, UUID> {
+public interface InternshipPostRepository extends JpaRepository<InternshipPost, UUID>, JpaSpecificationExecutor<InternshipPost> {
 
     List<InternshipPost> findAllByOrderByCreatedAtDesc();
     List<InternshipPost> findByStatus(PostStatus status);

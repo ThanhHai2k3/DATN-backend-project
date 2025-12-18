@@ -14,5 +14,5 @@ public interface InternshipPostService {
     InternshipPostResponse getPostDetail(UUID postId);
     void hidePost(UUID employerId, UUID postId);
     InternshipPostResponse approvePost(UUID postId, UUID adminId);
-    List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId);
+    List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId,String location);
 }
