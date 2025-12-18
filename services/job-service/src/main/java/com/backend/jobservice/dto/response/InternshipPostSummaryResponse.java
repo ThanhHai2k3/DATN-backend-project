@@ -20,5 +20,6 @@ public class InternshipPostSummaryResponse {
     private WorkMode workMode;
     private PostStatus status;
     private Instant expiredAt;
+    private Instant createdAt;
     private String companyName; // có thể lấy từ profile-service qua REST call
 }

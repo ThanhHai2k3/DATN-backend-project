@@ -41,6 +41,7 @@ public interface InternshipPostMapper {
     List<InternshipPostResponse> toResponseList(List<InternshipPost> entities);
 
     //danh sách/search
+    @Mapping(source = "createdAt", target = "createdAt")
     @Mapping(target = "companyName", ignore = true)
     InternshipPostSummaryResponse toSummaryResponse(InternshipPost entity);
 
