@@ -18,6 +18,7 @@ public class StudentResponse {
     private UUID userId;
     private String fullName;
     private String avatarUrl;
+    private String cvUrl;
     private String headline;
     private LocalDate dob;
     private Gender gender;

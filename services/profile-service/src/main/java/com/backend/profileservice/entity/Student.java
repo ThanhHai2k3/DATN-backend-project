@@ -31,6 +31,9 @@ public class Student {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column(name = "cv_url")
+    private String cvUrl;
+
     private String headline;
     private LocalDate dob;
 

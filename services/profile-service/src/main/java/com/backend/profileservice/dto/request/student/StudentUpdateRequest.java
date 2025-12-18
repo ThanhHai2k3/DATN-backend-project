@@ -14,6 +14,7 @@ public class StudentUpdateRequest {
 
     private String fullName;
     private String avatarUrl;
+    private String cvUrl;
     private String headline;
     private LocalDate dob;
     private Gender gender;
