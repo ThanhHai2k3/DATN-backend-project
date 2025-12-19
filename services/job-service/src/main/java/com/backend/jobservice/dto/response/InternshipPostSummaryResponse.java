@@ -17,6 +17,7 @@ public class InternshipPostSummaryResponse {
     private String title;
     private String position;
     private String location;
+    private String description;
     private WorkMode workMode;
     private PostStatus status;
     private Instant expiredAt;

@@ -50,19 +50,19 @@ public class InternshipPost {
     private Instant expiredAt;
 
     @Column(name = "company_id")
-    private UUID companyId; //FK to profile_schema.companies
+    private UUID companyId;
 
     @Column(name = "posted_by")
     private UUID postedBy;
 
     @Column(name = "nlp_status")
-    private String nlpStatus;      // PENDING / DONE / ERROR
+    private String nlpStatus;
 
     @Column(name = "nlp_error")
-    private String nlpError;       // Lưu message lỗi từ ai-nlp-service (nếu có)
+    private String nlpError;
 
     @Column(name = "processed_at")
-    private Instant processedAt;   // Thời điểm NLP xong
+    private Instant processedAt;
 
     @OneToOne(mappedBy = "internshipPost",
             fetch = FetchType.LAZY,
