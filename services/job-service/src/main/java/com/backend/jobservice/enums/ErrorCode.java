@@ -21,9 +21,11 @@ public enum ErrorCode {
     POST_NOT_FOUND("JOB_003", "Internship post with this id not found", HttpStatus.NOT_FOUND),
     POST_ALREADY_HIDDEN("JOB_004", "This internship post already hidden", HttpStatus.BAD_REQUEST),
     HIDE_POST_DENIED("JOB_005", "You are not allowed to modify this post", HttpStatus.FORBIDDEN),
+    INVALID_POST_STATUS("JOB_006", "Internship post status is not valid for this action", HttpStatus.BAD_REQUEST),
 
     SKILL_NOT_FOUND("SK_005", "Skill not found", HttpStatus.NOT_FOUND),
     SKILL_ID_REQUIRED("SK_006", "Skill id required", HttpStatus.BAD_REQUEST),
+
     ;
 
     private final String code;

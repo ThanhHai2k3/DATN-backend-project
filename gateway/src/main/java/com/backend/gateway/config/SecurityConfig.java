@@ -48,7 +48,7 @@ public class SecurityConfig {
 
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT","PATCH", "DELETE", "OPTIONS"));
         // Cho phép gửi các Header tiêu chuẩn và Authorization header
         configuration.setAllowedHeaders(Arrays.asList("*"));
         // Cho phép gửi cookies và credentials (nếu cần)

@@ -217,21 +217,62 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         internshipPostRepository.save(post);
     }
 
+//    @Override
+//    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+//    public InternshipPostResponse approvePost(UUID postId, UUID adminId){
+//        InternshipPost post = internshipPostRepository.findById(postId)
+//                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+//
+//        post.setStatus(PostStatus.ACTIVE);
+//        post.setUpdatedAt(Instant.now());
+//        InternshipPost saved = internshipPostRepository.save(post);
+//
+//        // TODO: gửi notification tới Employer
+//        InternshipPostResponse response = internshipPostMapper.toResponse(saved);
+//        fillSkillNames(response.getSkills());
+//
+//        return response;
+//    }
+
     @Override
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public InternshipPostResponse approvePost(UUID postId, UUID adminId){
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
+        if (post.getStatus() != PostStatus.PENDING) {
+            throw new AppException(ErrorCode.INVALID_POST_STATUS);
+        }
+
         post.setStatus(PostStatus.ACTIVE);
         post.setUpdatedAt(Instant.now());
-        InternshipPost saved = internshipPostRepository.save(post);
 
-        // TODO: gửi notification tới Employer
-        InternshipPostResponse response = internshipPostMapper.toResponse(saved);
-        fillSkillNames(response.getSkills());
+        return internshipPostMapper.toResponse(internshipPostRepository.save(post));
+    }
 
-        return response;
+
+    @Override
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public void rejectPost(UUID postId) {
+        InternshipPost post = internshipPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        if (post.getStatus() != PostStatus.PENDING) {
+            throw new AppException(ErrorCode.INVALID_POST_STATUS);
+        }
+
+        post.setStatus(PostStatus.REJECTED);
+        post.setUpdatedAt(Instant.now());
+        internshipPostRepository.save(post);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @Transactional(readOnly = true)
+    public List<InternshipPostSummaryResponse> getPendingPosts() {
+        List<InternshipPost> pendingPosts = internshipPostRepository
+                .findByStatusOrderByCreatedAtDesc(PostStatus.PENDING);
+        return internshipPostMapper.toSummaryResponseList(pendingPosts);
     }
 
     @Override
