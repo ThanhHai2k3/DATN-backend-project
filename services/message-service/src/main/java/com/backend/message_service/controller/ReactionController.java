@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequestMapping("/api/message/v1/reactions")
 @RequiredArgsConstructor
 public class ReactionController {
-
+    //TODO: controller này bỏ nhé, dư thời gian thì mới làm
     private final MessageService messageService; // Hoặc ReactionService
 
 //    @PostMapping

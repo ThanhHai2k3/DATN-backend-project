@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(
         name = "ai-nlp-service",
         url = "${URL_AI_NLP}"
-//        url = "http://localhost:8086"
 )
 public interface AiNlpClient {
 

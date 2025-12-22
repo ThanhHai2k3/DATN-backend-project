@@ -10,8 +10,8 @@ spring:
   # ===============================
   datasource:
     url: jdbc:postgresql://localhost:5432/intern_network
-    username: postgres
-    password: 123456789
+    username: duke
+    password: duke
     driver-class-name: org.postgresql.Driver
 
   # ===============================
@@ -19,7 +19,7 @@ spring:
   # ===============================
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     properties:
       hibernate:

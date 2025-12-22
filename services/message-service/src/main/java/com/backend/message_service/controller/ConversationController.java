@@ -18,15 +18,15 @@ import java.util.UUID;
 public class ConversationController {
     private final ConversationService conversationService;
 //    @GetMapping("/user/{userId}")
-    @GetMapping("/my-conversation/{userId}")
-    @PreAuthorize("hasAuthority('STUDENT')")
-    public ResponseEntity<List<ConversationResponse>> getConversationsByUserId(@PathVariable("userId") UUID userId) {
+    @GetMapping("/my-conversation")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ConversationResponse>> getConversationsByUserId(@AuthenticationPrincipal UUID userId) {
         List<ConversationResponse> responses = conversationService.getConversationsByUserId(userId);
         return ResponseEntity.ok(responses);
     }
 
     @PostMapping("/newConversation") //cái này để lấy 1 conversation đã có từ trước hoặc là tạo 1 conversation mới
-    @PreAuthorize("hasAuthority('STUDENT')")
+    @PreAuthorize("isAuthenticated()")
     public ConversationResponse findOrCreateConversation(
             @AuthenticationPrincipal UUID UID1,
             @RequestBody FindConversationRequest request
