@@ -13,7 +13,7 @@ public class AiNlpServiceApplication {
 	public static void main(String[] args) {
         System.out.println("oi thoi chettt");
         List<String> skills = SkillExtractor.extractSkills(
-                "Experienced with Java, Spring Boot and ReactJS"
+                "We are looking for a backend intern with experience in Java, Spring Boot, REST API, SQL. Knowledge of Docker is a plus"
         );
 
         System.out.println(skills);

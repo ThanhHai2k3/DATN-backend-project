@@ -1,12 +1,16 @@
 package com.backend.ai_nlp_service.service;
 
+import com.backend.ai_nlp_service.dto.JobSkillRequest;
+import com.backend.ai_nlp_service.dto.ProcessPostRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.util.StringUtils;
 
 import java.io.InputStream;
 import java.text.Normalizer;
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class SkillExtractor {
 
@@ -107,5 +111,48 @@ public class SkillExtractor {
         List<String> result = new ArrayList<>(found);
         Collections.sort(result);
         return result;
+    }
+    private List<String> buildSkillsNorm(ProcessPostRequest req) {
+
+        // 1) Extract từ text (title/position/description)
+        String text = joinNonBlank(req.getTitle(), req.getPosition(), req.getDescription());
+        Set<String> merged = new LinkedHashSet<>();
+
+        if (StringUtils.hasText(text)) {
+            merged.addAll(SkillExtractor.extractSkills(text)); // canonical đã chuẩn hoá theo dict
+        }
+
+        // 2) Merge skills employer nhập tay
+        if (req.getSkills() != null) {
+            for (JobSkillRequest s : req.getSkills()) {
+                if (s == null) continue;
+
+                // TODO: chỉnh đúng field trong JobSkillRequest của bạn (vd: getName(), getSkillName()...)
+                String manual = s.getSkillName();
+
+                if (StringUtils.hasText(manual)) {
+                    // dùng SkillExtractor.normalize để match alias -> canonical
+                    String norm = SkillExtractor.normalize(manual);
+                    // trick: chạy extractor trên chính chuỗi skill để map alias -> canonical
+                    List<String> mapped = SkillExtractor.extractSkills(norm);
+                    if (!mapped.isEmpty()) merged.addAll(mapped);
+                    else merged.add(manual.trim()); // fallback nếu dict chưa có
+                }
+            }
+        }
+
+        // 3) Output stable order (sorted) hoặc giữ insertion order tuỳ bạn
+        return merged.stream()
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .distinct()
+                .sorted(String.CASE_INSENSITIVE_ORDER)
+                .collect(Collectors.toList());
+    }
+    private String joinNonBlank(String... parts) {
+        return Arrays.stream(parts)
+                .filter(StringUtils::hasText)
+                .map(String::trim)
+                .collect(Collectors.joining(". "));
     }
 }
