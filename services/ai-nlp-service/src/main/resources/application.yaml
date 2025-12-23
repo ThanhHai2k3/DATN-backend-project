@@ -4,8 +4,14 @@ server:
 spring:
   application:
     name: ai-nlp-service
-
 logging:
   level:
     root: INFO
     com.backend.ai_nlp_service: DEBUG
+
+
+
+
+mapbox:
+  geocoding-base-url: https://api.mapbox.com/geocoding/v5/mapbox.places
+  token: ${MAPBOX_TOKEN}
