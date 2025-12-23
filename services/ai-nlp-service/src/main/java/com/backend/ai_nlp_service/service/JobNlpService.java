@@ -14,46 +14,51 @@ import java.util.List;
 public class JobNlpService {
 
     private final MapboxGeocodingService mapboxGeocodingService;
+    private final ProvinceResolver provinceResolver;
 
     public ProcessPostResponse processJob(ProcessPostRequest req) {
 
+        String rawLocation = req.getLocation();
         Double lat = null;
         Double lon = null;
-        String locationNorm = null;
 
-        String rawLocation = req.getLocation();
+        MapboxGeocodingService.Feature feature = null;
 
-        // 1) Normalize location -> lat/lon (Mapbox)
-        System.out.println("sắp if");
+        // 1) Geocode -> lat/lon (+ feature)
         if (StringUtils.hasText(rawLocation)) {
-            System.out.println("sắp chạy geocode");
             MapboxGeocodingService.GeocodeResult geo = mapboxGeocodingService.geocode(rawLocation);
-
             if (geo != null) {
                 lat = geo.lat();
                 lon = geo.lon();
-                MapboxGeocodingService.Feature f = geo.feature(); // hoặc feature bạn chọn
-                locationNorm = extractProvinceFromFeature(f);
-
-//                locationNorm = geo.displayName();
+                feature = geo.feature();
             }
         }
 
-        // 2) Build response (tạm thời chỉ fill lat/lon + meta; phần khác làm sau)
+        // 2) Resolve province (ưu tiên offline GADM)
+        String province = null;
+
+        if (lat != null && lon != null) {
+            var hit = provinceResolver.resolve(lat, lon);
+            if (hit != null) {
+                province = hit.provinceName();
+            }
+        }
+
+        // 3) Fallback: lấy province từ Mapbox context nếu GADM không ra
+        if (province == null && feature != null) {
+            province = extractProvinceFromFeature(feature);
+        }
+
         return ProcessPostResponse.builder()
                 .postId(req.getPostId())
-
-                // skills/experience/domain/locationNorm/workModeNorm/duration/salary: để null trước
                 .lat(lat)
                 .lon(lon)
-                .locationsNorm(
-                        locationNorm == null ? null : List.of(locationNorm)
-                )
-
-                .modelVersion("mapbox-geocode-0.1.0")
+                .locationsNorm(province == null ? null : List.of(province))
+                .modelVersion("job-rule-based-0.1.0")
                 .processedAt(Instant.now())
                 .build();
     }
+
     private String extractProvinceFromFeature(MapboxGeocodingService.Feature f) {
         if (f.context() == null) return null;
         for (MapboxGeocodingService.ContextItem c : f.context()) {
