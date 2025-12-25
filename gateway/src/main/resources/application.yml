@@ -58,3 +58,10 @@ spring:
             - Path=/api/skill/**
           filters:
             - PreserveHostHeader
+
+        - id: applying-service
+          uri: http://localhost:8090
+          predicates:
+            - Path=/api/applying/**
+          filters:
+            - PreserveHostHeader
