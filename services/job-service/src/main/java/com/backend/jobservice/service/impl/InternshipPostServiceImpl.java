@@ -37,6 +37,9 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -300,14 +303,27 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
 
     private void fillSkillNames(List<JobSkillResponse> skills) {
-        if (skills == null) return;
+        if (skills == null || skills.isEmpty()) return;
+        List<UUID> skillIds = skills.stream()
+                .map(JobSkillResponse::getSkillId)
+                .distinct()
+                .collect(Collectors.toList());
 
-        for (JobSkillResponse js : skills) {
-            ApiResponse<SkillResponse> api = skillClient.getSkillById(js.getSkillId());
-            SkillResponse skill = api.getData();
-            if (skill != null) {
-                js.setSkillName(skill.getName());
+        try {
+            ApiResponse<List<SkillResponse>> response = skillClient.getSkillsBatch(skillIds);
+
+            if (response.getData() != null) {
+                Map<UUID, String> skillMap = response.getData().stream()
+                        .collect(Collectors.toMap(SkillResponse::getId, SkillResponse::getName));
+
+                for (JobSkillResponse js : skills) {
+                    if (skillMap.containsKey(js.getSkillId())) {
+                        js.setSkillName(skillMap.get(js.getSkillId()));
+                    }
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error fetching batch skills: " + e.getMessage());
         }
     }
 
