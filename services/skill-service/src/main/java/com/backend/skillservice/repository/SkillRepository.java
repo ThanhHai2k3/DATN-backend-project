@@ -18,4 +18,6 @@ public interface SkillRepository extends JpaRepository<Skill, UUID> {
 
     @Query("SELECT s FROM Skill s WHERE LOWER(s.name) LIKE LOWER(CONCAT('%', :keyword, '%'))")
     List<Skill> search(@Param("keyword") String keyword);
+
+    List<Skill> findAllByIdIn(List<UUID> ids);
 }
