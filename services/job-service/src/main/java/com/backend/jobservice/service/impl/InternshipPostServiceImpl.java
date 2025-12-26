@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     private final SkillClient skillClient;
     private final AiNlpClient aiNlpClient;
     private final ObjectMapper objectMapper;
+
 
     @Override
     @PreAuthorize("hasRole('EMPLOYER')")
@@ -277,7 +280,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location) {
+    public Page<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location, Pageable pageable) {
 
         Specification<InternshipPost> spec = Specification.where(InternshipPostSpecification.hasStatus(PostStatus.ACTIVE));
 
@@ -290,11 +293,11 @@ public class InternshipPostServiceImpl implements InternshipPostService {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("companyId"), companyId));
         }
 
+        Page<InternshipPost> postsPage = internshipPostRepository.findAll(spec, pageable);
 
-        List<InternshipPost> found = internshipPostRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        return internshipPostMapper.toSummaryResponseList(found);
+        return postsPage.map(internshipPostMapper::toSummaryResponse);
     }
+
 
     private void fillSkillNames(List<JobSkillResponse> skills) {
         if (skills == null) return;
