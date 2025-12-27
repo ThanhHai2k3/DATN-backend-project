@@ -17,6 +17,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
+
 @RestController
 @RequestMapping("/api/internship-post")
 @RequiredArgsConstructor
@@ -146,20 +151,22 @@ public class InternshipPostController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ApiResponse<List<InternshipPostSummaryResponse>>> searchPosts(
+    public ResponseEntity<ApiResponse<Page<InternshipPostSummaryResponse>>> searchPosts(
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,
             @RequestParam(value = "workMode", required = false) String workMode,
             @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "skillId", required = false) UUID skillId,
-            @RequestParam(value = "companyId", required = false) UUID companyId) {
+            @RequestParam(value = "companyId", required = false) UUID companyId,
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
 
-
-        List<InternshipPostSummaryResponse> result = internshipPostService.searchPosts(
+        Page<InternshipPostSummaryResponse> result = internshipPostService.searchPosts(
                 keyword,
                 workMode,
                 skillId,
                 companyId,
-                location
+                location,
+                pageable
         );
 
         return ResponseEntity

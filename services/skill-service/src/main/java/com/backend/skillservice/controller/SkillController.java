@@ -92,4 +92,16 @@ public class SkillController {
                         null
                 ));
     }
+
+    @PostMapping("/batch")
+    public ResponseEntity<ApiResponse<List<SkillResponse>>> getSkillsBatch(@RequestBody List<UUID> ids) {
+        List<SkillResponse> result = skillService.getSkillsByIds(ids);
+        return ResponseEntity
+                .status(SuccessCode.GET_SUCCESS.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.GET_SUCCESS.getCode(),
+                        SuccessCode.GET_SUCCESS.getMessage(),
+                        result
+                ));
+    }
 }

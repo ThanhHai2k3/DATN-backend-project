@@ -14,4 +14,6 @@ public interface SkillService {
     SkillResponse getSkill(UUID id);
     List<SkillResponse> searchSkills(String keyword);
     List<SkillResponse> getSkillsByCategory(UUID categoryId);
+
+    List<SkillResponse> getSkillsByIds(List<UUID> ids);
 }

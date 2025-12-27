@@ -8,14 +8,16 @@ import com.backend.jobservice.dto.response.InternshipPostSummaryResponse;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+
 public interface InternshipPostService {
     InternshipPostResponse createPost(UUID employerId, InternshipPostRequest request);
     InternshipPostResponse updatePost(UUID employerId, UUID postId, InternshipPostUpdateRequest request);
     void hidePost(UUID employerId, UUID postId);
 
     InternshipPostResponse getPostDetail(UUID postId);
-    List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location);
-
+    Page<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location, Pageable pageable);
     InternshipPostResponse approvePost(UUID postId, UUID adminId);
 
     void rejectPost(UUID postId);

@@ -34,6 +34,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +53,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     private final SkillClient skillClient;
     private final AiNlpClient aiNlpClient;
     private final ObjectMapper objectMapper;
+
 
     @Override
     @PreAuthorize("hasRole('EMPLOYER')")
@@ -277,7 +283,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location) {
+    public Page<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location, Pageable pageable) {
 
         Specification<InternshipPost> spec = Specification.where(InternshipPostSpecification.hasStatus(PostStatus.ACTIVE));
 
@@ -290,21 +296,34 @@ public class InternshipPostServiceImpl implements InternshipPostService {
             spec = spec.and((root, query, cb) -> cb.equal(root.get("companyId"), companyId));
         }
 
+        Page<InternshipPost> postsPage = internshipPostRepository.findAll(spec, pageable);
 
-        List<InternshipPost> found = internshipPostRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        return internshipPostMapper.toSummaryResponseList(found);
+        return postsPage.map(internshipPostMapper::toSummaryResponse);
     }
 
-    private void fillSkillNames(List<JobSkillResponse> skills) {
-        if (skills == null) return;
 
-        for (JobSkillResponse js : skills) {
-            ApiResponse<SkillResponse> api = skillClient.getSkillById(js.getSkillId());
-            SkillResponse skill = api.getData();
-            if (skill != null) {
-                js.setSkillName(skill.getName());
+    private void fillSkillNames(List<JobSkillResponse> skills) {
+        if (skills == null || skills.isEmpty()) return;
+        List<UUID> skillIds = skills.stream()
+                .map(JobSkillResponse::getSkillId)
+                .distinct()
+                .collect(Collectors.toList());
+
+        try {
+            ApiResponse<List<SkillResponse>> response = skillClient.getSkillsBatch(skillIds);
+
+            if (response.getData() != null) {
+                Map<UUID, String> skillMap = response.getData().stream()
+                        .collect(Collectors.toMap(SkillResponse::getId, SkillResponse::getName));
+
+                for (JobSkillResponse js : skills) {
+                    if (skillMap.containsKey(js.getSkillId())) {
+                        js.setSkillName(skillMap.get(js.getSkillId()));
+                    }
+                }
             }
+        } catch (Exception e) {
+            System.err.println("Error fetching batch skills: " + e.getMessage());
         }
     }
 
