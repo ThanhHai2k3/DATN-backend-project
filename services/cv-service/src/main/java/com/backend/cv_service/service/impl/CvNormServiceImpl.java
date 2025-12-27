@@ -1,11 +1,15 @@
 package com.backend.cv_service.service.impl;
 
 import com.backend.cv_service.dto.CvNlpResultDto;
+import com.backend.cv_service.dto.CvNormUpdatedEvent;
 import com.backend.cv_service.entity.CV;
 import com.backend.cv_service.entity.CvNorm;
 import com.backend.cv_service.repository.CvNormRepository;
 import com.backend.cv_service.repository.CVRepository;
+import com.backend.cv_service.service.CvNormEventPublisher;
 import com.backend.cv_service.service.CvNormService;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,13 +18,15 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Service
+//@AllArgsConstructor
 public class CvNormServiceImpl implements CvNormService {
-
+    private final CvNormEventPublisher cvNormEventPublisher;
     private final CVRepository cvRepository;
     private final CvNormRepository cvNormRepository;
 
-    public CvNormServiceImpl(CVRepository cvRepository,
+    public CvNormServiceImpl(CvNormEventPublisher cvNormEventPublisher, CVRepository cvRepository,
                              CvNormRepository cvNormRepository) {
+        this.cvNormEventPublisher = cvNormEventPublisher;
         this.cvRepository = cvRepository;
         this.cvNormRepository = cvNormRepository;
     }
@@ -79,8 +85,24 @@ public class CvNormServiceImpl implements CvNormService {
         cvNormRepository.save(cvNorm);
 
         // optional
-//        cv.setNlpStatus("SUCCESS");
-//        cv.setProcessedAt(OffsetDateTime.now());
+        cv.setNlpStatus("SUCCESS");
+        cv.setProcessedAt(OffsetDateTime.now());
         cvRepository.save(cv);
+        cvNormEventPublisher.publish(
+                CvNormUpdatedEvent.builder()
+                        .cvId(cvId)
+                        .studentId(cv.getStudentId()) // hoặc cv.getStudent().getId() tuỳ entity bạn
+                        .skillsNorm(cvNorm.getSkillsNorm() != null ? cvNorm.getSkillsNorm() : Collections.emptyList())
+                        .experienceAreas(cvNorm.getExperienceAreas() != null ? cvNorm.getExperienceAreas() : Collections.emptyList())
+                        .experienceTitles(cvNorm.getExperienceTitles() != null ? cvNorm.getExperienceTitles() : Collections.emptyList())
+                        .educationLevel(cvNorm.getEducationLevel())
+                        .educationMajors(cvNorm.getEducationMajors() != null ? cvNorm.getEducationMajors() : Collections.emptyList())
+                        .yearsTotal(null)
+                        .modelVersion(cvNorm.getModelVersion()) // lấy đúng version từ NLP result bạn vừa set
+                        .updatedAt(OffsetDateTime.now())
+                        .build()
+        );
+
+
     }
 }

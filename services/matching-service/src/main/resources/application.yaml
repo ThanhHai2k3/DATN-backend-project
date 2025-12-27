@@ -1,0 +1,14 @@
+server:
+  port: 8088
+spring:
+  application:
+    name: matching-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/intern_network
+    username: duke
+    password: duke
+    driver-class-name: org.postgresql.Driver
+logging:
+  level:
+    root: INFO
+    com.backend.matching_service: DEBUG

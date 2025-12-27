@@ -4,6 +4,7 @@ server:
 spring:
   application:
     name: ai-nlp-service
+
 logging:
   level:
     root: INFO
