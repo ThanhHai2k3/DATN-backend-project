@@ -3,6 +3,7 @@ package com.backend.jobservice.service.impl;
 import com.backend.jobservice.client.AiNlpClient;
 import com.backend.jobservice.client.ProfileClient;
 import com.backend.jobservice.client.SkillClient;
+import com.backend.jobservice.dto.JobNormUpdatedEvent;
 import com.backend.jobservice.dto.request.InternshipPostRequest;
 import com.backend.jobservice.dto.request.InternshipPostUpdateRequest;
 import com.backend.jobservice.dto.request.JobSkillRequest;
@@ -20,6 +21,7 @@ import com.backend.jobservice.repository.InternshipPostRepository;
 import com.backend.jobservice.repository.JobSkillRepository;
 import com.backend.jobservice.repository.specification.InternshipPostSpecification;
 import com.backend.jobservice.service.InternshipPostService;
+import com.backend.jobservice.service.JobNormEventPublisher;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -31,14 +33,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.time.OffsetDateTime;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +54,7 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     private final SkillClient skillClient;
     private final AiNlpClient aiNlpClient;
     private final ObjectMapper objectMapper;
+    private final JobNormEventPublisher jobNormEventPublisher;
 
 
     @Override
@@ -71,11 +72,30 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         post.setCompanyId(UUID.randomUUID()); // TODO: profile-client
 
         InternshipPost saved = internshipPostRepository.save(post);
-
+//        saved.getInternshipPostNorm().
         try {
             ProcessPostRequest nlpReq = buildProcessPostRequest(saved, request);
             ProcessPostResponse nlpRes = aiNlpClient.processJob(nlpReq);
             applyNlpResultToPost(saved, nlpRes);
+            jobNormEventPublisher.publish(
+                    JobNormUpdatedEvent.builder()
+                            .internshipPostId(saved.getId())
+                            .companyId(null)
+                            .skillsNorm(
+                                    saved.getInternshipPostNorm().getSkillsNorm() != null
+                                            ? saved.getInternshipPostNorm().getSkillsNorm()
+                                            : Collections.emptyList()
+                            )
+//                            .minYears(saved.getInternshipPostNorm().getMinYears())
+                            .workMode(saved.getWorkMode() != null
+                                    ? saved.getWorkMode().name()
+                                    : null)
+                            .locationLat(saved.getInternshipPostNorm().getLat())
+                            .locationLon(saved.getInternshipPostNorm().getLon())
+                            .updatedAt(OffsetDateTime.now())
+                            .build()
+            );
+
         } catch (Exception ex) {
             saved.setNlpStatus("ERROR");
             saved.setNlpError(ex.getMessage());
