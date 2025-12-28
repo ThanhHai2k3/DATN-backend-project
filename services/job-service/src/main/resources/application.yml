@@ -4,8 +4,8 @@ server:
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/intern_network
-    username: postgres
-    password: 123456789
+    username: duke
+    password: duke
   jpa:
     hibernate:
       ddl-auto: update
@@ -32,3 +32,6 @@ services:
     base-url: http://localhost:8086
 
 URL_AI_NLP: http://localhost:8087
+matching:
+  service:
+    url: http://localhost:8088
