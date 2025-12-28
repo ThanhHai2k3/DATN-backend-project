@@ -15,10 +15,13 @@ public class InternshipPostSpecification {
     public static Specification<InternshipPost> hasKeyword(String keyword) {
         return (root, query, cb) -> {
             if (keyword == null || keyword.isBlank()) return null;
-            String pattern = "%" + keyword.toLowerCase() + "%";
+
+            String pattern = "%" + keyword.toLowerCase().trim() + "%";
+
             return cb.or(
                     cb.like(cb.lower(root.get("title")), pattern),
-                    cb.like(cb.lower(root.get("position")), pattern)
+                    cb.like(cb.lower(root.get("position")), pattern),
+                    cb.like(cb.lower(root.get("description")), pattern)
             );
         };
     }
@@ -38,7 +41,8 @@ public class InternshipPostSpecification {
     public static Specification<InternshipPost> hasLocation(String location) {
         return (root, query, cb) -> {
             if (location == null || location.isBlank()) return null;
-            return cb.equal(root.get("location"), location);
+            String pattern = "%" + location.toLowerCase().trim() + "%";
+            return cb.like(cb.lower(root.get("location")), pattern);
         };
     }
 

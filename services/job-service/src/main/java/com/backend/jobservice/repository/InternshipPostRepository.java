@@ -2,6 +2,8 @@ package com.backend.jobservice.repository;
 
 import com.backend.jobservice.entity.InternshipPost;
 import com.backend.jobservice.enums.PostStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -21,4 +23,5 @@ public interface InternshipPostRepository extends JpaRepository<InternshipPost, 
     Optional<InternshipPost> findByIdAndStatus(UUID id, PostStatus status);
     List<InternshipPost> findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(String keyword, PostStatus status);
 
+    Page<InternshipPost> findByPostedBy(UUID postedBy, Pageable pageable);
 }

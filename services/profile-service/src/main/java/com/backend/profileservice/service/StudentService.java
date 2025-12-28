@@ -4,6 +4,7 @@ import com.backend.profileservice.dto.request.student.StudentUpdateRequest;
 import com.backend.profileservice.dto.response.student.StudentResponse;
 import com.backend.profileservice.dto.response.student.VisibilityResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface StudentService {
@@ -19,4 +20,6 @@ public interface StudentService {
     void autoCreateProfile(UUID userId, String fullName);
 
     String getFullNameByUserId(UUID userId);
+
+    List<StudentResponse> getBasicInfoBatch(List<UUID> userIds);
 }

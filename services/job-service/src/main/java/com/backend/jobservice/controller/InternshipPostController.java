@@ -177,4 +177,22 @@ public class InternshipPostController {
                         result
                 ));
     }
+
+    @GetMapping("/employer/my-posts")
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public ResponseEntity<ApiResponse<Page<InternshipPostResponse>>> getMyPosts(
+                                                                                 @AuthenticationPrincipal String userIdStr,
+                                                                                 @RequestParam(defaultValue = "0") int page,
+                                                                                 @RequestParam(defaultValue = "10") int size
+    ) {
+        UUID employerId = UUID.fromString(userIdStr);
+
+        Page<InternshipPostResponse> response = internshipPostService.getMyPosts(employerId, page, size);
+
+        return ResponseEntity.ok(ApiResponse.success(
+                SuccessCode.INTERNSHIP_POST_FETCHED.getCode(),
+                "Get my posts successfully",
+                response
+        ));
+    }
 }

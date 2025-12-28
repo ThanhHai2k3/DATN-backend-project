@@ -1,14 +1,13 @@
 package com.backend.profileservice.controller;
 
 import com.backend.profileservice.dto.response.ApiResponse;
+import com.backend.profileservice.dto.response.student.StudentResponse;
 import com.backend.profileservice.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,6 +28,20 @@ public class InternalController {
                         "STUDENT_FULLNAME_FETCHED",
                         "Student full name fetched successfully",
                         fullName
+                )
+        );
+    }
+
+    @PostMapping("/students/batch-info")
+    public ResponseEntity<ApiResponse<List<StudentResponse>>> getStudentsBatch(
+            @RequestBody List<UUID> userIds
+    ) {
+        List<StudentResponse> students = studentService.getBasicInfoBatch(userIds);
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "BATCH_FETCH_SUCCESS",
+                        "Fetched student batch info successfully",
+                        students
                 )
         );
     }

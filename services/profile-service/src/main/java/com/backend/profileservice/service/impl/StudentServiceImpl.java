@@ -15,7 +15,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,16 @@ public class StudentServiceImpl implements StudentService {
         response.setSkills(studentSkillService.getAllByStudent(userId));
 
         return response;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<StudentResponse> getBasicInfoBatch(List<UUID> userIds) {
+        List<Student> students = studentRepository.findByUserIdIn(userIds);
+        // Reuse mapper có sẵn để chuyển đổi sang Response
+        return students.stream()
+                .map(studentMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     @Override

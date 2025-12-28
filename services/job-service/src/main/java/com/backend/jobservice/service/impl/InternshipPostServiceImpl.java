@@ -23,6 +23,7 @@ import com.backend.jobservice.service.InternshipPostService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -365,7 +366,6 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         norm.setExperienceYearsMax(res.getExperienceYearsMax());
         norm.setExperienceLevel(res.getExperienceLevel());
 
-        // educationLevels, majors: hiện chưa có từ NLP → để null
         norm.setEducationLevels(null);
         norm.setMajors(null);
 
@@ -383,22 +383,25 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
         norm.setDurationNormMonths(res.getDurationMonthsMin());
 
-        // lat / lon
         norm.setLat(res.getLat());
         norm.setLon(res.getLon());
 
         norm.setModelVersion(res.getModelVersion());
 
-//        if (res.getProcessedAt() != null) {
-//            norm.setProcessedAt(res.getProcessedAt().atOffset(ZoneOffset.UTC));
-//        }
-
-        // gắn norm vào post (OneToOne + cascade = ALL)
         post.setInternshipPostNorm(norm);
 
-        // cập nhật trạng thái NLP cho post (tuỳ naming của bạn)
         post.setNlpStatus("DONE");
         post.setNlpError(null);
         post.setProcessedAt(res.getProcessedAt());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<InternshipPostResponse> getMyPosts(UUID employerId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
+        Page<InternshipPost> postPage = internshipPostRepository.findByPostedBy(employerId, pageable);
+
+        return postPage.map(internshipPostMapper::toResponse);
     }
 }

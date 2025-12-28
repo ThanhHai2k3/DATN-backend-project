@@ -2,6 +2,8 @@ package com.backend.applyingservice.repository;
 
 import com.backend.applyingservice.entity.Application;
 import com.backend.applyingservice.enums.ApplicationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -25,8 +27,7 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     Optional<Application> findByIdAndEmployerId(UUID id, UUID employerId);
 
     //NTD lay danh sach ung vien
-    List<Application> findByJobPostIdOrderByAppliedAtDesc(UUID jobPostId);
-
+    Page<Application> findByJobPostIdAndEmployerId(UUID jobPostId, UUID employerId, Pageable pageable);
     //Loc trang thai
     List<Application> findByJobPostIdAndStatus(UUID jobPostId, ApplicationStatus status);
 
