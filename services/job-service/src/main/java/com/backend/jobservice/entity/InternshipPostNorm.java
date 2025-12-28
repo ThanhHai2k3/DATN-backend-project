@@ -1,10 +1,16 @@
 package com.backend.jobservice.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -24,8 +30,9 @@ public class InternshipPostNorm {
     @JoinColumn(name = "internship_post_id")
     private InternshipPost internshipPost;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "skills_norm", columnDefinition = "jsonb")
-    private String skillsNorm;
+    private List<String> skillsNorm = new ArrayList<>();
 
     private BigDecimal experienceYearsMin;
     private BigDecimal experienceYearsMax;

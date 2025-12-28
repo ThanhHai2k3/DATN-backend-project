@@ -12,6 +12,5 @@ public class CreateCategoryRequest {
 
     @NotBlank
     private String name;
-
     private String description;
 }

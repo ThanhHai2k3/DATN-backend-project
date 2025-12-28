@@ -358,8 +358,8 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
         // skills_norm: lưu JSONB (String)
         if (res.getSkillsNorm() != null) {
-            String json = objectMapper.writeValueAsString(res.getSkillsNorm());
-            norm.setSkillsNorm(json);
+//            String json = objectMapper.writeValueAsString(res.getSkillsNorm());
+            norm.setSkillsNorm(res.getSkillsNorm());
         }
 
         norm.setExperienceYearsMin(res.getExperienceYearsMin());
