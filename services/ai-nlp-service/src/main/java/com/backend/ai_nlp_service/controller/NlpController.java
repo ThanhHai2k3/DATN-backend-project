@@ -23,7 +23,7 @@ public class NlpController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/process-job")
+    @PostMapping("/process-post")
     public ProcessPostResponse processJob(@RequestBody ProcessPostRequest request) {
         return jobNlpService.processJob(request);
     }
