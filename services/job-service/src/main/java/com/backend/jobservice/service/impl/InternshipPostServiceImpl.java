@@ -245,15 +245,17 @@ public class InternshipPostServiceImpl implements InternshipPostService {
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
         if (!post.getPostedBy().equals(employerId)) {
-            throw new AppException(ErrorCode.HIDE_POST_DENIED);
+            throw new AppException(ErrorCode.FORBIDDEN);
         }
-
-        if(post.getStatus().equals(PostStatus.HIDDEN)){
-            throw new AppException(ErrorCode.POST_ALREADY_HIDDEN);
+        if (post.getStatus() == PostStatus.ACTIVE) {
+            post.setStatus(PostStatus.HIDDEN);
         }
-
-        post.setStatus(PostStatus.HIDDEN);
-        post.setUpdatedAt(Instant.now());
+        else if (post.getStatus() == PostStatus.HIDDEN) {
+            post.setStatus(PostStatus.PENDING);
+        }
+        else if (post.getStatus() == PostStatus.PENDING) {
+            post.setStatus(PostStatus.HIDDEN);
+        }
         internshipPostRepository.save(post);
     }
 

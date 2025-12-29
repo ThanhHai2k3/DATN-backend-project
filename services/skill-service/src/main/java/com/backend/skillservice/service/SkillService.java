@@ -16,4 +16,5 @@ public interface SkillService {
     List<SkillResponse> getSkillsByCategory(UUID categoryId);
 
     List<SkillResponse> getSkillsByIds(List<UUID> ids);
+
 }

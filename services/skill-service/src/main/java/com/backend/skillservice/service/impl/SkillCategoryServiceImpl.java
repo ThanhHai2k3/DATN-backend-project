@@ -86,4 +86,5 @@ public class SkillCategoryServiceImpl implements SkillCategoryService {
                 .map(skillCategoryMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
 }

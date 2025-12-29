@@ -109,7 +109,7 @@ public class SkillServiceImpl implements SkillService {
 
     @Override
     public List<SkillResponse> getSkillsByIds(List<UUID> ids) {
-        return skillRepository.findAllByIdIn(ids)
+        return skillRepository.findAllById(ids)
                 .stream()
                 .map(skillMapper::toResponse)
                 .collect(Collectors.toList());
