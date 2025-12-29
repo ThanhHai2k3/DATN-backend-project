@@ -150,6 +150,22 @@ public class InternshipPostController {
                 ));
     }
 
+    @GetMapping("/employer/detail")
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public ResponseEntity<ApiResponse<InternshipPostResponse>> getEmployerPostDetail(
+            @AuthenticationPrincipal String employerId,
+            @RequestParam("postId") UUID postId
+    ) {
+        UUID empId = UUID.fromString(employerId);
+        InternshipPostResponse response = internshipPostService.getEmployerPostDetail(empId, postId);
+
+        return ResponseEntity.ok(ApiResponse.success(
+                SuccessCode.INTERNSHIP_POST_FETCHED.getCode(),
+                SuccessCode.INTERNSHIP_POST_FETCHED.getMessage(),
+                response
+        ));
+    }
+
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<InternshipPostSummaryResponse>>> searchPosts(
             @RequestParam(value = "keyword", required = false, defaultValue = "") String keyword,

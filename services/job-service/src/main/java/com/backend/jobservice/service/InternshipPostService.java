@@ -24,4 +24,7 @@ public interface InternshipPostService {
 
     List<InternshipPostSummaryResponse> getPendingPosts();
 
-    Page<InternshipPostResponse> getMyPosts(UUID employerId, int page, int size);}
+    Page<InternshipPostResponse> getMyPosts(UUID employerId, int page, int size);
+
+    InternshipPostResponse getEmployerPostDetail(UUID employerId, UUID postId);
+}

@@ -214,6 +214,19 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     }
 
     @Override
+    public InternshipPostResponse getEmployerPostDetail(UUID employerId, UUID postId) {
+
+        InternshipPost post = internshipPostRepository.findById(postId)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        if (!post.getPostedBy().equals(employerId)) {
+            throw new AppException(ErrorCode.FORBIDDEN, "Bạn không có quyền xem bài đăng này");
+        }
+        InternshipPostResponse response = internshipPostMapper.toResponse(post);
+        return response;
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public InternshipPostResponse getPostDetail(UUID postId){
         InternshipPost post = internshipPostRepository.findByIdAndStatus(postId, PostStatus.ACTIVE)
