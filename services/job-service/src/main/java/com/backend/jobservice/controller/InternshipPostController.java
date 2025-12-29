@@ -182,8 +182,8 @@ public class InternshipPostController {
     @PreAuthorize("hasRole('EMPLOYER')")
     public ResponseEntity<ApiResponse<Page<InternshipPostResponse>>> getMyPosts(
                                                                                  @AuthenticationPrincipal String userIdStr,
-                                                                                 @RequestParam(defaultValue = "0") int page,
-                                                                                 @RequestParam(defaultValue = "10") int size
+                                                                                 @RequestParam(name = "page", defaultValue = "0") int page,
+                                                                                 @RequestParam(name = "size", defaultValue = "10") int size
     ) {
         UUID employerId = UUID.fromString(userIdStr);
 

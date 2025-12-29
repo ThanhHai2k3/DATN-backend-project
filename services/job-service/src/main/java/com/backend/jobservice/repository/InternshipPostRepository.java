@@ -23,5 +23,6 @@ public interface InternshipPostRepository extends JpaRepository<InternshipPost, 
     Optional<InternshipPost> findByIdAndStatus(UUID id, PostStatus status);
     List<InternshipPost> findByTitleContainingIgnoreCaseAndStatusOrderByCreatedAtDesc(String keyword, PostStatus status);
 
+
     Page<InternshipPost> findByPostedBy(UUID postedBy, Pageable pageable);
 }

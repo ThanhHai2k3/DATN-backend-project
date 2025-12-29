@@ -115,7 +115,7 @@ public class StudentServiceImpl implements StudentService {
         Student student = Student.builder()
                 .userId(userId)
                 .fullName(fullName)
-                .publicProfile(false)
+                .publicProfile(true)
                 .build();
 
         studentRepository.save(student);
