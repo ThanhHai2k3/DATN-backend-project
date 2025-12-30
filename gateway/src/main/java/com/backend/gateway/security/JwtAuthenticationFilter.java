@@ -98,6 +98,7 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
         ServerWebExchange modifiedExchange = exchange.mutate().request(modifiedRequest).build();
         log.info("Forwarding X-User-Id = {}", userId);
+        log.info("Role: {}", role);
         return chain.filter(modifiedExchange);
     }
 
