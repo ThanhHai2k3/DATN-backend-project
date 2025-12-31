@@ -47,6 +47,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 // Nếu tìm thấy user trong DB, gán vào SecurityContext
                 userAccountRepository.findByEmailIgnoreCase(email)
                         .ifPresent(userAccount -> {
+                            if (userAccount.getStatus() != com.backend.authservice.enums.AccountStatus.ACTIVE) {
+                                return;
+                            }
                             UsernamePasswordAuthenticationToken authentication =
                                     new UsernamePasswordAuthenticationToken(
                                             userAccount.getEmail(),

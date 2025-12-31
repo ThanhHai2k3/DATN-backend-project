@@ -30,6 +30,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.util.UUID;
 
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
@@ -105,8 +108,6 @@ public class AuthServiceImpl implements AuthService {
             }
 
             AuthResponse response = tokenService.issueTokens(user);
-
-            // THÊM LẠI LOGIC LẤY VÀ SET FULL NAME
             String fullName = getFullNameFromProfile(user.getId());
             response.setFullName(fullName);
 
@@ -114,6 +115,9 @@ public class AuthServiceImpl implements AuthService {
 
         } catch (BadCredentialsException ex) {
             throw new AppException(ErrorCode.INVALID_CREDENTIALS);
+
+        } catch (DisabledException | LockedException ex) {
+            throw new AppException(ErrorCode.ACCOUNT_INACTIVE);
         }
     }
 
