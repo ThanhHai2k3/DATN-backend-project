@@ -25,6 +25,7 @@ public class ApplicationResponse {
     private String coverLetter;
 
     private ApplicationStatus status;
+    private String note;
     private Instant appliedAt;
     private Instant viewedAt;
     private Instant updatedAt;

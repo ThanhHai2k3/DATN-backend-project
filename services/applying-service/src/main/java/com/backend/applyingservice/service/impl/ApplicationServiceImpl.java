@@ -174,6 +174,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .cvId(app.getCvId())
                 .coverLetter(app.getCoverLetter())
                 .status(app.getStatus())
+                .note(app.getNote())
                 .appliedAt(app.getAppliedAt())
                 .viewedAt(app.getViewedAt())
                 .updatedAt(app.getUpdatedAt())
