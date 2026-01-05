@@ -7,6 +7,7 @@ import com.backend.authservice.dto.admin.AdminUserSummary;
 import com.backend.authservice.dto.admin.PageResponse;
 import com.backend.authservice.entity.UserAccount;
 import com.backend.authservice.enums.ErrorCode;
+import com.backend.authservice.enums.Role;
 import com.backend.authservice.exception.AppException;
 import com.backend.authservice.repository.RefreshTokenRepository;
 import com.backend.authservice.repository.UserAccountRepository;
@@ -60,11 +61,16 @@ public class AdminServiceImpl implements AdminService {
         if (req.getStatus() == null) {
             throw new AppException(ErrorCode.INTERNAL_ERROR);
         }
-        UserAccount user = userAccountRepository.findById(userId)
+
+        UserAccount targetUser = userAccountRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        user.setStatus(req.getStatus());
-        UserAccount saved = userAccountRepository.save(user);
+        if (targetUser.getRole() == Role.SYSTEM_ADMIN) {
+            throw new AppException(ErrorCode.CANNOT_ACTION_ON_ADMIN);
+        }
+
+        targetUser.setStatus(req.getStatus());
+        UserAccount saved = userAccountRepository.save(targetUser);
 
         int tokenCount = refreshTokenRepository.countByUser_Id(userId);
         return toDetail(saved, tokenCount);

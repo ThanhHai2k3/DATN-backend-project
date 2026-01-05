@@ -2,6 +2,7 @@ package com.backend.applyingservice.controller;
 
 import com.backend.applyingservice.dto.external.ApiResponse;
 import com.backend.applyingservice.dto.request.ApplyRequest;
+import com.backend.applyingservice.dto.request.UpdateApplicationStatusRequest;
 import com.backend.applyingservice.dto.response.ApplicationResponse;
 import com.backend.applyingservice.enums.SuccessCode;
 import com.backend.applyingservice.service.ApplicationService;
@@ -94,9 +95,28 @@ public class ApplicationController {
         Page<ApplicationResponse> response = applicationService.getApplicationsByPostId(employerId, postId, page, size);
 
         return ResponseEntity.ok(ApiResponse.success(
-                SuccessCode.APPLICATION_LIST_FETCHED.getCode(), // Hoặc string cứng nếu chưa có Enum
+                SuccessCode.APPLICATION_LIST_FETCHED.getCode(),
                 "Get candidate list successfully",
                 response
+        ));
+    }
+
+    // 4. Nhà tuyển dụng cập nhật trạng thái đơn (Duyệt / Từ chối)
+    @PatchMapping("/employer/applications/{id}/status")
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public ResponseEntity<ApiResponse<Void>> updateStatus(
+            @PathVariable("id") UUID applicationId,
+            @RequestBody UpdateApplicationStatusRequest request,
+            @AuthenticationPrincipal String employerIdStr) {
+
+        UUID employerId = UUID.fromString(employerIdStr);
+
+        applicationService.updateApplicationStatus(employerId, applicationId, request.getStatus());
+
+        return ResponseEntity.ok(ApiResponse.success(
+                "APP_UPDATED",
+                "Application status updated to " + request.getStatus(),
+                null
         ));
     }
 }

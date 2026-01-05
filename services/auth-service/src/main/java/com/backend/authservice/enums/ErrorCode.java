@@ -15,7 +15,8 @@ public enum ErrorCode {
     TOKEN_EXPIRED("AUTH_005", "Token has expired", HttpStatus.UNAUTHORIZED),
     TOKEN_INVALID("AUTH_006", "Invalid token", HttpStatus.UNAUTHORIZED),
     INVALID_REFRESH_TOKEN("AUTH_007", "Invalid refresh token", HttpStatus.UNAUTHORIZED),
-    INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+    INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    CANNOT_ACTION_ON_ADMIN("AUTH_008", "Action not allowed on System Admin account", HttpStatus.FORBIDDEN),
     ;
 
     private final String code;

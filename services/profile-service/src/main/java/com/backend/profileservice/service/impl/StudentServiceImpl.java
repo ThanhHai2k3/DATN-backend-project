@@ -47,7 +47,6 @@ public class StudentServiceImpl implements StudentService {
     @Transactional(readOnly = true)
     public List<StudentResponse> getBasicInfoBatch(List<UUID> userIds) {
         List<Student> students = studentRepository.findByUserIdIn(userIds);
-        // Reuse mapper có sẵn để chuyển đổi sang Response
         return students.stream()
                 .map(studentMapper::toResponse)
                 .collect(Collectors.toList());

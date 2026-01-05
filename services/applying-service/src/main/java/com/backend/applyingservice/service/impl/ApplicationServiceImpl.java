@@ -234,4 +234,20 @@ public class ApplicationServiceImpl implements ApplicationService {
             return res;
         });
     }
+
+    @Override
+    @Transactional
+    public void updateApplicationStatus(UUID employerId, UUID applicationId, ApplicationStatus status) {
+        Application app = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
+
+        if (!app.getEmployerId().equals(employerId)) {
+            throw new AppException(ErrorCode.ACCESS_DENIED);
+        }
+
+        app.setStatus(status);
+        app.setUpdatedAt(Instant.now());
+
+        applicationRepository.save(app);
+    }
 }
