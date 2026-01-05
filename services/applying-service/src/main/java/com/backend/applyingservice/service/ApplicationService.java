@@ -13,5 +13,5 @@ public interface ApplicationService {
     List<ApplicationResponse> getMyApplications(UUID studentId);
     ApplicationResponse getApplicationDetailForEmployer(UUID employerId, UUID applicationId);
     Page<ApplicationResponse> getApplicationsByPostId(UUID employerId, UUID jobPostId, int page, int size);
-    void updateApplicationStatus(UUID employerId, UUID applicationId, ApplicationStatus status);
+    void updateApplicationStatus(UUID employerId, UUID applicationId, ApplicationStatus status, String note);
 }

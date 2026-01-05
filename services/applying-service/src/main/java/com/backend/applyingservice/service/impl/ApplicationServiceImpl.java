@@ -237,7 +237,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional
-    public void updateApplicationStatus(UUID employerId, UUID applicationId, ApplicationStatus status) {
+    public void updateApplicationStatus(UUID employerId, UUID applicationId, ApplicationStatus status, String note) {
+
         Application app = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new AppException(ErrorCode.APPLICATION_NOT_FOUND));
 
@@ -246,6 +247,9 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         app.setStatus(status);
+
+        app.setNote(note);
+
         app.setUpdatedAt(Instant.now());
 
         applicationRepository.save(app);

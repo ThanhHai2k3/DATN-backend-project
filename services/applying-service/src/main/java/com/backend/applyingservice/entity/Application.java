@@ -37,6 +37,9 @@ public class Application {
     @Enumerated(EnumType.STRING)
     private ApplicationStatus status;
 
+    @Column(name = "note", columnDefinition = "TEXT")
+    private String note;
+
     private String coverLetter;
 
     @CreationTimestamp

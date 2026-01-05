@@ -111,7 +111,12 @@ public class ApplicationController {
 
         UUID employerId = UUID.fromString(employerIdStr);
 
-        applicationService.updateApplicationStatus(employerId, applicationId, request.getStatus());
+        applicationService.updateApplicationStatus(
+                employerId,
+                applicationId,
+                request.getStatus(),
+                request.getNote()
+        );
 
         return ResponseEntity.ok(ApiResponse.success(
                 "APP_UPDATED",
