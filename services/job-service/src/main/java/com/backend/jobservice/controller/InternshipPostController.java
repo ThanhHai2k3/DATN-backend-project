@@ -100,6 +100,22 @@ public class InternshipPostController {
                 ));
     }
 
+    @GetMapping("/admin/detail")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    public ResponseEntity<ApiResponse<InternshipPostResponse>> getPostDetailForAdmin(
+            @RequestParam("postId") UUID postId) {
+
+        InternshipPostResponse response = internshipPostService.getPostDetailForAdmin(postId);
+
+        return ResponseEntity
+                .status(SuccessCode.INTERNSHIP_POST_FETCHED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.INTERNSHIP_POST_FETCHED.getCode(),
+                        SuccessCode.INTERNSHIP_POST_FETCHED.getMessage(),
+                        response
+                ));
+    }
+
     @PatchMapping("/approve")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<ApiResponse<InternshipPostResponse>> approvePost(

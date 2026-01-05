@@ -27,4 +27,6 @@ public interface InternshipPostService {
     Page<InternshipPostResponse> getMyPosts(UUID employerId, int page, int size);
 
     InternshipPostResponse getEmployerPostDetail(UUID employerId, UUID postId);
+
+    InternshipPostResponse getPostDetailForAdmin(UUID id);
 }

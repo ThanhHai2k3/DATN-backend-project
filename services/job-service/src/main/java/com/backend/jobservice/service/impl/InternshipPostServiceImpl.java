@@ -58,6 +58,17 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
 
     @Override
+    public InternshipPostResponse getPostDetailForAdmin(UUID id) {
+        InternshipPost post = internshipPostRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+        InternshipPostResponse response = internshipPostMapper.toResponse(post);
+        fillSkillNames(response.getSkills());
+
+        return response;
+    }
+
+    @Override
     @PreAuthorize("hasRole('EMPLOYER')")
     public InternshipPostResponse createPost(UUID employerId, InternshipPostRequest request){
         InternshipPost post = internshipPostMapper.toEntity(request);
