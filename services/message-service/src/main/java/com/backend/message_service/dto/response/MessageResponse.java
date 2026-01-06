@@ -19,4 +19,5 @@ public class MessageResponse {
     private String messageType;
     private Instant sentAt;
     private List<ReactionResponse> reactions;
+    private UserBasicInfoResponse senderInfo;
 }

@@ -59,3 +59,7 @@ aws:
     bucket-name: ${AWS_S3_BUCKET_NAME}
   access-key-id: ${AWS_ACCESS_KEY_ID}
   secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+
+service:
+  profile:
+    base-url: http://localhost:8082/api/profile/internal

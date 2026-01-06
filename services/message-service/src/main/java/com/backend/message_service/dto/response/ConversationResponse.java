@@ -11,6 +11,7 @@ import lombok.Setter;
 public class ConversationResponse {
     private Long id;
     private UserResponse receiver; //cũ: participant
+    private UserBasicInfoResponse otherUserInfo;
     private MessageResponse lastMessage;
     private long unreadCount;
 }
