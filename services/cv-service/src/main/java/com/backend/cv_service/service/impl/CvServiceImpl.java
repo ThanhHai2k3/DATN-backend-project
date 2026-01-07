@@ -1,6 +1,7 @@
 package com.backend.cv_service.service.impl;
 
 import com.backend.cv_service.client.AiNlpClient;
+import com.backend.cv_service.client.ProfileClient;
 import com.backend.cv_service.dto.*;
 import com.backend.cv_service.entity.CV;
 import com.backend.cv_service.exception.ResourceNotFoundException;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,6 +30,8 @@ public class CvServiceImpl implements CvService {
     private final S3FileStorageService s3FileStorageService;
     private final CvNormService cvNormService;
     private final AiNlpClient aiNlpClient;
+    private final ProfileClient profileClient;
+
     private static final Logger log = LoggerFactory.getLogger(S3FileStorageService.class);
 
     @Override
@@ -35,29 +39,36 @@ public class CvServiceImpl implements CvService {
     public CvSummaryDto uploadExtractAndSaveCv(UUID studentId, String cvName, MultipartFile file) {
         String fileUrl;
         String rawText;
-        try{
+        try {
             rawText = CvTextExtractor.extractText(
                     file.getInputStream(),
                     file.getOriginalFilename()
             );
             fileUrl = s3FileStorageService.storeFile(file, "cvs/");
-        }
-        catch (IOException e){
+        } catch (IOException e) {
             throw new RuntimeException("Lỗi khi lưu file: " + file.getOriginalFilename(), e);
-        }
-        catch (Exception e){
-            throw new RuntimeException("Lỗi khi trích xuất nội dung CV: "+ file.getOriginalFilename(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi trích xuất nội dung CV: " + file.getOriginalFilename(), e);
         }
 
         boolean isFirstCv = !cvRepository.existsByStudentId(studentId);
+
         CV newCv = new CV();
         newCv.setStudentId(studentId);
         newCv.setCvName(cvName);
         newCv.setCvUrl(fileUrl);
         newCv.setDefault(isFirstCv);
         newCv.setRawText(rawText);
+        newCv.setNlpStatus("PENDING");
 
         CV savedCv = cvRepository.save(newCv);
+
+        try {
+            log.info("Đang cập nhật CV URL cho student {} sang Profile Service...", studentId);
+            profileClient.updateCvUrl(studentId, fileUrl);
+        } catch (Exception e) {
+            log.error("Lỗi khi gọi Profile Service để update CV URL: {}", e.getMessage());
+        }
 
         try {
             CvNlpRequest request = new CvNlpRequest();
@@ -68,10 +79,14 @@ public class CvServiceImpl implements CvService {
 
             cvNormService.upsertFromNlpResult(savedCv.getId(), nlpResult);
 
+            savedCv.setNlpStatus("SUCCESS");
+            savedCv.setProcessedAt(OffsetDateTime.now());
             cvRepository.save(savedCv);
 
         } catch (Exception ex) {
-            System.out.println(ex);
+            log.error("Lỗi khi xử lý NLP cho CV {}: {}", savedCv.getId(), ex.getMessage());
+
+            savedCv.setNlpStatus("FAILED");
             cvRepository.save(savedCv);
         }
 

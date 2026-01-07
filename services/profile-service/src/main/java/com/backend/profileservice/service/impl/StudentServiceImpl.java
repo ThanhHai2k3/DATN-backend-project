@@ -53,6 +53,16 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
+    public void updateCvUrl(UUID userId, String cvUrl) {
+        Student student = studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.STUDENT_NOT_FOUND));
+
+        student.setCvUrl(cvUrl);
+        studentRepository.save(student);
+    }
+
+    @Override
     @PreAuthorize("isAuthenticated()")
     public StudentResponse updateProfile(UUID userId, StudentUpdateRequest request){
         Student student = studentRepository.findByUserId(userId)

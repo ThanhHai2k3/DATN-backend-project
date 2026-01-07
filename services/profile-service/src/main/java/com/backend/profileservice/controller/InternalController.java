@@ -32,6 +32,15 @@ public class InternalController {
         );
     }
 
+    @PutMapping("/students/{userId}/cv-url")
+    public ResponseEntity<ApiResponse<Void>> updateCvUrl(
+            @PathVariable("userId") UUID userId,
+            @RequestBody String cvUrl
+    ) {
+        studentService.updateCvUrl(userId, cvUrl);
+        return ResponseEntity.ok(ApiResponse.success("CV_URL_UPDATED", "Updated CV URL successfully", null));
+    }
+
     @PostMapping("/students/batch-info")
     public ResponseEntity<ApiResponse<List<StudentResponse>>> getStudentsBatch(
             @RequestBody List<UUID> userIds
