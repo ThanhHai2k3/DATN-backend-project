@@ -69,7 +69,7 @@ public class InternshipPostController {
     }
 
     @PatchMapping("/hide")
-    @PreAuthorize("hasRole('EMPLOYER')")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> hidePost(
             @AuthenticationPrincipal String employerId,
             @RequestParam("postId") UUID postId) {

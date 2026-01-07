@@ -250,14 +250,14 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     }
 
     @Override
-    @PreAuthorize("hasRole('EMPLOYER')")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('SYSTEM_ADMIN')")
     public void hidePost(UUID employerId, UUID postId){
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getPostedBy().equals(employerId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
+//        if (!post.getPostedBy().equals(employerId)) {
+//            throw new AppException(ErrorCode.FORBIDDEN);
+//        }
         if (post.getStatus() == PostStatus.ACTIVE) {
             post.setStatus(PostStatus.HIDDEN);
         }
