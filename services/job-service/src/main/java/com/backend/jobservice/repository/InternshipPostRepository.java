@@ -25,4 +25,5 @@ public interface InternshipPostRepository extends JpaRepository<InternshipPost, 
 
 
     Page<InternshipPost> findByPostedBy(UUID postedBy, Pageable pageable);
+
 }
