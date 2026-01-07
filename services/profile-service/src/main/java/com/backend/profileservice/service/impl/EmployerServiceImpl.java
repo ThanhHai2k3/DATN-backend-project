@@ -1,20 +1,22 @@
 package com.backend.profileservice.service.impl;
 
-import com.backend.profileservice.dto.request.CompanyRequest;
-import com.backend.profileservice.dto.request.EmployerRequest;
-import com.backend.profileservice.dto.response.CompanyResponse;
+import com.backend.profileservice.dto.request.CompanyCreateRequest;
+import com.backend.profileservice.dto.request.EmployerUpdateRequest;
 import com.backend.profileservice.dto.response.EmployerResponse;
 import com.backend.profileservice.entity.Company;
 import com.backend.profileservice.entity.Employer;
 import com.backend.profileservice.enums.ErrorCode;
 import com.backend.profileservice.exception.AppException;
-import com.backend.profileservice.helper.EmployerHelper;
 import com.backend.profileservice.mapper.EmployerMapper;
 import com.backend.profileservice.repository.CompanyRepository;
 import com.backend.profileservice.repository.EmployerRepository;
 import com.backend.profileservice.service.CompanyService;
 import com.backend.profileservice.service.EmployerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,15 +27,17 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EmployerServiceImpl implements EmployerService {
+
     private final EmployerRepository employerRepository;
     private final CompanyRepository companyRepository;
     private final EmployerMapper employerMapper;
     private final CompanyService companyService;
-    private final EmployerHelper employerHelper;
 
     @Override
-    public EmployerResponse getByUserId(UUID userId){
-        Employer employer = employerRepository.findByUserId(userId)
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public EmployerResponse getByUserId(UUID userId) {
+        Employer employer = employerRepository.findByUserIdWithCompany(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
         return employerMapper.toResponse(employer);
@@ -41,127 +45,151 @@ public class EmployerServiceImpl implements EmployerService {
 
     @Override
     @Transactional
-    public EmployerResponse createOrJoinCompany(UUID userId, EmployerRequest request) {
-        // Mỗi user chỉ có thể có một employer profile duy nhất
-        if (employerRepository.existsByUserId(userId)) {
-            throw new AppException(ErrorCode.EMPLOYER_PROFILE_EXISTED);
-        }
-
-//        // Khởi tạo entity Employer (profile)
-//        Employer employer = new Employer();
-//        employer.setUserId(userId);
-//        employer.setName(request.getName());
-//        employer.setPosition(request.getPosition());
-
-//        // Validate name bắt buộc
-//        if (request.getName() == null || request.getName().trim().isEmpty()) {
-//            throw new AppException(ErrorCode.INVALID_REQUEST, "Name is required");
-//        }
-
-        if (request.getCompanyId() != null) {
-            // Trường hợp 1: join vào công ty có sẵn
-            Company company = companyRepository.findById(request.getCompanyId())
-                    .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
-
-//            employer.setCompany(company);
-//            employer.setAdmin(false);
-            Employer employer = Employer.builder()
-                    .userId(userId)
-                    .name(request.getName())
-                    .position(request.getPosition())
-                    .company(company)
-                    .isAdmin(false)
-                    .build();
-
-            Employer saved = employerRepository.saveAndFlush(employer);
-            return employerMapper.toResponse(saved);
-        } else {
-            // Trường hợp 2: chưa có công ty → auto-create tạm (fallback cho giai đoạn phát triển BE)
-            // Sau này khi FE có form tạo công ty riêng, sẽ bỏ đoạn này đi
-            // Tạo company mới qua CompanyService
-            CompanyRequest companyRequest = CompanyRequest.builder()
-                    .name("Company " + request.getName())
-                    .description("New company created by " + request.getName())
-                    .industry("Unknown")
-                    .build();
-
-            CompanyResponse companyResponse = companyService.create(userId, companyRequest);
-            Company company = companyRepository.findById(companyResponse.getId())
-                    .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
-
-            // Dùng helper – sẽ tạo employer với đúng name/position
-//            Employer adminEmployer = employerHelper.ensureEmployerAdmin(
-//                    userId,
-//                    company,
-//                    request.getName(),
-//                    request.getPosition()
-//            );
-
-            Employer adminEmployer = Employer.builder()
-                    .userId(userId)
-                    .name(request.getName())
-                    .position(request.getPosition())
-                    .company(company)
-                    .isAdmin(true)
-                    .build();
-
-            Employer saved = employerRepository.saveAndFlush(adminEmployer);
-            return employerMapper.toResponse(saved);
-        }
-    }
-
-    @Override
-    @Transactional
-    public EmployerResponse updateProfile(UUID userId, EmployerRequest request) {
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public EmployerResponse updateMyProfile(UUID userId, EmployerUpdateRequest request) {
         Employer employer = employerRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
-        employerMapper.update(employer, request);
+        employerMapper.updateProfile(employer, request);
+
         Employer saved = employerRepository.saveAndFlush(employer);
         return employerMapper.toResponse(saved);
     }
 
     @Override
-    public List<EmployerResponse> getAllByCompany(UUID companyId){
-        return employerRepository.findAllByCompanyId(companyId)
+    @Transactional
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public EmployerResponse joinCompany(UUID userId, UUID companyId) {
+        Employer employer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        if (employer.getCompany() != null) {
+            throw new AppException(ErrorCode.EMPLOYER_ALREADY_HAS_COMPANY);
+        }
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
+
+        employer.setCompany(company);
+        employer.setAdmin(false);
+
+        Employer saved = employerRepository.saveAndFlush(employer);
+        return employerMapper.toResponse(saved);
+    }
+
+    /**
+     * Khi không tìm thấy company -> tạo mới và tự join.
+     * Nơi set admin=true hợp lý nhất là lúc tạo company.
+     */
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public EmployerResponse createCompanyAndJoin(UUID userId, CompanyCreateRequest request) {
+        Employer employer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        if (employer.getCompany() != null) {
+            throw new AppException(ErrorCode.EMPLOYER_ALREADY_HAS_COMPANY);
+        }
+
+        // CompanyService.create(...) đã:
+        // - tạo company
+        // - gán employer.company = company
+        // - set employer.admin = true (owner)
+        companyService.create(userId, request);
+
+        // reload employer để trả về response mới nhất
+        Employer updatedEmployer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        return employerMapper.toResponse(updatedEmployer);
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public void leaveCompany(UUID userId) {
+        Employer employer = employerRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        //admin không được rời company
+        if (employer.isAdmin() && employer.getCompany() != null) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_ADMIN_EMPLOYER);
+        }
+
+        employer.setCompany(null);
+        employer.setAdmin(false);
+        employerRepository.save(employer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasAnyRole('EMPLOYER','SYSTEM_ADMIN')")
+    public List<EmployerResponse> getAllByCompany(UUID callerUserId, UUID companyId) {
+        companyRepository.findById(companyId)
+                .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // Nếu caller là admin -> cho xem tất cả
+        if (!isSystemAdmin()) {
+            // caller là EMPLOYER -> chỉ được xem company của chính mình
+            Employer caller = employerRepository.findByUserIdWithCompany(callerUserId)
+                    .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+            if (caller.getCompany() == null || !caller.getCompany().getId().equals(companyId)) {
+                // bạn có thể dùng ErrorCode riêng: ACCESS_DENIED / FORBIDDEN
+                throw new AppException(ErrorCode.FORBIDDEN);
+            }
+        }
+
+        return employerRepository.findAllByCompanyIdWithCompany(companyId)
                 .stream()
                 .map(employerMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Override
-    @Transactional
-    public void delete(UUID userId) {
+    @Transactional(readOnly = true)
+    @PreAuthorize("isAuthenticated()")
+    public EmployerResponse getPublicProfile(UUID viewerUserId, UUID targetUserId) {
+        Employer target = employerRepository.findByUserIdWithCompany(targetUserId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        return employerMapper.toResponse(target);
+    }
+
+    @Override
+    @PreAuthorize("permitAll()")
+    public String getFullNameByUserId(UUID userId) {
         Employer employer = employerRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
-        // Nếu là admin công ty, không thể xóa khi công ty vẫn tồn tại
-        // Admin phải xóa công ty trước hoặc chuyển quyền admin
-        if (employer.isIsAdmin() && employer.getCompany() != null) {
-            throw new AppException(ErrorCode.CANNOT_DELETE_ADMIN_EMPLOYER);
-        }
-
-        //HR bình thường -> unlink khỏi công ty
-        employer.setCompany(null);
-        employer.setIsAdmin(false);
-
-        employerRepository.save(employer);
+        return employer.getName();
     }
 
     @Override
     @Transactional
+    @PreAuthorize("permitAll()")
     public void autoCreateProfile(UUID userId, String fullName) {
-        if (employerRepository.existsByUserId(userId)) {
-            return;
-        }
+        if (employerRepository.existsByUserId(userId)) return;
 
         Employer employer = Employer.builder()
                 .userId(userId)
                 .name(fullName)
-                .position(null)
-                .isAdmin(false)
+                .admin(false)
                 .build();
 
         employerRepository.save(employer);
+    }
+
+    private boolean isSystemAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || auth.getAuthorities() == null) return false;
+
+        for (GrantedAuthority ga : auth.getAuthorities()) {
+            if ("ROLE_SYSTEM_ADMIN".equals(ga.getAuthority())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

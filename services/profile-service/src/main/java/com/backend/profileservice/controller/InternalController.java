@@ -2,6 +2,7 @@ package com.backend.profileservice.controller;
 
 import com.backend.profileservice.dto.response.ApiResponse;
 import com.backend.profileservice.dto.response.student.StudentResponse;
+import com.backend.profileservice.service.EmployerService;
 import com.backend.profileservice.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import java.util.UUID;
 public class InternalController {
 
     private final StudentService studentService;
+    private final EmployerService employerService;
 
     @GetMapping("/students/{userId}/full-name")
     public ResponseEntity<ApiResponse<String>> getStudentFullName(
@@ -27,6 +29,21 @@ public class InternalController {
                 ApiResponse.success(
                         "STUDENT_FULLNAME_FETCHED",
                         "Student full name fetched successfully",
+                        fullName
+                )
+        );
+    }
+
+    @GetMapping("/employers/{userId}/full-name")
+    public ResponseEntity<ApiResponse<String>> getEmployerFullName(
+            @PathVariable("userId") UUID userId
+    ) {
+        String fullName = employerService.getFullNameByUserId(userId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "EMPLOYER_FULLNAME_FETCHED",
+                        "Employer full name fetched successfully",
                         fullName
                 )
         );

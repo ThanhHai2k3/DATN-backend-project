@@ -1,5 +1,6 @@
 package com.backend.profileservice.entity;
 
+import com.backend.profileservice.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -18,25 +19,30 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class Employer {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(nullable = false)
-    private UUID userId; // FK tới auth_schema.user_accounts.id
+    private UUID userId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
 
     @Column(nullable = false)
     private String name;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender")
+    @Builder.Default
+    private Gender gender = Gender.UNKNOWN;
+
     private String position;
 
     @Column(name = "is_admin", nullable = false)
-    @JsonProperty("isAdmin")
-    private boolean isAdmin = false;
+    private boolean admin = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -45,18 +51,4 @@ public class Employer {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
-    // Chỉ giữ 1 getter
-    public boolean isIsAdmin() {
-        return isAdmin;
-    }
-    public void setIsAdmin(boolean isAdmin) {
-        this.isAdmin = isAdmin;
-    }
-
-    // Tắt getAdmin()
-    @JsonIgnore
-    public boolean getAdmin() {
-        return isAdmin;
-    }
 }

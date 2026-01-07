@@ -1,14 +1,15 @@
 package com.backend.profileservice.controller;
 
-import com.backend.profileservice.dto.request.EmployerRequest;
+import com.backend.profileservice.dto.request.CompanyCreateRequest;
+import com.backend.profileservice.dto.request.EmployerUpdateRequest;
+import com.backend.profileservice.dto.request.JoinCompanyRequest;
 import com.backend.profileservice.dto.response.ApiResponse;
 import com.backend.profileservice.dto.response.EmployerResponse;
 import com.backend.profileservice.enums.SuccessCode;
 import com.backend.profileservice.service.EmployerService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,32 +19,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/profile/v1/employers")
 @RequiredArgsConstructor
-@Slf4j
 public class EmployerController {
 
     private final EmployerService employerService;
 
-    @PostMapping("/me")
-    public ResponseEntity<ApiResponse<EmployerResponse>> createOrJoinCompany(@RequestHeader("X-User-Id") String userIdHeader,
-                                                                             @Valid @RequestBody EmployerRequest request)
-    {
-
-        UUID userId = UUID.fromString(userIdHeader);
-        EmployerResponse response = employerService.createOrJoinCompany(userId, request);
-        log.info("Created or joined company for userId={}, employerId={}", userId, response.getId());
-
-        return ResponseEntity
-                .status(SuccessCode.EMPLOYER_INFO_CREATED.getStatus())
-                .body(ApiResponse.success(
-                        SuccessCode.EMPLOYER_INFO_CREATED.getCode(),
-                        SuccessCode.EMPLOYER_INFO_CREATED.getMessage(),
-                        response
-                ));
-    }
-
-    //Lấy thông tin Employer theo userId
     @GetMapping("/me")
-    public ResponseEntity<ApiResponse<EmployerResponse>> getByUserId(@RequestHeader("X-User-Id") String userIdHeader){
+    public ResponseEntity<ApiResponse<EmployerResponse>> getMyProfile(
+            @AuthenticationPrincipal String userIdHeader
+    ) {
         UUID userId = UUID.fromString(userIdHeader);
         EmployerResponse response = employerService.getByUserId(userId);
 
@@ -56,13 +39,32 @@ public class EmployerController {
                 ));
     }
 
-    //Cập nhật thông tin Employer
-    @PutMapping("/me")
-    public ResponseEntity<ApiResponse<EmployerResponse>> updateEmployer(@RequestHeader("X-User-Id") String userIdHeader,
-                                                                        @Valid @RequestBody EmployerRequest request)
-    {
+    //Public profile để mọi user đã đăng nhập xem employer khác
+    @GetMapping("/{targetUserId}")
+    public ResponseEntity<ApiResponse<EmployerResponse>> getEmployerPublicProfile(
+            @AuthenticationPrincipal String userIdHeader,
+            @PathVariable("targetUserId") UUID targetUserId
+    ) {
+        UUID viewerUserId = UUID.fromString(userIdHeader);
+        EmployerResponse response = employerService.getPublicProfile(viewerUserId, targetUserId);
+
+        return ResponseEntity
+                .status(SuccessCode.EMPLOYER_INFO_FETCHED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.EMPLOYER_INFO_FETCHED.getCode(),
+                        SuccessCode.EMPLOYER_INFO_FETCHED.getMessage(),
+                        response
+                ));
+    }
+
+    // Update profile info (name/gender/position)
+    @PatchMapping("/me/profile")
+    public ResponseEntity<ApiResponse<EmployerResponse>> updateMyProfile(
+            @AuthenticationPrincipal String userIdHeader,
+            @RequestBody EmployerUpdateRequest request
+    ) {
         UUID userId = UUID.fromString(userIdHeader);
-        EmployerResponse response = employerService.updateProfile(userId, request);
+        EmployerResponse response = employerService.updateMyProfile(userId, request);
 
         return ResponseEntity
                 .status(SuccessCode.EMPLOYER_INFO_UPDATED.getStatus())
@@ -73,14 +75,47 @@ public class EmployerController {
                 ));
     }
 
-    // Xóa Employer profile (rời khỏi công ty)
-    // Employer không bị xóa user account; chỉ unlink company
-    @DeleteMapping("/me")
-    public ResponseEntity<ApiResponse<Void>> deleteEmployer(@RequestHeader("X-User-Id") String userIdHeader) {
-
+    // Join existing company
+    @PatchMapping("/me/company")
+    public ResponseEntity<ApiResponse<EmployerResponse>> joinCompany(
+            @AuthenticationPrincipal String userIdHeader,
+            @RequestBody JoinCompanyRequest request
+    ) {
         UUID userId = UUID.fromString(userIdHeader);
-        employerService.delete(userId);
-        log.info("Deleted employer profile (detached company) for userId={}", userId);
+        EmployerResponse response = employerService.joinCompany(userId, request.getCompanyId());
+
+        return ResponseEntity
+                .status(SuccessCode.EMPLOYER_INFO_UPDATED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.EMPLOYER_INFO_UPDATED.getCode(),
+                        SuccessCode.EMPLOYER_INFO_UPDATED.getMessage(),
+                        response
+                ));
+    }
+
+    // Create company and auto join (admin=true)
+    @PostMapping("/me/company")
+    public ResponseEntity<ApiResponse<EmployerResponse>> createCompanyAndJoin(
+            @AuthenticationPrincipal String userIdHeader,
+            @RequestBody CompanyCreateRequest request
+    ) {
+        UUID userId = UUID.fromString(userIdHeader);
+        EmployerResponse response = employerService.createCompanyAndJoin(userId, request);
+
+        return ResponseEntity
+                .status(SuccessCode.EMPLOYER_INFO_UPDATED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.EMPLOYER_INFO_UPDATED.getCode(),
+                        SuccessCode.EMPLOYER_INFO_UPDATED.getMessage(),
+                        response
+                ));
+    }
+
+    // Leave company (detach)
+    @DeleteMapping("/me/company")
+    public ResponseEntity<ApiResponse<Void>> leaveCompany(@AuthenticationPrincipal String userIdHeader) {
+        UUID userId = UUID.fromString(userIdHeader);
+        employerService.leaveCompany(userId);
 
         return ResponseEntity
                 .status(SuccessCode.EMPLOYER_INFO_DELETED.getStatus())
@@ -91,10 +126,14 @@ public class EmployerController {
                 ));
     }
 
-    // Lấy danh sách Employer trong 1 công ty (Dành cho admin công ty hoặc HR)
     @GetMapping("/by-company")
-    public ResponseEntity<ApiResponse<List<EmployerResponse>>> getEmployersByCompany(@RequestParam("companyId") UUID companyId) {
-        List<EmployerResponse> responses = employerService.getAllByCompany(companyId);
+    public ResponseEntity<ApiResponse<List<EmployerResponse>>> getEmployersByCompany(
+            @AuthenticationPrincipal String userIdHeader,
+            @RequestParam("companyId") UUID companyId
+    ) {
+        UUID callerUserId = UUID.fromString(userIdHeader);
+        List<EmployerResponse> responses = employerService.getAllByCompany(callerUserId, companyId);
+
         return ResponseEntity
                 .status(SuccessCode.EMPLOYERS_LIST_FETCHED.getStatus())
                 .body(ApiResponse.success(
@@ -104,13 +143,13 @@ public class EmployerController {
                 ));
     }
 
+    // internal endpoint called by auth-service
     @PostMapping("/auto-create")
     public ResponseEntity<ApiResponse<Void>> autoCreateEmployerProfile(@RequestBody Map<String, Object> payload) {
         UUID userId = UUID.fromString((String) payload.get("userId"));
         String fullName = (String) payload.get("fullName");
 
         employerService.autoCreateProfile(userId, fullName);
-        log.info("Auto-created employer profile for userId={} with fullName={}", userId, fullName);
 
         return ResponseEntity
                 .status(SuccessCode.EMPLOYER_PROFILE_AUTO_CREATED.getStatus())

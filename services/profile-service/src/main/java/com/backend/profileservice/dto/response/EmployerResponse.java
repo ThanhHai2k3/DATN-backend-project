@@ -1,5 +1,6 @@
 package com.backend.profileservice.dto.response;
 
+import com.backend.profileservice.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
@@ -15,10 +16,10 @@ public class EmployerResponse {
     private UUID id;
     private UUID userId;
     private String name;
+    private Gender gender;
     private String position;
 
-    @JsonProperty("isAdmin")
-    private boolean isAdmin;
+    private boolean admin;
 
     private CompanyResponse company;
     private Instant createdAt;

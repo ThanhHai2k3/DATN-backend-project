@@ -1,17 +1,18 @@
 package com.backend.profileservice.service.impl;
 
-import com.backend.profileservice.dto.request.CompanyRequest;
+import com.backend.profileservice.dto.request.CompanyCreateRequest;
+import com.backend.profileservice.dto.request.CompanyUpdateRequest;
 import com.backend.profileservice.dto.response.CompanyResponse;
 import com.backend.profileservice.entity.Company;
 import com.backend.profileservice.entity.Employer;
 import com.backend.profileservice.enums.ErrorCode;
 import com.backend.profileservice.exception.AppException;
-import com.backend.profileservice.helper.EmployerHelper;
 import com.backend.profileservice.mapper.CompanyMapper;
 import com.backend.profileservice.repository.CompanyRepository;
 import com.backend.profileservice.repository.EmployerRepository;
 import com.backend.profileservice.service.CompanyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,12 +27,12 @@ public class CompanyServiceImpl implements CompanyService {
     private final CompanyRepository companyRepository;
     private final EmployerRepository employerRepository;
     private final CompanyMapper companyMapper;
-    private final EmployerHelper employerHelper;
 
     @Override
     @Transactional
-    public CompanyResponse create(UUID userId, CompanyRequest request){
-        if(companyRepository.existsByNameIgnoreCase(request.getName())){
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public CompanyResponse create(UUID userId, CompanyCreateRequest request) {
+        if (companyRepository.existsByNameIgnoreCase(request.getName())) {
             throw new AppException(ErrorCode.COMPANY_NAME_EXISTED);
         }
 
@@ -46,25 +47,29 @@ public class CompanyServiceImpl implements CompanyService {
         company = companyRepository.saveAndFlush(company);
 
         employer.setCompany(company);
-        employer.setIsAdmin(true);
+        employer.setAdmin(true);
         employerRepository.saveAndFlush(employer);
 
         return companyMapper.toResponse(company);
     }
 
-    public CompanyResponse updateByUser(UUID userId, CompanyRequest request) {
-        // Lấy employer theo userId
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public CompanyResponse updateByUser(UUID userId, CompanyUpdateRequest request) {
         Employer employer = employerRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
-
-        // Chỉ admin của công ty được phép sửa
-        if (!employer.isIsAdmin()) {
-            throw new AppException(ErrorCode.UPDATE_COMPANY_DENIED);
-        }
 
         Company company = employer.getCompany();
         if (company == null) {
             throw new AppException(ErrorCode.COMPANY_NOT_FOUND);
+        }
+
+        // nếu đổi tên thì check trùng (tránh đụng company khác)
+        if (request.getName() != null && !request.getName().isBlank()) {
+            if (companyRepository.existsByNameIgnoreCaseAndIdNot(request.getName(), company.getId())) {
+                throw new AppException(ErrorCode.COMPANY_NAME_EXISTED);
+            }
         }
 
         companyMapper.update(company, request);
@@ -73,10 +78,10 @@ public class CompanyServiceImpl implements CompanyService {
         return companyMapper.toResponse(company);
     }
 
-    // Lấy công ty theo userId (company mà user thuộc về)
     @Override
+    @PreAuthorize("hasRole('EMPLOYER')")
     public CompanyResponse getByUserId(UUID userId) {
-        Employer employer = employerRepository.findByUserId(userId)
+        Employer employer = employerRepository.findByUserIdWithCompany(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
         Company company = employer.getCompany();
@@ -88,21 +93,14 @@ public class CompanyServiceImpl implements CompanyService {
     }
 
     @Override
-    public List<CompanyResponse> getAll(){
-        return companyRepository.findAll()
-                .stream()
-                .map(companyMapper::toResponse)
-                .collect(Collectors.toList());
-    }
-
-    //Xoá công ty mà user đang quản lý (chỉ admin công ty)
-    @Override
     @Transactional
+    @PreAuthorize("hasRole('EMPLOYER')")
     public void deleteByUserId(UUID userId) {
         Employer employer = employerRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
 
-        if (!employer.isIsAdmin()) {
+        // khuyến nghị giữ admin cho delete để tránh xoá nhầm
+        if (!employer.isAdmin()) {
             throw new AppException(ErrorCode.UPDATE_COMPANY_DENIED);
         }
 
@@ -111,14 +109,33 @@ public class CompanyServiceImpl implements CompanyService {
             throw new AppException(ErrorCode.COMPANY_NOT_FOUND);
         }
 
-        // Tách tất cả employer ra khỏi công ty
         List<Employer> companyEmployers = employerRepository.findAllByCompanyId(company.getId());
         for (Employer e : companyEmployers) {
             e.setCompany(null);
-            e.setIsAdmin(false);
+            e.setAdmin(false);
         }
         employerRepository.saveAll(companyEmployers);
 
         companyRepository.delete(company);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("isAuthenticated()")
+    public CompanyResponse getById(UUID companyId) {
+
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new AppException(ErrorCode.COMPANY_NOT_FOUND));
+
+        return companyMapper.toResponse(company);
+    }
+
+    @Override
+    @PreAuthorize("isAuthenticated()")
+    public List<CompanyResponse> getAll(){
+        return companyRepository.findAll()
+                .stream()
+                .map(companyMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }

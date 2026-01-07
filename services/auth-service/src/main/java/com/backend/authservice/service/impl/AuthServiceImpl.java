@@ -108,7 +108,8 @@ public class AuthServiceImpl implements AuthService {
             }
 
             AuthResponse response = tokenService.issueTokens(user);
-            String fullName = getFullNameFromProfile(user.getId());
+            String role = user.getRole().name();
+            String fullName = getFullNameFromProfile(user.getId(), role);
             response.setFullName(fullName);
 
             return response;
@@ -129,24 +130,28 @@ public class AuthServiceImpl implements AuthService {
         });
     }
 
-    private String getFullNameFromProfile(UUID userId) {
+    private String getFullNameFromProfile(UUID userId, String role) {
         try {
-            String url = "http://localhost:8082/api/profile/internal/students/"
-                    + userId + "/full-name";
+            String path = switch (role) {
+                case "STUDENT"  -> "/api/profile/internal/students/";
+                case "EMPLOYER" -> "/api/profile/internal/employers/";
+                default         -> null;
+            };
 
-            ResponseEntity<Map> response =
-                    restTemplate.getForEntity(url, Map.class);
+            if (path == null) return "User";
 
-            if (response.getStatusCode().is2xxSuccessful()
-                    && response.getBody() != null) {
+            String url = "http://localhost:8082" + path + userId + "/full-name";
 
+            ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Map<String, Object> apiResponse = response.getBody();
-                return (String) apiResponse.get("data");
+                Object data = apiResponse.get("data");
+                return data != null ? data.toString() : "User";
             }
         } catch (Exception e) {
-            log.warn("Could not fetch full name for user {}: {}", userId, e.getMessage());
+            log.warn("Could not fetch full name for user {} (role={}): {}", userId, role, e.getMessage());
         }
-
         return "User";
     }
 }
