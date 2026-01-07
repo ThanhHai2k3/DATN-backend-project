@@ -28,41 +28,35 @@ public class InternalHeaderAuthFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String userIdHeader = request.getHeader("X-User-Id");
-
-        // 1) lấy authorities theo chuẩn mới
+        
         String authoritiesHeader = request.getHeader("X-Authorities");
-
-        // 2) fallback: nếu gateway chỉ gửi 1 role
-        String roleHeader = request.getHeader("X-User-Role"); // ví dụ "STUDENT"
+        
+        String roleHeader = request.getHeader("X-User-Role");
 
         log.info(">>> Headers received:");
         log.info("X-User-Id = {}", userIdHeader);
         log.info("X-Authorities = {}", authoritiesHeader);
         log.info("X-User-Role = {}", roleHeader);
-
-        // nếu đã có Authentication rồi thì khỏi set lại
+        
         if (SecurityContextHolder.getContext().getAuthentication() != null) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // Không có userId -> không tạo Authentication
+        
         if (userIdHeader == null || userIdHeader.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
-
-        // ✅ Fallback logic: nếu authorities không có thì dùng role
+        
         if ((authoritiesHeader == null || authoritiesHeader.isBlank())
                 && roleHeader != null && !roleHeader.isBlank()) {
-            authoritiesHeader = roleHeader; // "STUDENT"
+            authoritiesHeader = roleHeader;
         }
 
         UUID userId;
         try {
             userId = UUID.fromString(userIdHeader);
         } catch (IllegalArgumentException e) {
-            // userId không hợp lệ -> bỏ qua
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,9 +64,9 @@ public class InternalHeaderAuthFilter extends OncePerRequestFilter {
         List<SimpleGrantedAuthority> authorities = parseAuthorities(authoritiesHeader);
 
         Authentication auth = new UsernamePasswordAuthenticationToken(
-                userId,        // principal = UUID
+                userId,       
                 null,
-                authorities    // ["STUDENT"] hoặc ["STUDENT","EMPLOYER"]
+                authorities   
         );
 
         SecurityContextHolder.getContext().setAuthentication(auth);
@@ -89,7 +83,7 @@ public class InternalHeaderAuthFilter extends OncePerRequestFilter {
         return Arrays.stream(header.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
-                .map(SimpleGrantedAuthority::new) // "STUDENT"
+                .map(SimpleGrantedAuthority::new)
                 .toList();
     }
 }

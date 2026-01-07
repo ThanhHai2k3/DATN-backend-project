@@ -28,7 +28,6 @@ public class SkillExtractor {
         try {
             ObjectMapper mapper = new ObjectMapper();
 
-            // Đọc thẳng file từ classpath: src/main/resources/skills_dict.json
             InputStream is = SkillExtractor.class
                     .getClassLoader()
                     .getResourceAsStream("skills_dict.json");
@@ -72,9 +71,7 @@ public class SkillExtractor {
     public static String normalize(String text) {
         if (text == null) return "";
         String lower = text.toLowerCase(Locale.ROOT);
-        // bỏ dấu câu
         lower = PUNCT.matcher(lower).replaceAll(" ");
-        // gộp khoảng trắng
         lower = MULTI_SPACE.matcher(lower).replaceAll(" ").trim();
         return lower;
     }
@@ -92,7 +89,6 @@ public class SkillExtractor {
             for (int n = MAX_PHRASE_LEN; n >= 1; n--) {
                 if (i + n > nTokens) continue;
 
-                // join tokens[i .. i+n)
                 StringBuilder sb = new StringBuilder();
                 for (int k = 0; k < n; k++) {
                     if (k > 0) sb.append(' ');
@@ -103,7 +99,7 @@ public class SkillExtractor {
                 String canonical = PHRASE_TO_CANONICAL.get(phrase);
                 if (canonical != null) {
                     found.add(canonical);
-                    break; // đã match cụm dài, bỏ qua cụm ngắn ở vị trí i
+                    break;
                 }
             }
         }
@@ -114,34 +110,28 @@ public class SkillExtractor {
     }
     private List<String> buildSkillsNorm(ProcessPostRequest req) {
 
-        // 1) Extract từ text (title/position/description)
         String text = joinNonBlank(req.getTitle(), req.getPosition(), req.getDescription());
         Set<String> merged = new LinkedHashSet<>();
 
         if (StringUtils.hasText(text)) {
-            merged.addAll(SkillExtractor.extractSkills(text)); // canonical đã chuẩn hoá theo dict
+            merged.addAll(SkillExtractor.extractSkills(text));
         }
 
-        // 2) Merge skills employer nhập tay
         if (req.getSkills() != null) {
             for (JobSkillRequest s : req.getSkills()) {
                 if (s == null) continue;
 
-                // TODO: chỉnh đúng field trong JobSkillRequest của bạn (vd: getName(), getSkillName()...)
                 String manual = s.getSkillName();
 
                 if (StringUtils.hasText(manual)) {
-                    // dùng SkillExtractor.normalize để match alias -> canonical
                     String norm = SkillExtractor.normalize(manual);
-                    // trick: chạy extractor trên chính chuỗi skill để map alias -> canonical
                     List<String> mapped = SkillExtractor.extractSkills(norm);
                     if (!mapped.isEmpty()) merged.addAll(mapped);
-                    else merged.add(manual.trim()); // fallback nếu dict chưa có
+                    else merged.add(manual.trim());
                 }
             }
         }
 
-        // 3) Output stable order (sorted) hoặc giữ insertion order tuỳ bạn
         return merged.stream()
                 .filter(StringUtils::hasText)
                 .map(String::trim)

@@ -23,12 +23,10 @@ public class MatchingServiceImpl implements MatchingService {
     @Override
     public List<JobMatchResult> matchJobs(UUID userId, JobMatchingRequest request) {
 
-        // 1️⃣ Validate input
         if (request == null || request.getCvId() == null) {
             throw new IllegalArgumentException("cvId is required");
         }
 
-        // 2️⃣ Load CV snapshot & verify ownership
         CvNormSnapshotEntity cv = cvRepo.findById(request.getCvId())
                 .orElseThrow(() -> new IllegalArgumentException("CV not found: " + request.getCvId()));
 
@@ -61,11 +59,10 @@ public class MatchingServiceImpl implements MatchingService {
             JobNormSnapshotEntity job
     ) {
 
-        // --- Skill score ---
         Set<String> jobSkills = jsonArrayToSet(job.getSkillsNorm());
 
         if (jobSkills.isEmpty()) {
-            return null; // job không có skill yêu cầu -> bỏ
+            return null;
         }
 
         Set<String> matched = new HashSet<>(cvSkills);
@@ -73,7 +70,6 @@ public class MatchingServiceImpl implements MatchingService {
 
         double skillScore = (double) matched.size() / jobSkills.size();
 
-        // --- Location score ---
         Double distanceKm = null;
         double locationScore = 1.0;
 
@@ -85,7 +81,6 @@ public class MatchingServiceImpl implements MatchingService {
                     job.getLocationLat(), job.getLocationLon()
             );
 
-            // filter theo maxDistance nếu client gửi
             if (request.getMaxDistanceKm() != null
                     && distanceKm > request.getMaxDistanceKm()) {
                 return null;
@@ -97,10 +92,8 @@ public class MatchingServiceImpl implements MatchingService {
                                     distanceKm <= 30 ? 0.4 : 0.1;
         }
 
-        // --- Final score (weighted) ---
         double finalScore = 0.7 * skillScore + 0.3 * locationScore;
 
-        // threshold v1
         if (finalScore < 0.2) {
             return null;
         }

@@ -66,21 +66,13 @@ public class CvServiceImpl implements CvService {
 
             CvNlpResultDto nlpResult = aiNlpClient.processCv(request);
 
-            // 4. Lưu vào cv_norm
             cvNormService.upsertFromNlpResult(savedCv.getId(), nlpResult);
 
-            // cập nhật trạng thái
-//            savedCv.setNlpStatus("SUCCESS");
-//            savedCv.setProcessedAt(OffsetDateTime.now());
             cvRepository.save(savedCv);
 
         } catch (Exception ex) {
             System.out.println(ex);
-            // Không để fail cả luồng upload khi NLP lỗi (tùy em)
-//            savedCv.setNlpStatus("FAILED");
             cvRepository.save(savedCv);
-            // log lỗi để debug
-            // log.error("Call ai-nlp-service failed for cvId={}", savedCv.getId(), ex);
         }
 
         return mapToCvSummaryDto(savedCv);
@@ -115,20 +107,11 @@ public class CvServiceImpl implements CvService {
     @Override
     @Transactional(readOnly = true)
     public CvDetailDto findCvDetailById(Long cvId, UUID studentId) {
-//        CV cv = cvRepository.findById(cvId).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy CV"));
         CV cv = cvRepository.findById(cvId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy CV hoặc bạn không có quyền xem CV này."));
-//        if(!cv.getStudentId().equals(studentId)) throw new SecurityException("Bạn không có quyền truy cập CV này");
         return mapToCvDetailDto(cv);
     }
 
-//    @Override
-//    @Transactional
-//    public CvDetailDto findDetailedByIdAndStudentId(Long cvId, UUID studentId) {
-//        CV cv = cvRepository.findById(cvId).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy CV"));
-//        if(!cv.getStudentId().equals(studentId)) throw new SecurityException("Bạn không có quyền truy cập CV này");
-//        return mapToCvDetailDto(cv);
-//    }
 
     @Override
     @Transactional
@@ -155,7 +138,6 @@ public class CvServiceImpl implements CvService {
         try {
             s3FileStorageService.deleteFile(cv.getCvUrl());
         } catch (Exception e) {
-            // Ghi log lỗi xóa file, nhưng không nên dừng việc xóa trong DB
             log.warn("Không thể xóa file trên S3: {}", cv.getCvUrl(), e);
         }
 
@@ -174,42 +156,5 @@ public class CvServiceImpl implements CvService {
         cvRepository.saveAll(cvList);
     }
 
-//    @Override
-//    @Transactional(readOnly = true)
-//    public Object getStructuredDataForMatching(Long cvId) {
-//
-//        CV cv = cvRepository.findDetailedById(cvId)
-//                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy CV với id: " + cvId));
-//
-//        return mapToMatchingDataDto(cv);
-//    }
-//    private MatchingDataDto mapToMatchingDataDto(CV cv) {
-//        Set<String> skills = cv.getSkills().stream()
-//                .map(Skill::getName)
-//                .collect(Collectors.toSet());
-//
-//        List<EducationData> educations = cv.getEducations().stream()
-//                .map(e -> EducationData.builder()
-//                        .major(e.getMajor())
-//                        .normalizedGpa(e.getNormalizedGpa())
-//                        .build())
-//                .collect(Collectors.toList());
-//
-//        List<ExperienceData> experiences = cv.getExperiences().stream()
-//                .map(e -> ExperienceData.builder()
-//                        .position(e.getPosition())
-//                        // TODO: Thêm logic tính toán số tháng kinh nghiệm ở đây
-//                        // .durationInMonths(ChronoUnit.MONTHS.between(e.getStartDate(), e.getEndDate()))
-//                        .build())
-//                .collect(Collectors.toList());
-//
-//        return MatchingDataDto.builder()
-//                .cvId(cv.getId())
-//                .studentId(cv.getStudentId())
-//                .skills(skills)
-//                .educations(educations)
-//                .experiences(experiences)
-//                .build();
-//    }
 }
 

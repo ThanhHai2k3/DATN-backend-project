@@ -12,8 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class NlpService { //trích skill từ cv
-    //hardcore
+public class NlpService {
     private static final List<String> KNOWN_SKILLS =
             Arrays.asList(
                     "java", "spring", "spring boot", "postgresql", "sql",
@@ -21,69 +20,6 @@ public class NlpService { //trích skill từ cv
             );
 
 
-//    public CvNlpResult processCv(ProcessCvRequest request) {
-//        String text = request.getRawText();
-//        if (text == null) {
-//            text = "";
-//        }
-//
-//        String lower = text.toLowerCase(Locale.ROOT);
-//
-//
-//        List<String> skills = new ArrayList<>();
-//        for (String s : KNOWN_SKILLS) {
-//            if (lower.contains(s)) {
-//
-//                skills.add(capitalizeSkill(s));
-//            }
-//        }
-//
-//
-//        Double yearsTotal = extractYearsOfExperience(lower);
-//
-//
-//        List<String> titles = new ArrayList<>();
-//        if (lower.contains("backend")) {
-//            titles.add("Backend Developer");
-//        }
-//        if (lower.contains("java")) {
-//            titles.add("Java Developer");
-//        }
-//
-//        List<String> areas = new ArrayList<>();
-//        if (lower.contains("backend")) {
-//            areas.add("Backend");
-//        }
-//        if (lower.contains("web")) {
-//            areas.add("Web Development");
-//        }
-//
-//        String level = null;
-//        List<String> majors = new ArrayList<>();
-//        if (lower.contains("đại học") || lower.contains("university")) {
-//            level = "bachelor";
-//        }
-//
-//
-//        CvNlpResult result = new CvNlpResult();
-//        result.setCvId(request.getCvId());
-//        result.setSkills(skills);
-//
-//        CvNlpResult.ExperiencePart exp = new CvNlpResult.ExperiencePart();
-//        exp.setYearsTotal(yearsTotal);
-//        exp.setTitles(titles);
-//        exp.setAreas(areas);
-//        result.setExperience(exp);
-//
-//        CvNlpResult.EducationPart edu = new CvNlpResult.EducationPart();
-//        edu.setLevel(level);
-//        edu.setMajors(majors);
-//        result.setEducation(edu);
-//
-//        result.setModelVersion("dummy-0.1.0");
-//
-//        return result;
-//    }
 public CvNlpResult processCv(ProcessCvRequest request) {
     String text = request.getRawText();
     if (text == null) {
@@ -92,10 +28,8 @@ public CvNlpResult processCv(ProcessCvRequest request) {
 
     String lower = text.toLowerCase(Locale.ROOT);
 
-    // ✅ Dùng PythonSkillExtractor để lấy skills từ CV
     List<String> skills = SkillExtractor.extractSkills(text);
 
-    // Giữ nguyên logic cũ cho kinh nghiệm
     Double yearsTotal = extractYearsOfExperience(lower);
 
     List<String> titles = new ArrayList<>();
@@ -135,7 +69,7 @@ public CvNlpResult processCv(ProcessCvRequest request) {
     edu.setMajors(majors);
     result.setEducation(edu);
 
-    result.setModelVersion("rule-based-0.2.0"); // đổi tên version cho dễ debug
+    result.setModelVersion("rule-based-0.2.0");
 
     return result;
 }
@@ -175,11 +109,8 @@ public CvNlpResult processCv(ProcessCvRequest request) {
         return s.substring(0, 1).toUpperCase(Locale.ROOT) + s.substring(1);
     }
 
-//    ========CV ở trên=========
-//    ========Job ở dưới=========
 public ProcessPostResponse processPost(ProcessPostRequest request) {
 
-    // 1. Ghép text lại để trích skill
     StringBuilder sb = new StringBuilder();
 
     if (request.getTitle() != null)
@@ -200,10 +131,8 @@ public ProcessPostResponse processPost(ProcessPostRequest request) {
 
     String fullText = sb.toString();
 
-    // 2. Chuẩn hoá skills bằng SkillExtractor (quy tắc CV)
     List<String> skillsNorm = SkillExtractor.extractSkills(fullText);
 
-    // 3. Build response (tạm chưa chuẩn hoá các phần khác)
     ProcessPostResponse response = ProcessPostResponse.builder()
             .postId(request.getPostId())
             .skillsNorm(skillsNorm)
@@ -227,7 +156,7 @@ public ProcessPostResponse processPost(ProcessPostRequest request) {
             .salaryMax(null)
             .salaryCurrency(null)
             .salaryType(null)
-            .lat(null)  // sẽ được gán sau khi geocode
+            .lat(null)
             .lon(null)
             .modelVersion("job-rule-based-0.1.0")
             .processedAt(Instant.now())

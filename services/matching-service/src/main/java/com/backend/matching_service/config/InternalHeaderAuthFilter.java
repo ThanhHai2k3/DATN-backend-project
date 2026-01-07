@@ -29,10 +29,8 @@ public class InternalHeaderAuthFilter extends OncePerRequestFilter {
 
         String userIdHeader = request.getHeader("X-User-Id");
 
-        // 1) lấy authorities theo chuẩn mới
         String authoritiesHeader = request.getHeader("X-Authorities");
 
-        // 2) fallback: nếu gateway chỉ gửi 1 role
         String roleHeader = request.getHeader("X-User-Role"); // ví dụ "STUDENT"
 
         log.info(">>> Headers received:");
@@ -46,13 +44,11 @@ public class InternalHeaderAuthFilter extends OncePerRequestFilter {
             return;
         }
 
-        // Không có userId -> không tạo Authentication
         if (userIdHeader == null || userIdHeader.isBlank()) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // ✅ Fallback logic: nếu authorities không có thì dùng role
         if ((authoritiesHeader == null || authoritiesHeader.isBlank())
                 && roleHeader != null && !roleHeader.isBlank()) {
             authoritiesHeader = roleHeader; // "STUDENT"
