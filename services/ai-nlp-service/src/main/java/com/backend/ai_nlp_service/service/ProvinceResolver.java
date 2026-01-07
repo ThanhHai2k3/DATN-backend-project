@@ -21,11 +21,11 @@ public class ProvinceResolver {
 
     private final ObjectMapper objectMapper;
 
-    private final GeometryFactory gf = new GeometryFactory(new PrecisionModel(), 4326); // WGS84
+    private final GeometryFactory gf = new GeometryFactory(new PrecisionModel(), 4326);
     private final GeoJsonReader geoJsonReader = new GeoJsonReader(gf);
 
     private final List<ProvincePolygon> provinces = new ArrayList<>();
-    private final STRtree index = new STRtree(); // spatial index
+    private final STRtree index = new STRtree();
 
     public record ProvinceHit(String provinceName) {}
 
@@ -33,7 +33,6 @@ public class ProvinceResolver {
 
     @PostConstruct
     public void load() throws Exception {
-        // đổi path theo nơi bạn đặt file trong resources
         ClassPathResource res = new ClassPathResource("gadm/gadm41_VNM_1.json");
 
         try (InputStream is = res.getInputStream()) {
@@ -49,7 +48,6 @@ public class ProvinceResolver {
 
                 if (props == null || geomNode == null) continue;
 
-                // GADM level 1 thường có NAME_1 (tỉnh/thành)
                 String name = props.path("NAME_1").asText(null);
                 if (name == null) continue;
 
@@ -59,7 +57,6 @@ public class ProvinceResolver {
                 ProvincePolygon pp = new ProvincePolygon(name, geom);
                 provinces.add(pp);
 
-                // index theo envelope để query nhanh
                 index.insert(geom.getEnvelopeInternal(), pp);
             }
             index.build();
@@ -67,7 +64,6 @@ public class ProvinceResolver {
     }
 
     public ProvinceHit resolve(double lat, double lon) {
-        // JTS: Point(x=lon, y=lat)
         Point p = gf.createPoint(new Coordinate(lon, lat));
 
         @SuppressWarnings("unchecked")

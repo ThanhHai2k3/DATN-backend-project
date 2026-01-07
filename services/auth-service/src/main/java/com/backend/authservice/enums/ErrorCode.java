@@ -17,6 +17,7 @@ public enum ErrorCode {
     INVALID_REFRESH_TOKEN("AUTH_007", "Invalid refresh token", HttpStatus.UNAUTHORIZED),
     INTERNAL_ERROR("SYS_500", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
     CANNOT_ACTION_ON_ADMIN("AUTH_008", "Action not allowed on System Admin account", HttpStatus.FORBIDDEN),
+    UNAUTHORIZED("AUTH_009", "Unauthorized", HttpStatus.UNAUTHORIZED),
     ;
 
     private final String code;

@@ -12,6 +12,7 @@ public enum SuccessCode {
     LOGIN_SUCCESS("AUTH_201", "Login successfully", HttpStatus.OK),
     LOGOUT_SUCCESS("AUTH_202", "Logout successfully", HttpStatus.OK),
     REFRESH_TOKEN_SUCCESS("AUTH_203", "Token refreshed successfully", HttpStatus.OK),
+    CHANGE_PASSWORD_SUCCESS("AUTH_204", "Change password successfully", HttpStatus.OK),
     ;
 
     private final String code;

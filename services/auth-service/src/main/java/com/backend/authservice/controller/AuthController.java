@@ -1,9 +1,6 @@
 package com.backend.authservice.controller;
 
-import com.backend.authservice.dto.request.LoginRequest;
-import com.backend.authservice.dto.request.LogoutRequest;
-import com.backend.authservice.dto.request.RefreshTokenRequest;
-import com.backend.authservice.dto.request.RegisterRequest;
+import com.backend.authservice.dto.request.*;
 import com.backend.authservice.dto.response.ApiResponse;
 import com.backend.authservice.dto.response.AuthResponse;
 import com.backend.authservice.enums.SuccessCode;
@@ -46,6 +43,18 @@ public class AuthController {
                         SuccessCode.LOGIN_SUCCESS.getCode(),
                         SuccessCode.LOGIN_SUCCESS.getMessage(),
                         result
+                ));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<ApiResponse<Void>> changePassword(@RequestBody @Valid ChangePasswordRequest request) {
+        authService.changePassword(request);
+        return ResponseEntity
+                .status(SuccessCode.CHANGE_PASSWORD_SUCCESS.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.CHANGE_PASSWORD_SUCCESS.getCode(),
+                        SuccessCode.CHANGE_PASSWORD_SUCCESS.getMessage(),
+                        null
                 ));
     }
 

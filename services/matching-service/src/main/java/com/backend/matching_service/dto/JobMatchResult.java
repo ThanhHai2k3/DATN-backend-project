@@ -15,14 +15,11 @@ public class JobMatchResult {
     private UUID internshipPostId;
     private UUID companyId;
 
-    // tổng điểm matching (0 → 1)
     private double score;
 
-    // --- skill matching ---
     private double skillScore;
     private List<String> matchedSkills;
 
-    // --- location matching ---
     private Double distanceKm;
     private double locationScore;
 }

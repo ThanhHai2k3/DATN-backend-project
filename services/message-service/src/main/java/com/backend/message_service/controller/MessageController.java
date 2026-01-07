@@ -4,7 +4,7 @@ import com.backend.message_service.dto.request.SendMessageRequest;
 import com.backend.message_service.dto.response.MessageResponse;
 import com.backend.message_service.enums.MessageType;
 import com.backend.message_service.service.MessageService;
-import com.backend.message_service.service.S3FileStorageService; // <-- 1. Import service S3
+import com.backend.message_service.service.S3FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile; // <-- Import MultipartFile
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,10 +26,7 @@ public class MessageController {
     private final MessageService messageService;
     private final S3FileStorageService s3FileStorageService;
 
-    /**
-     * Endpoint để gửi tin nhắn TEXT.
-     * URL: POST http://localhost:8084/api/v1/messages
-     */
+
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponse> sendMessage(
@@ -39,12 +36,8 @@ public class MessageController {
         return ResponseEntity.ok(messageService.sendMessage(senderId, request));
     }
 
-    // === TẠO ENDPOINT MỚI ĐỂ GỬI ẢNH ===
-    /**
-     * Endpoint để gửi tin nhắn dạng ẢNH.
-     * Client sẽ gửi request dạng multipart/form-data.
-     * URL: POST http://localhost:8084/api/v1/messages/image
-     */
+
+
     @PostMapping("/image")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> sendImageMessage(
@@ -60,8 +53,8 @@ public class MessageController {
             imageRequest.setContent(fileUrl);
             imageRequest.setMessageType(String.valueOf(MessageType.IMAGE));
 
-//            messageService.sendMessage(senderId, imageRequest);
-//            return ResponseEntity.ok().build();
+
+
             MessageResponse saved = messageService.sendMessage(senderId, imageRequest);
             return ResponseEntity.ok(saved);
 
@@ -73,11 +66,6 @@ public class MessageController {
     }
 
 
-
-    /**
-     * Endpoint để lấy lịch sử tin nhắn.
-     * URL: GET http://localhost:8084/api/v1/messages/conversation/{conversationId}?page=0&size=20
-     */
     @GetMapping("/conversation/{conversationId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<MessageResponse>> getMessagesByConversation(

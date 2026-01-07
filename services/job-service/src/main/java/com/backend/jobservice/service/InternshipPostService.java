@@ -8,6 +8,7 @@ import com.backend.jobservice.dto.response.InternshipPostSummaryResponse;
 import java.util.List;
 import java.util.UUID;
 
+import com.backend.jobservice.entity.InternshipPost;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
@@ -29,4 +30,6 @@ public interface InternshipPostService {
     InternshipPostResponse getEmployerPostDetail(UUID employerId, UUID postId);
 
     InternshipPostResponse getPostDetailForAdmin(UUID id);
+
+    List<InternshipPostSummaryResponse> getRejectedAndHiddenPosts();
 }

@@ -22,4 +22,6 @@ public interface StudentService {
     String getFullNameByUserId(UUID userId);
 
     List<StudentResponse> getBasicInfoBatch(List<UUID> userIds);
+
+    void updateCvUrl(UUID userId, String cvUrl);
 }

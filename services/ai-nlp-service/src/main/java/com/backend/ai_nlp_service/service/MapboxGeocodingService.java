@@ -37,9 +37,9 @@ public class MapboxGeocodingService {
 
         if (resp == null || resp.features() == null || resp.features().isEmpty()) return null;
 
-        Feature f = resp.features().getFirst(); // Java 17: dùng get(0), không dùng getFirst()
+        Feature f = resp.features().getFirst();
 
-        // Mapbox: center = [lon, lat]
+
         double lon = f.center().get(0);
         double lat = f.center().get(1);
 
@@ -50,7 +50,7 @@ public class MapboxGeocodingService {
         );
     }
 
-    // ===== DTOs =====
+
 
     public record GeocodeResult(
             Feature feature,

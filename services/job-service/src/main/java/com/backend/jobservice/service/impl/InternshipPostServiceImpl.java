@@ -40,6 +40,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -249,15 +250,17 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         return response;
     }
 
+
+
     @Override
-    @PreAuthorize("hasRole('EMPLOYER')")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('SYSTEM_ADMIN')")
     public void hidePost(UUID employerId, UUID postId){
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getPostedBy().equals(employerId)) {
-            throw new AppException(ErrorCode.FORBIDDEN);
-        }
+//        if (!post.getPostedBy().equals(employerId)) {
+//            throw new AppException(ErrorCode.FORBIDDEN);
+//        }
         if (post.getStatus() == PostStatus.ACTIVE) {
             post.setStatus(PostStatus.HIDDEN);
         }
@@ -326,6 +329,20 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         List<InternshipPost> pendingPosts = internshipPostRepository
                 .findByStatusOrderByCreatedAtDesc(PostStatus.PENDING);
         return internshipPostMapper.toSummaryResponseList(pendingPosts);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('SYSTEM_ADMIN')")
+    @Transactional(readOnly = true)
+    public List<InternshipPostSummaryResponse> getRejectedAndHiddenPosts() {
+        List<InternshipPost> hidden = internshipPostRepository.findByStatusOrderByCreatedAtDesc(PostStatus.HIDDEN);
+        List<InternshipPost> rejected = internshipPostRepository.findByStatusOrderByCreatedAtDesc(PostStatus.REJECTED);
+
+        List<InternshipPost> combined = Stream.concat(hidden.stream(), rejected.stream())
+                .sorted(Comparator.comparing(InternshipPost::getCreatedAt).reversed())
+                .collect(Collectors.toList());
+        
+        return internshipPostMapper.toSummaryResponseList(combined);
     }
 
     @Override

@@ -10,8 +10,8 @@ spring:
   # ===============================
   datasource:
     url: jdbc:postgresql://localhost:5432/intern_network
-    username: duke
-    password: duke
+    username: postgres
+    password: 123456789
     driver-class-name: org.postgresql.Driver
 
   # ===============================
@@ -52,3 +52,7 @@ aws:
   secret-access-key: ${AWS_SECRET_ACCESS_KEY}
 
 URL_AI_NLP: http://localhost:8087
+
+services:
+  profile:
+    base-url: http://localhost:8082

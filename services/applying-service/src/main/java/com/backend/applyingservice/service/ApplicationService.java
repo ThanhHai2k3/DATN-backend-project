@@ -2,6 +2,7 @@ package com.backend.applyingservice.service;
 
 import com.backend.applyingservice.dto.request.ApplyRequest;
 import com.backend.applyingservice.dto.response.ApplicationResponse;
+import com.backend.applyingservice.dto.response.EmployerDashboardStatsDto;
 import com.backend.applyingservice.enums.ApplicationStatus;
 import org.springframework.data.domain.Page;
 
@@ -14,4 +15,5 @@ public interface ApplicationService {
     ApplicationResponse getApplicationDetailForEmployer(UUID employerId, UUID applicationId);
     Page<ApplicationResponse> getApplicationsByPostId(UUID employerId, UUID jobPostId, int page, int size);
     void updateApplicationStatus(UUID employerId, UUID applicationId, ApplicationStatus status, String note);
+    EmployerDashboardStatsDto getStatsForEmployer(List<UUID> postIds);
 }

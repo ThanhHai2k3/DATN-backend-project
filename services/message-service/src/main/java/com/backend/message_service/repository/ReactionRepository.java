@@ -11,12 +11,6 @@ import java.util.UUID;
 @Repository
 public interface ReactionRepository extends JpaRepository<Reaction, Long> {
 
-    /**
-     * Tìm tất cả các reaction của một tin nhắn cụ thể.
-     *
-     * @param messageId ID của tin nhắn.
-     * @return danh sách các reaction.
-     */
     List<Reaction> findByMessageId(Long messageId);
     Optional<Reaction> findByMessageIdAndUserId(Long messageId, UUID userId);
 }

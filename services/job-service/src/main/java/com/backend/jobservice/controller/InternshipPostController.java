@@ -5,6 +5,7 @@ import com.backend.jobservice.dto.request.InternshipPostUpdateRequest;
 import com.backend.jobservice.dto.response.ApiResponse;
 import com.backend.jobservice.dto.response.InternshipPostResponse;
 import com.backend.jobservice.dto.response.InternshipPostSummaryResponse;
+import com.backend.jobservice.entity.InternshipPost;
 import com.backend.jobservice.enums.SuccessCode;
 import com.backend.jobservice.service.InternshipPostService;
 import lombok.RequiredArgsConstructor;
@@ -68,8 +69,20 @@ public class InternshipPostController {
                 ));
     }
 
+    @GetMapping("/rejected-hidden")
+    public ResponseEntity<ApiResponse<List<InternshipPostSummaryResponse>>> getRejectedAndHidden() {
+        List<InternshipPostSummaryResponse> result = internshipPostService.getRejectedAndHiddenPosts();
+        return ResponseEntity
+                .status(SuccessCode.INTERNSHIP_POST_FETCHED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.INTERNSHIP_POST_FETCHED.getCode(),
+                        SuccessCode.INTERNSHIP_POST_FETCHED.getMessage(),
+                        result
+                ));
+    }
+
     @PatchMapping("/hide")
-    @PreAuthorize("hasRole('EMPLOYER')")
+    @PreAuthorize("hasRole('EMPLOYER') or hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<ApiResponse<Void>> hidePost(
             @AuthenticationPrincipal String employerId,
             @RequestParam("postId") UUID postId) {
