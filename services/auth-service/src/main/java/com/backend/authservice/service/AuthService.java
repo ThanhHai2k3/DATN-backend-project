@@ -1,5 +1,6 @@
 package com.backend.authservice.service;
 
+import com.backend.authservice.dto.request.ChangePasswordRequest;
 import com.backend.authservice.dto.request.LoginRequest;
 import com.backend.authservice.dto.request.LogoutRequest;
 import com.backend.authservice.dto.request.RegisterRequest;
@@ -12,4 +13,6 @@ public interface AuthService {
     AuthResponse login(LoginRequest request);
 
     void logout(LogoutRequest request);
+
+    void changePassword(ChangePasswordRequest request);
 }

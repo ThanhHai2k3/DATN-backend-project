@@ -1,5 +1,6 @@
 package com.backend.authservice.service.impl;
 
+import com.backend.authservice.dto.request.ChangePasswordRequest;
 import com.backend.authservice.dto.request.LoginRequest;
 import com.backend.authservice.dto.request.LogoutRequest;
 import com.backend.authservice.dto.request.RegisterRequest;
@@ -24,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -148,5 +150,36 @@ public class AuthServiceImpl implements AuthService {
         }
 
         return "User";
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequest request) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        String currentPrincipal = authentication.getName();
+
+        UserAccount user = userAccountRepository.findByEmailIgnoreCase(currentPrincipal)
+                .or(() -> {
+                    try {
+                        return userAccountRepository.findById(UUID.fromString(currentPrincipal));
+                    } catch (IllegalArgumentException e) {
+                        return java.util.Optional.empty();
+                    }
+                })
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPasswordHash())) {
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS, "Mật khẩu cũ không chính xác");
+        }
+
+        if (request.getConfirmPassword() != null && !request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new AppException(ErrorCode.INVALID_CREDENTIALS, "Mật khẩu xác nhận không khớp");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userAccountRepository.save(user);
     }
 }
