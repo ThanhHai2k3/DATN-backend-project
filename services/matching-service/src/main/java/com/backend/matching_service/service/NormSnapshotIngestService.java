@@ -21,9 +21,6 @@ public class NormSnapshotIngestService {
     private final JobNormSnapshotRepository jobRepo;
     private final ObjectMapper objectMapper;
 
-    /**
-     * Ingest CV_NORM event -> upsert cv_norm_snapshot
-     */
     public void upsertCv(CvNormUpdatedEvent event) {
         if (event == null || event.getCvId() == null) {
             throw new IllegalArgumentException("CvNormUpdatedEvent is null or missing cvId");
@@ -48,9 +45,6 @@ public class NormSnapshotIngestService {
         );
     }
 
-    /**
-     * Ingest JOB_NORM event -> upsert job_norm_snapshot
-     */
     public void upsertJob(JobNormUpdatedEvent event) {
         if (event == null || event.getInternshipPostId() == null) {
             throw new IllegalArgumentException("JobNormUpdatedEvent is null or missing internshipPostId");
@@ -74,10 +68,6 @@ public class NormSnapshotIngestService {
         );
     }
 
-    /**
-     * Convert List<String> -> JSON array string safely.
-     * - Default: throw if serialization fails (recommended to avoid silently losing data)
-     */
     private String toJsonOrThrow(List<String> data) {
         try {
             List<String> safe = (data == null) ? Collections.emptyList() : data;
@@ -87,10 +77,6 @@ public class NormSnapshotIngestService {
         }
     }
 
-    /**
-     * If you prefer "never fail ingest", you can use this fallback version instead.
-     * (Not recommended during dev because it can hide bugs.)
-     */
     @SuppressWarnings("unused")
     private String toJsonOrEmpty(List<String> data) {
         try {

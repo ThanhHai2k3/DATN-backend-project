@@ -27,7 +27,6 @@ public class JobNormUpdatedEvent {
 
     private BigDecimal minYears;
 
-    // filter fields (bạn đã làm xong)
     private String workMode;
     private Double locationLat;
     private Double locationLon;

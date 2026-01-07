@@ -16,12 +16,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ReactionController {
     //TODO: controller này bỏ nhé, dư thời gian thì mới làm
-    private final MessageService messageService; // Hoặc ReactionService
+    private final MessageService messageService;
 
-//    @PostMapping
-//    public ResponseEntity<ReactionResponse> addReaction(@RequestBody CreateReactionRequest request) {
-//        return ResponseEntity.ok(messageService.addReaction(request));
-//    }
 
     @PostMapping
     @PreAuthorize("hasAuthorized()")
