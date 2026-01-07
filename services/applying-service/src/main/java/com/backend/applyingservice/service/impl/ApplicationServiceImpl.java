@@ -132,10 +132,25 @@ public class ApplicationServiceImpl implements ApplicationService {
             }
         } catch (Exception ignored){}
 
+        String cvUrl = null;
+        try {
+            var cvRes = cvClient.getCvById(
+                    app.getCvId(),
+                    app.getStudentId().toString(),
+                    "STUDENT"
+            );
+            if (cvRes != null) {
+                cvUrl = cvRes.getCvUrl();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch CV URL for app {}: {}", applicationId, e.getMessage());
+        }
+
         // Map response
         ApplicationResponse response = mapToResponse(app, jobTitle, null);
         response.setStudentName(studentName);
         response.setStudentAvatar(studentAvatar);
+        response.setCvUrl(cvUrl);
 
         return response;
     }
