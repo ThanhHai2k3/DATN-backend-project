@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import com.backend.applyingservice.dto.response.EmployerDashboardStatsDto;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +23,19 @@ import java.util.UUID;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+
+    @PostMapping("/stats")
+    public ResponseEntity<ApiResponse<EmployerDashboardStatsDto>> getDashboardStats(
+            @RequestBody List<UUID> jobIds
+    ) {
+        EmployerDashboardStatsDto stats = applicationService.getStatsForEmployer(jobIds);
+
+        return ResponseEntity.ok(ApiResponse.success(
+                "STATS_FETCHED",
+                "Lấy thống kê dashboard thành công",
+                stats
+        ));
+    }
 
     // 1. Sinh viên nộp đơn
     @PostMapping("/apply")

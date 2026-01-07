@@ -46,4 +46,10 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
             @Param("status") ApplicationStatus status,
             @Param("viewedAt") Instant viewedAt
     );
+
+    // Đếm tổng số đơn ứng tuyển cho danh sách các bài Job
+    long countByJobPostIdIn(List<UUID> jobPostIds);
+
+    // Đếm số đơn theo danh sách Job VÀ trạng thái cụ thể
+    long countByJobPostIdInAndStatus(List<UUID> jobPostIds, ApplicationStatus status);
 }

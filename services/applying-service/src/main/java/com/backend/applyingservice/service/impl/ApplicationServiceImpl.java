@@ -12,6 +12,7 @@ import com.backend.applyingservice.enums.ApplicationStatus;
 import com.backend.applyingservice.enums.ErrorCode;
 import com.backend.applyingservice.exception.AppException;
 import com.backend.applyingservice.repository.ApplicationRepository;
+import com.backend.applyingservice.dto.response.EmployerDashboardStatsDto;
 import com.backend.applyingservice.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,19 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final CvClient cvClient;
     private final JobClient jobClient;
     private final ProfileClient profileClient;
+
+    @Override
+    public EmployerDashboardStatsDto getStatsForEmployer(List<UUID> postIds) {
+        if (postIds == null || postIds.isEmpty()) {
+            return new EmployerDashboardStatsDto(0, 0);
+        }
+
+        long total = applicationRepository.countByJobPostIdIn(postIds);
+
+        long newApps = applicationRepository.countByJobPostIdInAndStatus(postIds, ApplicationStatus.SUBMITTED);
+
+        return new EmployerDashboardStatsDto(total, newApps);
+    }
 
     @Override
     @Transactional
