@@ -4,6 +4,8 @@ import com.backend.jobservice.entity.InternshipPost;
 import com.backend.jobservice.enums.PostStatus;
 import com.backend.jobservice.enums.WorkMode;
 import org.springframework.data.jpa.domain.Specification;
+
+import java.time.Instant;
 import java.util.UUID;
 
 public class InternshipPostSpecification {
@@ -52,5 +54,12 @@ public class InternshipPostSpecification {
             query.distinct(true);
             return cb.equal(root.join("jobSkills").get("skillId"), skillId);
         };
+    }
+
+    public static Specification<InternshipPost> notExpired() {
+        return (root, query, cb) -> cb.and(
+                cb.isNotNull(root.get("expiredAt")),
+                cb.greaterThan(root.get("expiredAt"), cb.currentTimestamp())
+        );
     }
 }

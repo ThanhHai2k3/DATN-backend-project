@@ -32,6 +32,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -235,6 +236,10 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         InternshipPost post = internshipPostRepository.findByIdAndStatus(postId, PostStatus.ACTIVE)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
+        if (post.getExpiredAt() == null || !post.getExpiredAt().isAfter(Instant.now())) {
+            throw new AppException(ErrorCode.POST_EXPIRED);
+        }
+
         InternshipPostResponse response = internshipPostMapper.toResponse(post);
         fillSkillNames(response.getSkills());
 
@@ -291,10 +296,18 @@ public class InternshipPostServiceImpl implements InternshipPostService {
             throw new AppException(ErrorCode.INVALID_POST_STATUS);
         }
 
-        post.setStatus(PostStatus.ACTIVE);
-        post.setUpdatedAt(Instant.now());
+        Instant now = Instant.now();
 
-        return internshipPostMapper.toResponse(internshipPostRepository.save(post));
+        post.setStatus(PostStatus.ACTIVE);
+        post.setUpdatedAt(now);
+
+        // set hạn 30 ngày kể từ lúc duyệt
+        if (post.getExpiredAt() == null) {
+            post.setExpiredAt(now.plus(Duration.ofDays(30)));
+        }
+
+        InternshipPost saved = internshipPostRepository.save(post);
+        return internshipPostMapper.toResponse(saved);
     }
 
 
@@ -340,7 +353,9 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     @Transactional(readOnly = true)
     public Page<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location, Pageable pageable) {
 
-        Specification<InternshipPost> spec = Specification.where(InternshipPostSpecification.hasStatus(PostStatus.ACTIVE));
+        Specification<InternshipPost> spec = Specification
+                .where(InternshipPostSpecification.hasStatus(PostStatus.ACTIVE))
+                .and(InternshipPostSpecification.notExpired());
 
         spec = spec.and(InternshipPostSpecification.hasKeyword(keyword))
                 .and(InternshipPostSpecification.hasWorkMode(workMode))

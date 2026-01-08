@@ -10,6 +10,7 @@ import com.backend.jobservice.enums.SuccessCode;
 import com.backend.jobservice.service.InternshipPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -202,7 +203,11 @@ public class InternshipPostController {
             @RequestParam(value = "location", required = false) String location,
             @RequestParam(value = "skillId", required = false) UUID skillId,
             @RequestParam(value = "companyId", required = false) UUID companyId,
-            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+            @PageableDefault(size = 10) // bỏ default sort cũ
+            @SortDefault.SortDefaults({
+                    @SortDefault(sort = "expiredAt", direction = Sort.Direction.ASC),
+                    @SortDefault(sort = "createdAt", direction = Sort.Direction.DESC)
+            }) Pageable pageable
     ) {
 
         Page<InternshipPostSummaryResponse> result = internshipPostService.searchPosts(
