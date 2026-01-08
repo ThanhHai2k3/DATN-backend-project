@@ -2,6 +2,7 @@ package com.backend.profileservice.service.impl;
 
 import com.backend.profileservice.dto.request.CompanyCreateRequest;
 import com.backend.profileservice.dto.request.CompanyUpdateRequest;
+import com.backend.profileservice.dto.response.CompanyBasicResponse;
 import com.backend.profileservice.dto.response.CompanyResponse;
 import com.backend.profileservice.entity.Company;
 import com.backend.profileservice.entity.Employer;
@@ -137,5 +138,19 @@ public class CompanyServiceImpl implements CompanyService {
                 .stream()
                 .map(companyMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("permitAll()")
+    public List<CompanyBasicResponse> getBasicBatch(List<UUID> ids) {
+        if (ids == null || ids.isEmpty()) return List.of();
+
+        return companyRepository.findAllById(ids).stream()
+                .map(c -> CompanyBasicResponse.builder()
+                        .id(c.getId())
+                        .name(c.getName())
+                        .build())
+                .toList();
     }
 }

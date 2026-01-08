@@ -3,6 +3,7 @@ package com.backend.profileservice.service;
 import com.backend.profileservice.dto.request.CompanyCreateRequest;
 import com.backend.profileservice.dto.request.CompanyRequest;
 import com.backend.profileservice.dto.request.CompanyUpdateRequest;
+import com.backend.profileservice.dto.response.CompanyBasicResponse;
 import com.backend.profileservice.dto.response.CompanyResponse;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface CompanyService {
     List<CompanyResponse> getAll();
 
     void deleteByUserId(UUID userId);
+
+    List<CompanyBasicResponse> getBasicBatch(List<UUID> ids);
 }

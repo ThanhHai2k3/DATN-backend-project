@@ -1,7 +1,10 @@
 package com.backend.profileservice.controller;
 
 import com.backend.profileservice.dto.response.ApiResponse;
+import com.backend.profileservice.dto.response.CompanyBasicResponse;
 import com.backend.profileservice.dto.response.student.StudentResponse;
+import com.backend.profileservice.enums.SuccessCode;
+import com.backend.profileservice.service.CompanyService;
 import com.backend.profileservice.service.EmployerService;
 import com.backend.profileservice.service.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +22,7 @@ public class InternalController {
 
     private final StudentService studentService;
     private final EmployerService employerService;
+    private final CompanyService companyService;
 
     @GetMapping("/students/{userId}/full-name")
     public ResponseEntity<ApiResponse<String>> getStudentFullName(
@@ -78,5 +82,20 @@ public class InternalController {
                         companyId
                 )
         );
+    }
+
+    @GetMapping("/companies/batch")
+    public ResponseEntity<ApiResponse<List<CompanyBasicResponse>>> getCompaniesBatch(
+            @RequestParam("ids") List<UUID> ids
+    ) {
+        List<CompanyBasicResponse> responses = companyService.getBasicBatch(ids);
+
+        return ResponseEntity
+                .status(SuccessCode.COMPANIES_LIST_FETCHED.getStatus())
+                .body(ApiResponse.success(
+                        SuccessCode.COMPANIES_LIST_FETCHED.getCode(),
+                        "Companies fetched successfully",
+                        responses
+                ));
     }
 }

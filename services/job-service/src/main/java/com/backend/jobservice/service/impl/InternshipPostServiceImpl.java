@@ -351,7 +351,11 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location, Pageable pageable) {
+    public Page<InternshipPostSummaryResponse> searchPosts(
+            String keyword, String workMode,
+            UUID skillId, UUID companyId,
+            String location, Pageable pageable
+    ) {
 
         Specification<InternshipPost> spec = Specification
                 .where(InternshipPostSpecification.hasStatus(PostStatus.ACTIVE))
@@ -368,9 +372,45 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
         Page<InternshipPost> postsPage = internshipPostRepository.findAll(spec, pageable);
 
-        return postsPage.map(internshipPostMapper::toSummaryResponse);
+        List<InternshipPost> posts = postsPage.getContent();
+        List<InternshipPostSummaryResponse> summaries = posts.stream()
+                .map(internshipPostMapper::toSummaryResponse)
+                .collect(java.util.stream.Collectors.toList());
+
+        fillCompanyNames(posts, summaries);
+
+        return new org.springframework.data.domain.PageImpl<>(summaries, pageable, postsPage.getTotalElements());
     }
 
+    private void fillCompanyNames(List<InternshipPost> posts, List<InternshipPostSummaryResponse> summaries) {
+        if (posts == null || posts.isEmpty()) return;
+
+        List<UUID> companyIds = posts.stream()
+                .map(InternshipPost::getCompanyId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .toList();
+
+        if (companyIds.isEmpty()) return;
+
+        try {
+            ApiResponse<List<CompanyBasicResponse>> api = profileClient.getCompaniesBatch(companyIds);
+            if (api == null || api.getData() == null) return;
+
+            Map<UUID, String> map = api.getData().stream()
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toMap(CompanyBasicResponse::getId, CompanyBasicResponse::getName, (a, b) -> a));
+
+            for (int i = 0; i < posts.size(); i++) {
+                UUID cid = posts.get(i).getCompanyId();
+                if (cid != null && map.containsKey(cid)) {
+                    summaries.get(i).setCompanyName(map.get(cid));
+                }
+            }
+        } catch (Exception ignored) {
+            // profile-service down thì để companyName null, không làm fail search
+        }
+    }
 
     private void fillSkillNames(List<JobSkillResponse> skills) {
         if (skills == null || skills.isEmpty()) return;
