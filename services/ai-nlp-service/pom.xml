@@ -8,8 +8,8 @@
         <groupId>com.backend</groupId>
         <artifactId>backend-project</artifactId>
         <version>0.0.1-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath> </parent>
-
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
 
     <artifactId>ai-nlp-service</artifactId>
     <name>ai-nlp-service</name>

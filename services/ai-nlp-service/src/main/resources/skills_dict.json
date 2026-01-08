@@ -696,5 +696,126 @@
       "negotiation",
       "đàm phán"
     ]
+  },
+  "math_teaching": {
+    "canonical": "Mathematics Teaching",
+    "aliases": [
+      "sư phạm toán",
+      "giáo viên toán",
+      "dạy toán",
+      "toán học",
+      "giảng dạy toán",
+      "math teaching",
+      "mathematics teaching"
+    ]
+  },
+  "math_problem_solving": {
+    "canonical": "Math Problem Solving",
+    "aliases": [
+      "giải toán",
+      "tư duy toán học",
+      "problem solving in math",
+      "mathematical thinking"
+    ]
+  },
+  "exam_preparation_math": {
+    "canonical": "Math Exam Preparation",
+    "aliases": [
+      "luyện thi toán",
+      "ôn thi toán",
+      "bồi dưỡng học sinh giỏi toán",
+      "math exam preparation"
+    ]
+  },
+  "literature_teaching": {
+    "canonical": "Literature Teaching",
+    "aliases": [
+      "sư phạm văn",
+      "sư phạm ngữ văn",
+      "giáo viên văn",
+      "giáo viên ngữ văn",
+      "dạy văn",
+      "giảng dạy ngữ văn",
+      "literature teaching"
+    ]
+  },
+  "essay_writing_instruction": {
+    "canonical": "Essay Writing Instruction",
+    "aliases": [
+      "dạy làm văn",
+      "hướng dẫn viết bài văn",
+      "kỹ năng viết văn",
+      "essay writing",
+      "writing instruction"
+    ]
+  },
+  "literary_analysis": {
+    "canonical": "Literary Analysis",
+    "aliases": [
+      "phân tích tác phẩm",
+      "phân tích văn học",
+      "literary analysis",
+      "text analysis"
+    ]
+  },
+  "english_teaching": {
+    "canonical": "English Teaching",
+    "aliases": [
+      "sư phạm anh",
+      "sư phạm tiếng anh",
+      "giáo viên tiếng anh",
+      "dạy tiếng anh",
+      "giảng dạy tiếng anh",
+      "english teaching",
+      "teaching english"
+    ]
+  },
+  "english_communication": {
+    "canonical": "English Communication",
+    "aliases": [
+      "tiếng anh giao tiếp",
+      "english communication",
+      "speaking english",
+      "giao tiếp tiếng anh"
+    ]
+  },
+  "english_exam_preparation": {
+    "canonical": "English Exam Preparation",
+    "aliases": [
+      "luyện thi tiếng anh",
+      "ôn thi tiếng anh",
+      "ielts teaching",
+      "toeic teaching",
+      "exam preparation english"
+    ]
+  },
+  "preschool_education": {
+    "canonical": "Preschool Education",
+    "aliases": [
+      "sư phạm mầm non",
+      "giáo dục mầm non",
+      "giáo viên mầm non",
+      "preschool education",
+      "early childhood education"
+    ]
+  },
+  "child_development": {
+    "canonical": "Child Development",
+    "aliases": [
+      "phát triển trẻ em",
+      "tâm lý trẻ em",
+      "child psychology",
+      "child development"
+    ]
+  },
+  "play_based_learning": {
+    "canonical": "Play-based Learning",
+    "aliases": [
+      "giáo dục qua trò chơi",
+      "học qua chơi",
+      "play based learning"
+    ]
   }
+
 }
+

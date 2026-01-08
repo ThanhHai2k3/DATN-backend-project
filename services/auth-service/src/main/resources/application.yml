@@ -1,16 +1,16 @@
 server:
-  port: 8081
+  port: ${AUTH_PORT:8081}
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/intern_network
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:intern_network}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
     properties:
-      hibernate.default_schema: auth_schema
+      hibernate.default_schema: ${AUTH_SCHEMA:auth_schema}
       hibernate.jdbc.time_zone: UTC
     open-in-view: false
   flyway:
@@ -20,9 +20,9 @@ spring:
 
 app:
   jwt:
-    secret: "a8e33b4cd23905e1cfdac93858f74db34770b55e2bcb95a7d70563fd54c16b0b"
-    expiration-minutes: 15
-    refresh-expiration-days: 7
+    secret: ${JWT_SECRET}
+    expiration-minutes: ${JWT_ACCESS_EXP_MINUTES}
+    refresh-expiration-days: ${JWT_REFRESH_EXP_DAYS}
 
 logging:
   level:

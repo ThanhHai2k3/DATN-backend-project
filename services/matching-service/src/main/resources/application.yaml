@@ -1,13 +1,20 @@
 server:
-  port: 8088
+  port: ${MATCHING_PORT:8088}
+
 spring:
   application:
     name: matching-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/intern_network
-    username: duke
-    password: duke
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:intern_network}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate.default_schema: ${MATCHING_SCHEMA:matching_schema}
+      hibernate.jdbc.time_zone: UTC
+    open-in-view: false
+
 logging:
   level:
     root: INFO

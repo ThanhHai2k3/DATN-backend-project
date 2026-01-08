@@ -1,22 +1,16 @@
 server:
-  port: 8084
+  port: ${MESSAGE_PORT:8084}
 
 spring:
   application:
     name: message-service
 
-  # ===============================
-  # PostgreSQL DataSource
-  # ===============================
   datasource:
-    url: jdbc:postgresql://localhost:5432/intern_network
-    username: postgres
-    password: 123456789
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:intern_network}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
-  # ===============================
-  # JPA / Hibernate
-  # ===============================
   jpa:
     hibernate:
       ddl-auto: validate
@@ -25,6 +19,8 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: ${MESSAGE_SCHEMA:message_schema}
+        jdbc.time_zone: UTC
 
   # Flyway
   flyway:
@@ -41,18 +37,13 @@ spring:
       max-file-size: 10MB
       max-request-size: 12MB
 
-# ===============================
-# Logging
-# ===============================
 logging:
   level:
     org.springframework: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-# ===============================
-# AWS S3 Configuration
-# ===============================
+
 aws:
   region: ${AWS_REGION}
   s3:

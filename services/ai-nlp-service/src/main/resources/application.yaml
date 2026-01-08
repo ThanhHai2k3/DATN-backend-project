@@ -1,5 +1,5 @@
 server:
-  port: 8087
+  port: ${AI_NLP_PORT:8087}
 
 spring:
   application:
@@ -9,9 +9,6 @@ logging:
   level:
     root: INFO
     com.backend.ai_nlp_service: DEBUG
-
-
-
 
 mapbox:
   geocoding-base-url: https://api.mapbox.com/geocoding/v5/mapbox.places

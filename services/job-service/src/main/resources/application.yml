@@ -1,16 +1,16 @@
 server:
-  port: 8083
+  port: ${JOB_PORT:8083}
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/intern_network
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:intern_network}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
     properties:
-      hibernate.default_schema: job_schema
+      hibernate.default_schema: ${JOB_SCHEMA:job_schema}
       hibernate.jdbc.time_zone: UTC
     open-in-view: false
   flyway:

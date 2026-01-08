@@ -35,5 +35,6 @@ build/
 services/cv-service/.env
 services/message-service/.env
 
-.env.example
 .env
+.env.local
+.env.docker
