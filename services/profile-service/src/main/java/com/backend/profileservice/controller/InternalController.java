@@ -6,6 +6,7 @@ import com.backend.profileservice.service.EmployerService;
 import com.backend.profileservice.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,6 +60,22 @@ public class InternalController {
                         "BATCH_FETCH_SUCCESS",
                         "Fetched student batch info successfully",
                         students
+                )
+        );
+    }
+
+    @GetMapping("/employers/me/company-id")
+    public ResponseEntity<ApiResponse<UUID>> getMyCompanyId(
+            @AuthenticationPrincipal String userIdHeader
+    ) {
+        UUID userId = UUID.fromString(userIdHeader);
+        UUID companyId = employerService.getMyCompanyId(userId);
+
+        return ResponseEntity.ok(
+                ApiResponse.success(
+                        "EMPLOYER_COMPANY_ID_FETCHED",
+                        "Employer companyId fetched successfully",
+                        companyId
                 )
         );
     }

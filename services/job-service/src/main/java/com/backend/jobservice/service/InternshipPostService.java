@@ -13,21 +13,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 
 public interface InternshipPostService {
-    InternshipPostResponse createPost(UUID employerId, InternshipPostRequest request);
-    InternshipPostResponse updatePost(UUID employerId, UUID postId, InternshipPostUpdateRequest request);
-    void hidePost(UUID employerId, UUID postId);
+
+    InternshipPostResponse createPost(UUID employerUserId, InternshipPostRequest request);
+
+    InternshipPostResponse updatePost(UUID employerUserId, UUID postId, InternshipPostUpdateRequest request);
+
+    void hidePost(UUID employerUserId, UUID postId);
 
     InternshipPostResponse getPostDetail(UUID postId);
+
     Page<InternshipPostSummaryResponse> searchPosts(String keyword, String workMode, UUID skillId, UUID companyId, String location, Pageable pageable);
+
     InternshipPostResponse approvePost(UUID postId, UUID adminId);
 
     void rejectPost(UUID postId);
 
     List<InternshipPostSummaryResponse> getPendingPosts();
 
-    Page<InternshipPostResponse> getMyPosts(UUID employerId, int page, int size);
+    Page<InternshipPostResponse> getMyPosts(UUID employerUserId, int page, int size);
 
-    InternshipPostResponse getEmployerPostDetail(UUID employerId, UUID postId);
+    InternshipPostResponse getEmployerPostDetail(UUID employerUserId, UUID postId);
 
     InternshipPostResponse getPostDetailForAdmin(UUID id);
 

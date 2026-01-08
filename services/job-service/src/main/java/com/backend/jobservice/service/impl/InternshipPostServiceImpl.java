@@ -71,60 +71,22 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     @PreAuthorize("hasRole('EMPLOYER')")
-    public InternshipPostResponse createPost(UUID employerId, InternshipPostRequest request){
+    public InternshipPostResponse createPost(UUID employerUserId, InternshipPostRequest request){
         InternshipPost post = internshipPostMapper.toEntity(request);
-        post.setPostedBy(employerId);
+        post.setPostedBy(employerUserId);
         post.setStatus(PostStatus.PENDING);
         post.setCreatedAt(Instant.now());
         post.setUpdatedAt(Instant.now());
 
         //Gọi profile-service lấy companyId của employer
-//        UUID companyId = profileClient.getCompanyIdByEmployer(employerId);
-//        post.setCompanyId(companyId);
-        post.setCompanyId(UUID.randomUUID()); // TODO: profile-client
+        UUID companyId = resolveCompanyIdOrThrow(employerUserId);
+        post.setCompanyId(companyId);
 
         InternshipPost saved = internshipPostRepository.save(post);
-//        saved.getInternshipPostNorm().
-        try {
-            ProcessPostRequest nlpReq = buildProcessPostRequest(saved, request);
-            ProcessPostResponse nlpRes = aiNlpClient.processJob(nlpReq);
-            applyNlpResultToPost(saved, nlpRes);
-            jobNormEventPublisher.publish(
-                    JobNormUpdatedEvent.builder()
-                            .internshipPostId(saved.getId())
-                            .companyId(null)
-                            .skillsNorm(
-                                    saved.getInternshipPostNorm().getSkillsNorm() != null
-                                            ? saved.getInternshipPostNorm().getSkillsNorm()
-                                            : Collections.emptyList()
-                            )
-//                            .minYears(saved.getInternshipPostNorm().getMinYears())
-                            .workMode(saved.getWorkMode() != null
-                                    ? saved.getWorkMode().name()
-                                    : null)
-                            .locationLat(saved.getInternshipPostNorm().getLat())
-                            .locationLon(saved.getInternshipPostNorm().getLon())
-                            .updatedAt(OffsetDateTime.now())
-                            .build()
-            );
-
-        } catch (Exception ex) {
-            saved.setNlpStatus("ERROR");
-            saved.setNlpError(ex.getMessage());
-        }
-
 
         //Validate and save job skills
         List<JobSkill> jobSkills = new ArrayList<>();
 
-//        if(request.getSkills() != null && !request.getSkills().isEmpty()){
-//            jobSkills = request.getSkills().stream()
-//                    .map(jobSkillMapper::toEntity)
-//                    .peek(jobSkill -> jobSkill.setInternshipPost(saved))
-//                    .collect(Collectors.toList());
-//
-//            jobSkillRepository.saveAll(jobSkills);
-//        }
         if(request.getSkills() != null){
             for(JobSkillRequest skillRequest : request.getSkills()){
                 // FE bắt buộc gửi skillId trong job-service
@@ -159,6 +121,35 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         jobSkillRepository.saveAll(jobSkills);
         saved.setJobSkills(jobSkills);
 
+        //saved.getInternshipPostNorm().
+        try {
+            ProcessPostRequest nlpReq = buildProcessPostRequest(saved, request);
+            ProcessPostResponse nlpRes = aiNlpClient.processJob(nlpReq);
+            applyNlpResultToPost(saved, nlpRes);
+            jobNormEventPublisher.publish(
+                    JobNormUpdatedEvent.builder()
+                            .internshipPostId(saved.getId())
+                            .companyId(companyId)
+                            .skillsNorm(
+                                    saved.getInternshipPostNorm().getSkillsNorm() != null
+                                            ? saved.getInternshipPostNorm().getSkillsNorm()
+                                            : Collections.emptyList()
+                            )
+//                            .minYears(saved.getInternshipPostNorm().getMinYears())
+                            .workMode(saved.getWorkMode() != null
+                                    ? saved.getWorkMode().name()
+                                    : null)
+                            .locationLat(saved.getInternshipPostNorm().getLat())
+                            .locationLon(saved.getInternshipPostNorm().getLon())
+                            .updatedAt(OffsetDateTime.now())
+                            .build()
+            );
+
+        } catch (Exception ex) {
+            saved.setNlpStatus("ERROR");
+            saved.setNlpError(ex.getMessage());
+        }
+
         InternshipPostResponse response = internshipPostMapper.toResponse(saved);
         fillSkillNames(response.getSkills());
         return response;
@@ -166,8 +157,8 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     @PreAuthorize("hasRole('EMPLOYER')")
-    public InternshipPostResponse updatePost(UUID employerId, UUID postId, InternshipPostUpdateRequest request){
-        InternshipPost post = internshipPostRepository.findByIdAndPostedBy(postId, employerId)
+    public InternshipPostResponse updatePost(UUID employerUserId, UUID postId, InternshipPostUpdateRequest request){
+        InternshipPost post = internshipPostRepository.findByIdAndPostedBy(postId, employerUserId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND_OR_FORBIDDEN));
 
         if(post.getStatus().equals(PostStatus.EXPIRED)){
@@ -226,12 +217,12 @@ public class InternshipPostServiceImpl implements InternshipPostService {
     }
 
     @Override
-    public InternshipPostResponse getEmployerPostDetail(UUID employerId, UUID postId) {
+    public InternshipPostResponse getEmployerPostDetail(UUID employerUserId, UUID postId) {
 
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-        if (!post.getPostedBy().equals(employerId)) {
+        if (!post.getPostedBy().equals(employerUserId)) {
             throw new AppException(ErrorCode.FORBIDDEN, "Bạn không có quyền xem bài đăng này");
         }
         InternshipPostResponse response = internshipPostMapper.toResponse(post);
@@ -254,11 +245,11 @@ public class InternshipPostServiceImpl implements InternshipPostService {
 
     @Override
     @PreAuthorize("hasRole('EMPLOYER') or hasRole('SYSTEM_ADMIN')")
-    public void hidePost(UUID employerId, UUID postId){
+    public void hidePost(UUID employerUserId, UUID postId){
         InternshipPost post = internshipPostRepository.findById(postId)
                 .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-//        if (!post.getPostedBy().equals(employerId)) {
+//        if (!post.getPostedBy().equals(employerUserId)) {
 //            throw new AppException(ErrorCode.FORBIDDEN);
 //        }
         if (post.getStatus() == PostStatus.ACTIVE) {
@@ -458,12 +449,33 @@ public class InternshipPostServiceImpl implements InternshipPostService {
         post.setProcessedAt(res.getProcessedAt());
     }
 
+    private UUID resolveCompanyIdOrThrow(UUID employerUserId) {
+        try {
+            ApiResponse<UUID> api = profileClient.getMyCompanyId(
+                    employerUserId.toString(),
+                    "EMPLOYER"
+            );
+
+            if (api == null || api.getData() == null) {
+                throw new AppException(ErrorCode.EMPLOYER_HAS_NO_COMPANY);
+            }
+
+            return api.getData();
+
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+        }
+    }
+
+
     @Override
     @Transactional(readOnly = true)
-    public Page<InternshipPostResponse> getMyPosts(UUID employerId, int page, int size) {
+    public Page<InternshipPostResponse> getMyPosts(UUID employerUserId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
-        Page<InternshipPost> postPage = internshipPostRepository.findByPostedBy(employerId, pageable);
+        Page<InternshipPost> postPage = internshipPostRepository.findByPostedBy(employerUserId, pageable);
 
         return postPage.map(internshipPostMapper::toResponse);
     }

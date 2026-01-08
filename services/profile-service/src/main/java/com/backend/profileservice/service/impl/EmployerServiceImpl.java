@@ -167,6 +167,21 @@ public class EmployerServiceImpl implements EmployerService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('EMPLOYER')")
+    public UUID getMyCompanyId(UUID userId) {
+
+        Employer employer = employerRepository.findByUserIdWithCompany(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.EMPLOYER_NOT_FOUND));
+
+        if (employer.getCompany() == null) {
+            throw new AppException(ErrorCode.EMPLOYER_HAS_NO_COMPANY);
+        }
+
+        return employer.getCompany().getId();
+    }
+
+    @Override
     @Transactional
     @PreAuthorize("permitAll()")
     public void autoCreateProfile(UUID userId, String fullName) {

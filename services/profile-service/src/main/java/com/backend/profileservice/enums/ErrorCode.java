@@ -34,6 +34,7 @@ public enum ErrorCode {
     EMPLOYER_PROFILE_EXISTED("EMP_002", "Employer profile already exists", HttpStatus.BAD_REQUEST),
     CANNOT_DELETE_ADMIN_EMPLOYER("EMP_003", "Cannot delete employer admin in company", HttpStatus.FORBIDDEN),
     EMPLOYER_ALREADY_HAS_COMPANY("EMP_004", "Employer already belongs to a company", HttpStatus.BAD_REQUEST),
+    EMPLOYER_HAS_NO_COMPANY("EMP_005", "Employer has not joined any company yet", HttpStatus.BAD_REQUEST),
 
     COMPANY_NAME_EXISTED("PRO_001", "Company name already exists", HttpStatus.BAD_REQUEST),
     COMPANY_NOT_FOUND("PRO_002", "Company not found", HttpStatus.NOT_FOUND),

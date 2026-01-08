@@ -23,6 +23,8 @@ public enum ErrorCode {
     HIDE_POST_DENIED("JOB_005", "You are not allowed to modify this post", HttpStatus.FORBIDDEN),
     INVALID_POST_STATUS("JOB_006", "Internship post status is not valid for this action", HttpStatus.BAD_REQUEST),
 
+    EMPLOYER_HAS_NO_COMPANY("EMP_005", "Employer has not joined any company yet", HttpStatus.BAD_REQUEST),
+
     SKILL_NOT_FOUND("SK_005", "Skill not found", HttpStatus.NOT_FOUND),
     SKILL_ID_REQUIRED("SK_006", "Skill id required", HttpStatus.BAD_REQUEST),
 

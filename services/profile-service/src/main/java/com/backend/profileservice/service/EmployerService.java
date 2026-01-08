@@ -27,5 +27,7 @@ public interface EmployerService {
 
     String getFullNameByUserId(UUID userId);
 
+    UUID getMyCompanyId(UUID userId);
+
     void autoCreateProfile(UUID userId, String fullName);
 }
