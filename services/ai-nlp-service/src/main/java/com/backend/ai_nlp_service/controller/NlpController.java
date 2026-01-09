@@ -5,6 +5,7 @@ import com.backend.ai_nlp_service.dto.ProcessCvRequest;
 import com.backend.ai_nlp_service.dto.ProcessPostRequest;
 import com.backend.ai_nlp_service.dto.ProcessPostResponse;
 import com.backend.ai_nlp_service.service.JobNlpService;
+import com.backend.ai_nlp_service.service.MapboxGeocodingService;
 import com.backend.ai_nlp_service.service.NlpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ public class NlpController {
 
     private final NlpService nlpService;
     private final JobNlpService jobNlpService;
+    private final MapboxGeocodingService mapboxGeocodingService;
+
     @PostMapping("/process-cv")
     public ResponseEntity<CvNlpResult> processCv(@RequestBody ProcessCvRequest request) {
         CvNlpResult result = nlpService.processCv(request);
@@ -28,4 +31,10 @@ public class NlpController {
         return jobNlpService.processJob(request);
     }
 
+    @GetMapping("/geocode")
+    public MapboxGeocodingService.GeocodeResult geocode(@RequestParam("q") String q) {
+        System.out.println(q);
+        System.out.println(mapboxGeocodingService.geocode(q));
+        return mapboxGeocodingService.geocode(q);
+    }
 }
