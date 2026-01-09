@@ -5,13 +5,17 @@ import com.backend.profileservice.dto.response.ApiResponse;
 import com.backend.profileservice.dto.response.student.StudentResponse;
 import com.backend.profileservice.dto.response.student.VisibilityResponse;
 import com.backend.profileservice.enums.SuccessCode;
+import com.backend.profileservice.service.S3FileStorageService;
 import com.backend.profileservice.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -22,6 +26,7 @@ import java.util.UUID;
 public class StudentController {
 
     private final StudentService studentService;
+    private final S3FileStorageService s3FileStorageService;
 
     // GET /api/students/me
     // SELF PROFILE
@@ -114,6 +119,36 @@ public class StudentController {
                         SuccessCode.STUDENT_PROFILE_AUTO_CREATED.getMessage(),
                         null
                 ));
+    }
+
+    @PatchMapping("/me/avatar")
+    public ResponseEntity<?> uploadAvatar(
+            @AuthenticationPrincipal String userIdHeader,
+            @RequestParam("file") MultipartFile file
+    ) {
+        UUID userId = UUID.fromString(userIdHeader);
+
+        try {
+            String avatarUrl = s3FileStorageService.storeFile(file);
+
+            StudentResponse response = studentService.updateAvatarUrl(userId, avatarUrl);
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(
+                            "AVATAR_UPDATED",
+                            "Avatar updated successfully",
+                            response
+                    )
+            );
+
+        } catch (IOException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error(
+                            "AVATAR_UPLOAD_FAILED",
+                            "Failed to upload avatar"
+                    ));
+        }
     }
 
 }

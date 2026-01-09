@@ -1,0 +1,155 @@
+services:
+  db:
+    image: postgres:16
+    container_name: intern-db
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/auth-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${AUTH_PORT}:${AUTH_PORT}"
+
+  profile-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/profile-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${PROFILE_PORT}:${PROFILE_PORT}"
+
+  skill-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/skill-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${SKILL_PORT}:${SKILL_PORT}"
+
+  job-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/job-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${JOB_PORT}:${JOB_PORT}"
+
+  cv-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/cv-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${CV_PORT}:${CV_PORT}"
+
+  message-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/message-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${MESSAGE_PORT}:${MESSAGE_PORT}"
+
+  applying-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/applying-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${APPLYING_PORT}:${APPLYING_PORT}"
+
+  matching-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/matching-service
+    env_file: .env.docker
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${MATCHING_PORT}:${MATCHING_PORT}"
+
+  ai-nlp-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: services/ai-nlp-service
+    env_file: .env.docker
+    ports:
+      - "${AI_NLP_PORT}:${AI_NLP_PORT}"
+
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_PATH: gateway
+    env_file: .env.docker
+    depends_on:
+      - auth-service
+      - profile-service
+      - job-service
+      - skill-service
+      - cv-service
+      - message-service
+      - applying-service
+      - matching-service
+      - ai-nlp-service
+    ports:
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
+
+volumes:
+  pgdata:

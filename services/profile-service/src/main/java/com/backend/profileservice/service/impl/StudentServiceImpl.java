@@ -115,6 +115,18 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
+    @Transactional
+    public StudentResponse updateAvatarUrl(UUID userId, String avatarUrl) {
+        Student student = studentRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        student.setAvatarUrl(avatarUrl);
+        studentRepository.save(student);
+
+        return studentMapper.toResponse(student);
+    }
+
+    @Override
     public void autoCreateProfile(UUID userId, String fullName) {
 
         if (studentRepository.existsByUserId(userId)) {

@@ -24,4 +24,6 @@ public interface StudentService {
     List<StudentResponse> getBasicInfoBatch(List<UUID> userIds);
 
     void updateCvUrl(UUID userId, String cvUrl);
+
+    StudentResponse updateAvatarUrl(UUID userId, String avatarUrl);
 }
